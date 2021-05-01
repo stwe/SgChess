@@ -102,8 +102,6 @@ public class MoveGenerator {
     // Sliding pieces
     //-------------------------------------------------
 
-    // todo
-
     public void addRookMoves(long piece, long allPieces, long possiblePositions, char pieceChar) {
         while (piece != 0) {
             var fromSquare = Long.numberOfTrailingZeros(piece);
@@ -114,6 +112,22 @@ public class MoveGenerator {
                 moves.add(move);
 
                 rookMoves &= rookMoves - 1;
+            }
+
+            piece &= piece - 1;
+        }
+    }
+
+    public void addBishopMoves(long piece, long allPieces, long possiblePositions, char pieceChar) {
+        while (piece != 0) {
+            var fromSquare = Long.numberOfTrailingZeros(piece);
+            long bishopMoves = Attack.getBishopMoves(fromSquare, allPieces) & possiblePositions;
+
+            while (bishopMoves != 0) {
+                var move = new Move(pieceChar, fromSquare, Long.numberOfTrailingZeros(bishopMoves));
+                moves.add(move);
+
+                bishopMoves &= bishopMoves - 1;
             }
 
             piece &= piece - 1;

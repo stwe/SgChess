@@ -36,11 +36,11 @@ public class Main {
         //moveGenerator.addWhitePawnMoves(board.getWhitePawns(), board.getAllPieces());
         //moveGenerator.addWhiteKingMoves(board.getWhiteKing(), board.getWhitePieces());
 
-        moveGenerator.addRookMoves(board.getWhiteRooks(), board.getAllPieces(), ~board.getWhitePieces(), 'R');
-        moveGenerator.addRookMoves(board.getBlackRooks(), board.getAllPieces(), ~board.getBlackPieces(), 'r');
+        //moveGenerator.addRookMoves(board.getWhiteRooks(), board.getAllPieces(), ~board.getWhitePieces(), 'R');
+        //moveGenerator.addRookMoves(board.getBlackRooks(), board.getAllPieces(), ~board.getBlackPieces(), 'r');
 
-        //moveGenerator.addWhiteBishopMoves(board.getWhiteBishops(), board.getAllPieces(), board.getWhitePieces());
-        //moveGenerator.addWhiteQueenMoves(board.getWhiteQueens(), board.getAllPieces(), board.getWhitePieces());
+        moveGenerator.addBishopMoves(board.getWhiteBishops(), board.getAllPieces(), ~board.getWhitePieces(), 'B');
+        moveGenerator.addBishopMoves(board.getBlackBishops(), board.getAllPieces(), ~board.getBlackPieces(), 'b');
 
         var mlist = moveGenerator.getMoves();
         for (var move : mlist) {
