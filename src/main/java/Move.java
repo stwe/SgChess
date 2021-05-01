@@ -45,6 +45,6 @@ public class Move {
 
     @Override
     public String toString() {
-        return "Piece: " + piece + " from: " + from + " to: " + to;
+        return "Piece: " + piece + " from: " + Bitboard.SQUARE_STRINGS[from] + " to: " + Bitboard.SQUARE_STRINGS[to];
     }
 }

@@ -232,9 +232,9 @@ public class Bitboard {
     }
 
     /**
-     * Returns the bit index of a specific square (for example square E4 => return bit index 28).
+     * Returns the bit index for a given square bitboard (for example square E4 => returns bit index 28).
      *
-     * @param square A chess board square.
+     * @param square A square bitboard.
      *
      * @return The bit index.
      */
@@ -243,7 +243,7 @@ public class Bitboard {
     }
 
     /**
-     * Returns the bitboard for a square.
+     * Returns the square bitboard for a given bit index.
      */
     public static final long[] SQUARES = {
             A1, B1, C1, D1, E1, F1, G1, H1,
@@ -254,6 +254,20 @@ public class Bitboard {
             A6, B6, C6, D6, E6, F6, G6, H6,
             A7, B7, C7, D7, E7, F7, G7, H7,
             A8, B8, C8, D8, E8, F8, G8, H8
+    };
+
+    /**
+     * Returns the square String for a given bit index.
+     */
+    public static final String[] SQUARE_STRINGS = {
+            "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+            "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+            "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+            "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+            "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+            "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+            "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+            "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"
     };
 
     //-------------------------------------------------
@@ -359,7 +373,7 @@ public class Bitboard {
         }
 
         System.out.println("   _______________");
-        System.out.println("   A B C D E F G H");
+        System.out.println("   a b c d e f g h");
     }
 
     /**

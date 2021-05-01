@@ -28,7 +28,7 @@ public class Main {
         //Board board = new Board();
 
         Board board = new Board("7k/5b2/8/5r2/8/1R6/6B1/7K w - - 0 1");
-        board.setColored(false);
+        board.setColored(true);
         System.out.println(board);
 
         MoveGenerator moveGenerator = new MoveGenerator();

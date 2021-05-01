@@ -33,11 +33,11 @@ public class Board {
 
     // board and pieces colors
 
-    private static final String BOARD_WHITE = "\u001B[48;5;246m";
-    private static final String BOARD_BLACK = "\u001B[48;5;21m";
+    private static final String BOARD_WHITE = ANSI_BLACK;
+    private static final String BOARD_BLACK = ANSI_BLACK;
 
     private static final String PIECE_WHITE = "\u001B[38;5;15m";
-    private static final String PIECE_BLACK = ANSI_BLACK;
+    private static final String PIECE_BLACK = ANSI_RED;
 
     /**
      * The FEN for the starting position.
@@ -268,7 +268,7 @@ public class Board {
             s.append(" +---+---+---+---+---+---+---+---+\n");
         }
 
-        s.append("   A   B   C   D   E   F   G   H");
+        s.append("   a   b   c   d   e   f   g   h");
 
         return s.toString();
     }
