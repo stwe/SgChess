@@ -90,25 +90,37 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the white pawn.
+     * The method adds moves for the white and black pawns.
      *
-     * @param whitePawnsBitboard A bitboard with all the white pawns.
-     * @param allPiecesBitboard Own and black pieces can block.
+     * @param piece Specifies for which type of pawn the moves are to be added.
+     * @param piecesBitboard A bitboard with all the white or black pawns.
+     * @param allPiecesBitboard Pieces can block.
      */
-    public void addWhitePawnMoves(long whitePawnsBitboard, long allPiecesBitboard) {
-        while (whitePawnsBitboard != 0) {
-            var fromSquare = Long.numberOfTrailingZeros(whitePawnsBitboard);
-            long whitePawnBitboard = 1L << fromSquare;
-            long movesBitboard = getWhitePawnMoves(whitePawnBitboard, allPiecesBitboard);
+    public void addPawnMoves(Piece piece, long piecesBitboard, long allPiecesBitboard) {
+        while (piecesBitboard != 0) {
+            var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
+            long pawnBitboard = 1L << fromSquare;
+
+            var movesBitboard = 0L;
+
+            switch (piece) {
+                case WHITE_PAWN:
+                    movesBitboard = getWhitePawnMoves(pawnBitboard, allPiecesBitboard);
+                    break;
+                case BLACK_PAWN:
+                    movesBitboard = getBlackPawnMoves(pawnBitboard, allPiecesBitboard);
+                    break;
+                default:
+            }
 
             while (movesBitboard != 0) {
-                var move = new Move(Piece.WHITE_PAWN, fromSquare, Long.numberOfTrailingZeros(movesBitboard));
+                var move = new Move(piece, fromSquare, Long.numberOfTrailingZeros(movesBitboard));
                 moves.add(move);
 
                 movesBitboard &= movesBitboard - 1;
             }
 
-            whitePawnsBitboard &= whitePawnsBitboard - 1;
+            piecesBitboard &= piecesBitboard - 1;
         }
     }
 
@@ -128,6 +140,25 @@ public class MoveGenerator {
 
         // check and see if the pawn can move forward one more
         long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_3) << 8) & ~allPiecesBitboard;
+
+        // return possible moves
+        return firstStepBitboard | twoStepsBitboard;
+    }
+
+    /**
+     * Computing black pawn movements bitboard.
+     *
+     * @param blackPawnBitboard A bitboard with all the black pawns.
+     * @param allPiecesBitboard Own and white pieces can block.
+     *
+     * @return Black pawns valid movements bitboard.
+     */
+    private static long getBlackPawnMoves(long blackPawnBitboard, long allPiecesBitboard) {
+        // check the single space infront of the black pawn
+        long firstStepBitboard = (blackPawnBitboard >>> 8) & ~allPiecesBitboard;
+
+        // check and see if the pawn can move forward one more
+        long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_6) >>> 8) & ~allPiecesBitboard;
 
         // return possible moves
         return firstStepBitboard | twoStepsBitboard;
