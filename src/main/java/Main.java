@@ -25,24 +25,29 @@ public class Main {
         keyboard.close();
         */
 
-        //Board board = new Board();
-
-        Board board = new Board("7k/5b2/8/5r2/8/1R6/6B1/7K w - - 0 1");
+        Board board = new Board();
+        //Board board = new Board("7k/5b2/8/5r2/8/1R6/6B1/7K w - - 0 1");
         board.setColored(true);
         System.out.println(board);
 
         MoveGenerator moveGenerator = new MoveGenerator();
 
-        //moveGenerator.addWhiteKnightMoves(board.getWhiteKnights(), board.getWhitePieces());
-        //moveGenerator.addWhitePawnMoves(board.getWhitePawns(), board.getAllPieces());
-        //moveGenerator.addWhiteKingMoves(board.getWhiteKing(), board.getWhitePieces());
+        //(board.getWhitePawns(), board.getAllPieces());
 
-        moveGenerator.addSlidingMoves(
+        moveGenerator.addNonslidingPiecesMoves(
+                Piece.WHITE_KNIGHT,
+                board.getWhiteKnights(),
+                ~board.getWhitePieces()
+        );
+
+        /*
+        moveGenerator.addSlidingPiecesMoves(
                 Piece.WHITE_BISHOP,
                 board.getWhiteBishops(),
                 board.getAllPieces(),
                 ~board.getWhitePieces()
         );
+        */
 
         var mlist = moveGenerator.getMoves();
         for (var move : mlist) {

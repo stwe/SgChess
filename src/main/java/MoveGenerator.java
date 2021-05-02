@@ -1,73 +1,93 @@
 import java.util.ArrayList;
 
-    /*
-         8 | 56 57 58 59 60 61 62 63
-         7 | 48 49 50 51 52 53 54 55
-         6 | 40 41 42 43 44 45 46 47
-         5 | 32 33 34 35 36 37 38 39
-         4 | 24 25 26 27 28 29 30 31
-         3 | 16 17 18 19 20 21 22 23
-         2 |  8  9 10 11 12 13 14 15
-         1 |  0  1  2  3  4  5  6  7
-           -------------------------
-              A  B  C  D  E  F  G  H
+/*
+     8 | 56 57 58 59 60 61 62 63
+     7 | 48 49 50 51 52 53 54 55
+     6 | 40 41 42 43 44 45 46 47
+     5 | 32 33 34 35 36 37 38 39
+     4 | 24 25 26 27 28 29 30 31
+     3 | 16 17 18 19 20 21 22 23
+     2 |  8  9 10 11 12 13 14 15
+     1 |  0  1  2  3  4  5  6  7
+       -------------------------
+          A  B  C  D  E  F  G  H
 
-      Left shift '<<' means +1 on the chessboard
-      Right shift '>>>' means -1 on the chessboard
+  Left shift '<<' means +1 on the chessboard
+  Right shift '>>>' means -1 on the chessboard
 
-      +7  +8  +9
-      -1   0  +1
-      -9  -8  -7
-    */
+  +7  +8  +9
+  -1   0  +1
+  -9  -8  -7
+*/
 
+/**
+ * Represents a MoveGenerator object.
+ */
 public class MoveGenerator {
 
     //-------------------------------------------------
     // Member
     //-------------------------------------------------
 
+    /**
+     * A list with all moves.
+     */
     private final ArrayList<Move> moves = new ArrayList<>();
 
     //-------------------------------------------------
     // Getter
     //-------------------------------------------------
 
+    /**
+     * Get {@link #moves}.
+     *
+     * @return {@link #moves}
+     */
     public ArrayList<Move> getMoves() {
         return moves;
     }
 
     //-------------------------------------------------
-    // White
+    // Nonsliding pieces (Knight, King)
     //-------------------------------------------------
 
-    public void addWhiteKnightMoves(long whiteKnights, long whitePieces) {
-        while (whiteKnights != 0) {
-            var fromSquare = Long.numberOfTrailingZeros(whiteKnights);
-            // only move to squares that are not occupied by a white piece
-            var knightMoves = Attack.knightAttacks[fromSquare] & ~whitePieces;
+    /**
+     * The method adds moves for the nonsliding pieces except pawns (Knight, King).
+     *
+     * @param piece Specifies for which type of piece the moves are to be added.
+     * @param piecesBitboard A bitboard with all the knights or the king.
+     * @param possiblePositionsBitboard This prevents own pieces from being captured.
+     */
+    public void addNonslidingPiecesMoves(Piece piece, long piecesBitboard, long possiblePositionsBitboard) {
+        while (piecesBitboard != 0) {
+            var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
 
-            while(knightMoves != 0) {
-                var move = new Move(Piece.WHITE_KNIGHT, fromSquare, Long.numberOfTrailingZeros(knightMoves));
-                moves.add(move);
+            var pieceMoves = 0L;
 
-                knightMoves &= knightMoves - 1;
+            switch (piece) {
+                case WHITE_KNIGHT:
+                case BLACK_KNIGHT:
+                    pieceMoves = Attack.knightAttacks[fromSquare] & possiblePositionsBitboard;
+                    break;
+                case WHITE_KING:
+                case BLACK_KING:
+                    pieceMoves = Attack.kingAttacks[fromSquare] & possiblePositionsBitboard;
+                    break;
+                default:
             }
 
-            whiteKnights &= whiteKnights - 1;
+            while (pieceMoves != 0) {
+                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(pieceMoves)));
+                pieceMoves &= pieceMoves - 1;
+            }
+
+            piecesBitboard &= piecesBitboard - 1;
         }
     }
 
-    public void addWhiteKingMoves(long whiteKing, long whitePieces) {
-        var fromSquare = Long.numberOfTrailingZeros(whiteKing);
-        var kingMoves = Attack.kingAttacks[fromSquare] & ~whitePieces;
-
-        while (kingMoves != 0) {
-            var move = new Move(Piece.WHITE_KING, fromSquare, Long.numberOfTrailingZeros(kingMoves));
-            moves.add(move);
-
-            kingMoves &= kingMoves - 1;
-        }
-    }
+    //-------------------------------------------------
+    // Nonsliding pieces (Pawn)
+    //-------------------------------------------------
 
     public void addWhitePawnMoves(long whitePawns, long allPieces) {
         while (whitePawns != 0) {
@@ -94,23 +114,18 @@ public class MoveGenerator {
     }
 
     //-------------------------------------------------
-    // Black
-    //-------------------------------------------------
-
-
-    //-------------------------------------------------
-    // Sliding pieces
+    // Sliding pieces (Rook, Bishop, Queen)
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the sliding pieces (rooks, bishops or queens).
+     * The method adds moves for the sliding pieces (Rook, Bishop or Queen).
      *
      * @param piece Specifies for which type of piece the moves are to be added.
-     * @param piecesBitboard A bitboard with all the rooks, bishops or queens
+     * @param piecesBitboard A bitboard with all the rooks, bishops or queens.
      * @param allPiecesBitboard A bitboard with all pieces.
      * @param possiblePositionsBitboard This prevents own pieces from being captured.
      */
-    public void addSlidingMoves(Piece piece, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
+    public void addSlidingPiecesMoves(Piece piece, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
         while (piecesBitboard != 0) {
             var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
 
