@@ -8,9 +8,9 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * For print out.
+     * The piece.
      */
-    public char piece;
+    public Piece piece;
 
     /**
      * The start index.
@@ -33,7 +33,7 @@ public class Move {
      * @param from {@link #from}
      * @param to {@link #to}
      */
-    public Move(char piece, int from, int to) {
+    public Move(Piece piece, int from, int to) {
         this.piece = piece;
         this.from = from;
         this.to = to;
@@ -45,6 +45,6 @@ public class Move {
 
     @Override
     public String toString() {
-        return "Piece: " + piece + " from: " + Bitboard.SQUARE_STRINGS[from] + " to: " + Bitboard.SQUARE_STRINGS[to];
+        return "Piece: " + piece.moveLetter + " from: " + Bitboard.SQUARE_STRINGS[from] + " to: " + Bitboard.SQUARE_STRINGS[to];
     }
 }

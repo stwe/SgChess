@@ -17,6 +17,11 @@ public class Magic {
      */
     public long[] moveBoards;
 
+    /**
+     * Precomputed value to determine the correct move board index.
+     */
+    public int shift;
+
     //-------------------------------------------------
     // Print
     //-------------------------------------------------

@@ -110,8 +110,10 @@ public class Attack {
         var rookBlockerBoards = calcBlockerBoards(rookMagics);
         var bishopBlockerBoards = calcBlockerBoards(bishopMagics);
 
-        generateRookMoveBoards(rookBlockerBoards);
-        generateBishopMoveBoards(bishopBlockerBoards);
+        calcShifts();
+
+        calcRookMoveBoards(rookBlockerBoards);
+        calcBishopMoveBoards(bishopBlockerBoards);
     }
 
     //-------------------------------------------------
@@ -120,14 +122,16 @@ public class Attack {
 
     public static long getRookMoves(int from, long allPieces) {
         var magic = rookMagics[from];
-        var shift = 64 - Long.bitCount(magic.blockerMask);
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[from] >>> shift)];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[from] >>> magic.shift)];
     }
 
     public static long getBishopMoves(int from, long allPieces) {
         var magic = bishopMagics[from];
-        var shift = 64 - Long.bitCount(magic.blockerMask);
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[from] >>> shift)];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[from] >>> magic.shift)];
+    }
+
+    public static long getQueenMoves(int from, long allPieces) {
+        return getRookMoves(from, allPieces) | getBishopMoves(from, allPieces);
     }
 
     //-------------------------------------------------
@@ -271,7 +275,7 @@ public class Attack {
     // Move boards
     //-------------------------------------------------
 
-    private static void generateRookMoveBoards(long[][] rookBlockerBoards) {
+    private static void calcRookMoveBoards(long[][] rookBlockerBoards) {
         /*
 
         Example: Rook on A1 with second blocker board (rookBlockerBoards[0][1])
@@ -371,7 +375,7 @@ public class Attack {
                 }
 
                 // generate the hash key
-                var key = (int) ((rookBlockerBoards[square][i] * ROOK_MAGIC_NUMBERS[square]) >>> (64 - Long.bitCount(rookMagics[square].blockerMask)));
+                var key = (int) ((rookBlockerBoards[square][i] * ROOK_MAGIC_NUMBERS[square]) >>> rookMagics[square].shift);
                 // todo: temp code
                 if (controlHashMap.containsKey(key)) {
                     throw new RuntimeException("Invalid magic number!");
@@ -388,7 +392,7 @@ public class Attack {
         }
     }
 
-    private static void generateBishopMoveBoards(long[][] bishopBlockerBoards) {
+    private static void calcBishopMoveBoards(long[][] bishopBlockerBoards) {
         for (var square = 0; square < 64; square++) {
             // a move board for each blocker board
             var blockerBoardCount = bishopBlockerBoards[square].length;
@@ -430,7 +434,7 @@ public class Attack {
                 }
 
                 // generate the hash key
-                var key = (int) ((bishopBlockerBoards[square][i] * BISHOP_MAGIC_NUMBERS[square]) >>> (64 - Long.bitCount(bishopMagics[square].blockerMask)));
+                var key = (int) ((bishopBlockerBoards[square][i] * BISHOP_MAGIC_NUMBERS[square]) >>> bishopMagics[square].shift);
                 // todo: temp code
                 if (controlHashMap.containsKey(key)) {
                     throw new RuntimeException("Invalid magic number!");
@@ -492,5 +496,22 @@ public class Attack {
         }
 
         return knightAttacks;
+    }
+
+    //-------------------------------------------------
+    // Helper
+    //-------------------------------------------------
+
+    /**
+     * Precompute how many bits are shifted to the right.
+     *
+     * For example, a rook on a1 requires a 12-bit database and we therefore have to shift right with 52 bits,
+     * leaving an index in the range [0 - 4095].
+     */
+    private static void calcShifts() {
+        for (var i = 0; i < 64; i++) {
+            rookMagics[i].shift = 64 - Long.bitCount(rookMagics[i].blockerMask);
+            bishopMagics[i].shift = 64 - Long.bitCount(bishopMagics[i].blockerMask);
+        }
     }
 }

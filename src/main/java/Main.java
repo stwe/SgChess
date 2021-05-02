@@ -32,15 +32,17 @@ public class Main {
         System.out.println(board);
 
         MoveGenerator moveGenerator = new MoveGenerator();
+
         //moveGenerator.addWhiteKnightMoves(board.getWhiteKnights(), board.getWhitePieces());
         //moveGenerator.addWhitePawnMoves(board.getWhitePawns(), board.getAllPieces());
         //moveGenerator.addWhiteKingMoves(board.getWhiteKing(), board.getWhitePieces());
 
-        //moveGenerator.addRookMoves(board.getWhiteRooks(), board.getAllPieces(), ~board.getWhitePieces(), 'R');
-        //moveGenerator.addRookMoves(board.getBlackRooks(), board.getAllPieces(), ~board.getBlackPieces(), 'r');
-
-        moveGenerator.addBishopMoves(board.getWhiteBishops(), board.getAllPieces(), ~board.getWhitePieces(), 'B');
-        moveGenerator.addBishopMoves(board.getBlackBishops(), board.getAllPieces(), ~board.getBlackPieces(), 'b');
+        moveGenerator.addSlidingMoves(
+                Piece.WHITE_BISHOP,
+                board.getWhiteBishops(),
+                board.getAllPieces(),
+                ~board.getWhitePieces()
+        );
 
         var mlist = moveGenerator.getMoves();
         for (var move : mlist) {

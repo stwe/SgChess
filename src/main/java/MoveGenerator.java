@@ -47,7 +47,7 @@ public class MoveGenerator {
             var knightMoves = Attack.knightAttacks[fromSquare] & ~whitePieces;
 
             while(knightMoves != 0) {
-                var move = new Move('N', fromSquare, Long.numberOfTrailingZeros(knightMoves));
+                var move = new Move(Piece.WHITE_KNIGHT, fromSquare, Long.numberOfTrailingZeros(knightMoves));
                 moves.add(move);
 
                 knightMoves &= knightMoves - 1;
@@ -62,7 +62,7 @@ public class MoveGenerator {
         var kingMoves = Attack.kingAttacks[fromSquare] & ~whitePieces;
 
         while (kingMoves != 0) {
-            var move = new Move('K', fromSquare, Long.numberOfTrailingZeros(kingMoves));
+            var move = new Move(Piece.WHITE_KING, fromSquare, Long.numberOfTrailingZeros(kingMoves));
             moves.add(move);
 
             kingMoves &= kingMoves - 1;
@@ -76,7 +76,7 @@ public class MoveGenerator {
             long pawnMoves = getWhitePawnMoves(whitePawn, allPieces);
 
             while (pawnMoves != 0) {
-                var move = new Move('P', fromSquare, Long.numberOfTrailingZeros(pawnMoves));
+                var move = new Move(Piece.WHITE_PAWN, fromSquare, Long.numberOfTrailingZeros(pawnMoves));
                 moves.add(move);
 
                 pawnMoves &= pawnMoves - 1;
@@ -102,35 +102,42 @@ public class MoveGenerator {
     // Sliding pieces
     //-------------------------------------------------
 
-    public void addRookMoves(long piece, long allPieces, long possiblePositions, char pieceChar) {
-        while (piece != 0) {
-            var fromSquare = Long.numberOfTrailingZeros(piece);
-            long rookMoves = Attack.getRookMoves(fromSquare, allPieces) & possiblePositions;
+    /**
+     * The method adds moves for the sliding pieces (rooks, bishops or queens).
+     *
+     * @param piece Specifies for which type of piece the moves are to be added.
+     * @param piecesBitboard A bitboard with all the rooks, bishops or queens
+     * @param allPiecesBitboard A bitboard with all pieces.
+     * @param possiblePositionsBitboard This prevents own pieces from being captured.
+     */
+    public void addSlidingMoves(Piece piece, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
+        while (piecesBitboard != 0) {
+            var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
 
-            while (rookMoves != 0) {
-                var move = new Move(pieceChar, fromSquare, Long.numberOfTrailingZeros(rookMoves));
-                moves.add(move);
+            var pieceMoves = 0L;
 
-                rookMoves &= rookMoves - 1;
+            switch (piece) {
+                case WHITE_ROOK:
+                case BLACK_ROOK:
+                    pieceMoves = Attack.getRookMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    break;
+                case WHITE_BISHOP:
+                case BLACK_BISHOP:
+                    pieceMoves = Attack.getBishopMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    break;
+                case WHITE_QUEEN:
+                case BLACK_QUEEN:
+                    pieceMoves = Attack.getQueenMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    break;
+                default:
             }
 
-            piece &= piece - 1;
-        }
-    }
-
-    public void addBishopMoves(long piece, long allPieces, long possiblePositions, char pieceChar) {
-        while (piece != 0) {
-            var fromSquare = Long.numberOfTrailingZeros(piece);
-            long bishopMoves = Attack.getBishopMoves(fromSquare, allPieces) & possiblePositions;
-
-            while (bishopMoves != 0) {
-                var move = new Move(pieceChar, fromSquare, Long.numberOfTrailingZeros(bishopMoves));
-                moves.add(move);
-
-                bishopMoves &= bishopMoves - 1;
+            while (pieceMoves != 0) {
+                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(pieceMoves)));
+                pieceMoves &= pieceMoves - 1;
             }
 
-            piece &= piece - 1;
+            piecesBitboard &= piecesBitboard - 1;
         }
     }
 }

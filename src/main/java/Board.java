@@ -417,74 +417,74 @@ public class Board {
     private String getPieceString(int file, int rank) {
         if (Bitboard.isBitSet(getWhitePawns(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_PAWNS.symbol + ANSI_RESET : Piece.WHITE_PAWNS.symbol
-                    : colored ? PIECE_WHITE + "P " + ANSI_RESET : "P ";
+                      colored ? PIECE_WHITE + Piece.WHITE_PAWN.symbol + ANSI_RESET : Piece.WHITE_PAWN.symbol
+                    : colored ? PIECE_WHITE + Piece.WHITE_PAWN.letter + ANSI_RESET : Piece.WHITE_PAWN.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteKnights(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_KNIGHTS.symbol + ANSI_RESET : Piece.WHITE_KNIGHTS.symbol
-                    : colored ? PIECE_WHITE + "N " + ANSI_RESET : "N ";
+                      colored ? PIECE_WHITE + Piece.WHITE_KNIGHT.symbol + ANSI_RESET : Piece.WHITE_KNIGHT.symbol
+                    : colored ? PIECE_WHITE + Piece.WHITE_KNIGHT.letter + ANSI_RESET : Piece.WHITE_KNIGHT.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteBishops(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_BISHOPS.symbol + ANSI_RESET : Piece.WHITE_BISHOPS.symbol
-                    : colored ? PIECE_WHITE + "B " + ANSI_RESET : "B ";
+                      colored ? PIECE_WHITE + Piece.WHITE_BISHOP.symbol + ANSI_RESET : Piece.WHITE_BISHOP.symbol
+                    : colored ? PIECE_WHITE + Piece.WHITE_BISHOP.letter + ANSI_RESET : Piece.WHITE_BISHOP.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteRooks(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_ROOKS.symbol + ANSI_RESET : Piece.WHITE_ROOKS.symbol
-                    : colored ? PIECE_WHITE + "R " + ANSI_RESET : "R ";
+                      colored ? PIECE_WHITE + Piece.WHITE_ROOK.symbol + ANSI_RESET : Piece.WHITE_ROOK.symbol
+                    : colored ? PIECE_WHITE + Piece.WHITE_ROOK.letter + ANSI_RESET : Piece.WHITE_ROOK.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteQueens(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_QUEENS.symbol + ANSI_RESET : Piece.WHITE_QUEENS.symbol
-                    : colored ? PIECE_WHITE + "Q " + ANSI_RESET : "Q ";
+                      colored ? PIECE_WHITE + Piece.WHITE_QUEEN.symbol + ANSI_RESET : Piece.WHITE_QUEEN.symbol
+                    : colored ? PIECE_WHITE + Piece.WHITE_QUEEN.letter + ANSI_RESET : Piece.WHITE_QUEEN.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteKing(), file, rank)) {
             return showUnicodeSymbols ?
                       colored ? PIECE_WHITE + Piece.WHITE_KING.symbol + ANSI_RESET : Piece.WHITE_KING.symbol
-                    : colored ? PIECE_WHITE + "K " + ANSI_RESET : "K ";
+                    : colored ? PIECE_WHITE + Piece.WHITE_KING.letter + ANSI_RESET : Piece.WHITE_KING.letter;
         }
 
         if (Bitboard.isBitSet(getBlackPawns(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_PAWNS.symbol + ANSI_RESET : Piece.BLACK_PAWNS.symbol
-                    : colored ? PIECE_BLACK + "p " + ANSI_RESET : "p ";
+                      colored ? PIECE_BLACK + Piece.BLACK_PAWN.symbol + ANSI_RESET : Piece.BLACK_PAWN.symbol
+                    : colored ? PIECE_BLACK + Piece.BLACK_PAWN.letter + ANSI_RESET : Piece.BLACK_PAWN.letter;
         }
 
         if (Bitboard.isBitSet(getBlackKnights(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_KNIGHTS.symbol + ANSI_RESET : Piece.BLACK_KNIGHTS.symbol
-                    : colored ? PIECE_BLACK + "n " + ANSI_RESET : "n ";
+                      colored ? PIECE_BLACK + Piece.BLACK_KNIGHT.symbol + ANSI_RESET : Piece.BLACK_KNIGHT.symbol
+                    : colored ? PIECE_BLACK + Piece.BLACK_KNIGHT.letter + ANSI_RESET : Piece.BLACK_KNIGHT.letter;
         }
 
         if (Bitboard.isBitSet(getBlackBishops(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_BISHOPS.symbol + ANSI_RESET : Piece.BLACK_BISHOPS.symbol
-                    : colored ? PIECE_BLACK + "b " + ANSI_RESET : "b ";
+                      colored ? PIECE_BLACK + Piece.BLACK_BISHOP.symbol + ANSI_RESET : Piece.BLACK_BISHOP.symbol
+                    : colored ? PIECE_BLACK + Piece.BLACK_BISHOP.letter + ANSI_RESET : Piece.BLACK_BISHOP.letter;
         }
 
         if (Bitboard.isBitSet(getBlackRooks(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_ROOKS.symbol + ANSI_RESET : Piece.BLACK_ROOKS.symbol
-                    : colored ? PIECE_BLACK + "r " + ANSI_RESET : "r ";
+                      colored ? PIECE_BLACK + Piece.BLACK_ROOK.symbol + ANSI_RESET : Piece.BLACK_ROOK.symbol
+                    : colored ? PIECE_BLACK + Piece.BLACK_ROOK.letter + ANSI_RESET : Piece.BLACK_ROOK.letter;
         }
 
         if (Bitboard.isBitSet(getBlackQueens(), file, rank)) {
             return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_QUEENS.symbol + ANSI_RESET : Piece.BLACK_QUEENS.symbol
-                    : colored ? PIECE_BLACK + "q " + ANSI_RESET : "q ";
+                      colored ? PIECE_BLACK + Piece.BLACK_QUEEN.symbol + ANSI_RESET : Piece.BLACK_QUEEN.symbol
+                    : colored ? PIECE_BLACK + Piece.BLACK_QUEEN.letter + ANSI_RESET : Piece.BLACK_QUEEN.letter;
         }
 
         if (Bitboard.isBitSet(getBlackKing(), file, rank)) {
             return showUnicodeSymbols ?
                       colored ? PIECE_BLACK + Piece.BLACK_KING.symbol  + ANSI_RESET : Piece.BLACK_KING.symbol
-                    : colored ? PIECE_BLACK + "k " + ANSI_RESET : "k ";
+                    : colored ? PIECE_BLACK + Piece.BLACK_KING.letter + ANSI_RESET : Piece.BLACK_KING.letter;
         }
 
         return "";
