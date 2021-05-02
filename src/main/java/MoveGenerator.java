@@ -62,23 +62,23 @@ public class MoveGenerator {
         while (piecesBitboard != 0) {
             var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
 
-            var pieceMoves = 0L;
+            var movesBitboard = 0L;
 
             switch (piece) {
                 case WHITE_KNIGHT:
                 case BLACK_KNIGHT:
-                    pieceMoves = Attack.knightAttacks[fromSquare] & possiblePositionsBitboard;
+                    movesBitboard = Attack.knightAttacks[fromSquare] & possiblePositionsBitboard;
                     break;
                 case WHITE_KING:
                 case BLACK_KING:
-                    pieceMoves = Attack.kingAttacks[fromSquare] & possiblePositionsBitboard;
+                    movesBitboard = Attack.kingAttacks[fromSquare] & possiblePositionsBitboard;
                     break;
                 default:
             }
 
-            while (pieceMoves != 0) {
-                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(pieceMoves)));
-                pieceMoves &= pieceMoves - 1;
+            while (movesBitboard != 0) {
+                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(movesBitboard)));
+                movesBitboard &= movesBitboard - 1;
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -89,28 +89,48 @@ public class MoveGenerator {
     // Nonsliding pieces (Pawn)
     //-------------------------------------------------
 
-    public void addWhitePawnMoves(long whitePawns, long allPieces) {
-        while (whitePawns != 0) {
-            var fromSquare = Long.numberOfTrailingZeros(whitePawns);
-            long whitePawn = 1L << fromSquare;
-            long pawnMoves = getWhitePawnMoves(whitePawn, allPieces);
+    /**
+     * The method adds moves for the white pawn.
+     *
+     * @param whitePawnsBitboard A bitboard with all the white pawns.
+     * @param allPiecesBitboard Own and black pieces can block.
+     */
+    public void addWhitePawnMoves(long whitePawnsBitboard, long allPiecesBitboard) {
+        while (whitePawnsBitboard != 0) {
+            var fromSquare = Long.numberOfTrailingZeros(whitePawnsBitboard);
+            long whitePawnBitboard = 1L << fromSquare;
+            long movesBitboard = getWhitePawnMoves(whitePawnBitboard, allPiecesBitboard);
 
-            while (pawnMoves != 0) {
-                var move = new Move(Piece.WHITE_PAWN, fromSquare, Long.numberOfTrailingZeros(pawnMoves));
+            while (movesBitboard != 0) {
+                var move = new Move(Piece.WHITE_PAWN, fromSquare, Long.numberOfTrailingZeros(movesBitboard));
                 moves.add(move);
 
-                pawnMoves &= pawnMoves - 1;
+                movesBitboard &= movesBitboard - 1;
             }
 
-            whitePawns &= whitePawns - 1;
+            whitePawnsBitboard &= whitePawnsBitboard - 1;
         }
     }
 
-    private static long getWhitePawnMoves(long whitePawn, long allPieces) {
-        long firstStep = (whitePawn << 8) & ~allPieces;
-        long twoSteps = ((firstStep & Bitboard.MASK_RANK_3) << 8) & ~allPieces;
+    /**
+     * Computing white pawn movements bitboard.
+     *
+     * @see <a href="http://pages.cs.wisc.edu/~psilord/blog/data/chess-pages/nonsliding.html">Nonsliding Pieces</a>
+     *
+     * @param whitePawnBitboard A bitboard with all the white pawns.
+     * @param allPiecesBitboard Own and black pieces can block.
+     *
+     * @return White pawns valid movements bitboard.
+     */
+    private static long getWhitePawnMoves(long whitePawnBitboard, long allPiecesBitboard) {
+        // check the single space infront of the white pawn
+        long firstStepBitboard = (whitePawnBitboard << 8) & ~allPiecesBitboard;
 
-        return firstStep | twoSteps;
+        // check and see if the pawn can move forward one more
+        long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_3) << 8) & ~allPiecesBitboard;
+
+        // return possible moves
+        return firstStepBitboard | twoStepsBitboard;
     }
 
     //-------------------------------------------------
@@ -129,27 +149,27 @@ public class MoveGenerator {
         while (piecesBitboard != 0) {
             var fromSquare = Long.numberOfTrailingZeros(piecesBitboard);
 
-            var pieceMoves = 0L;
+            var movesBitboard = 0L;
 
             switch (piece) {
                 case WHITE_ROOK:
                 case BLACK_ROOK:
-                    pieceMoves = Attack.getRookMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    movesBitboard = Attack.getRookMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
                     break;
                 case WHITE_BISHOP:
                 case BLACK_BISHOP:
-                    pieceMoves = Attack.getBishopMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    movesBitboard = Attack.getBishopMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
                     break;
                 case WHITE_QUEEN:
                 case BLACK_QUEEN:
-                    pieceMoves = Attack.getQueenMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
+                    movesBitboard = Attack.getQueenMoves(fromSquare, allPiecesBitboard) & possiblePositionsBitboard;
                     break;
                 default:
             }
 
-            while (pieceMoves != 0) {
-                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(pieceMoves)));
-                pieceMoves &= pieceMoves - 1;
+            while (movesBitboard != 0) {
+                moves.add(new Move(piece, fromSquare, Long.numberOfTrailingZeros(movesBitboard)));
+                movesBitboard &= movesBitboard - 1;
             }
 
             piecesBitboard &= piecesBitboard - 1;

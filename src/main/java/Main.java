@@ -32,13 +32,15 @@ public class Main {
 
         MoveGenerator moveGenerator = new MoveGenerator();
 
-        //(board.getWhitePawns(), board.getAllPieces());
+        moveGenerator.addWhitePawnMoves(board.getWhitePawns(), board.getAllPieces());
 
+        /*
         moveGenerator.addNonslidingPiecesMoves(
                 Piece.WHITE_KNIGHT,
                 board.getWhiteKnights(),
                 ~board.getWhitePieces()
         );
+        */
 
         /*
         moveGenerator.addSlidingPiecesMoves(
