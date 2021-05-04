@@ -25,8 +25,8 @@ public class Main {
         keyboard.close();
         */
 
-        Board board = new Board();
-        //Board board = new Board("7k/5b2/8/5r2/8/1R6/6B1/7K w - - 0 1");
+        //Board board = new Board();
+        Board board = new Board("rnbqkbnr/pp4pp/2p2p2/1N2N3/8/3pp3/PPPPPPPP/R1BQKB1R w KQkq - 0 1");
         board.setColored(true);
         System.out.println(board);
 
@@ -36,6 +36,7 @@ public class Main {
         moveGenerator.addPawnMoves(
                 Piece.WHITE_PAWN,
                 board.getWhitePawns(),
+                board.getBlackPieces(),
                 board.getAllPieces()
         );
         */
@@ -43,6 +44,7 @@ public class Main {
         moveGenerator.addPawnMoves(
                 Piece.BLACK_PAWN,
                 board.getBlackPawns(),
+                board.getWhitePieces(),
                 board.getAllPieces()
         );
 

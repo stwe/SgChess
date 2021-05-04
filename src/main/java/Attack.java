@@ -53,14 +53,24 @@ public class Attack {
     //-------------------------------------------------
 
     /**
-     * The precomputed lookup table for any color king.
+     * Possible positions of movement and attack for any color king.
      */
-    public static final long[] kingAttacks;
+    public static final long[] kingMovesAndAttacks;
 
     /**
-     * The precomputed lookup table for any color knight.
+     * Possible positions of movement and attack for any color knight.
      */
-    public static final long[] knightAttacks;
+    public static final long[] knightMovesAndAttacks;
+
+    /**
+     * Possible positions of attack for any white pawn.
+     */
+    public static final long[] whitePawnAttacks;
+
+    /**
+     * Possible positions of attack for any black pawn.
+     */
+    public static final long[] blackPawnAttacks;
 
     /**
      * Rook magic objects.
@@ -78,8 +88,10 @@ public class Attack {
 
     static {
 
-        kingAttacks = calcKingAttacks();
-        knightAttacks = calcKnightAttacks();
+        kingMovesAndAttacks = calcKingMovesAndAttacks();
+        knightMovesAndAttacks = calcKnightMovesAndAttacks();
+        whitePawnAttacks = calcWhitePawnAttacks();
+        blackPawnAttacks = calcBlackPawnAttacks();
 
         /*
             Rook on e4:
@@ -117,7 +129,7 @@ public class Attack {
     }
 
     //-------------------------------------------------
-    // Get moves
+    // Get moves && attacks
     //-------------------------------------------------
 
     public static long getRookMoves(int from, long allPieces) {
@@ -452,50 +464,88 @@ public class Attack {
     }
 
     //-------------------------------------------------
-    // Lookup tables
+    // Precomputed lookup tables
     //-------------------------------------------------
 
     /**
      * Calculate every possible position of movement and attack for any color king.
      *
-     * @return The precomputed lookup table for any color king.
+     * @return A precomputed lookup table.
      */
-    private static long[] calcKingAttacks() {
-        var kingAttacks = new long[64];
+    private static long[] calcKingMovesAndAttacks() {
+        var kingMoves = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long m = 1L << square;
+            long positionBitboard = 1L << square;
             long mask =
-                    (((m >>> 1) | (m << 7) | (m >>> 9)) & Bitboard.CLEAR_FILE_H) |
-                    (((m << 1) | (m << 9) | (m >>> 7)) & Bitboard.CLEAR_FILE_A) |
-                    (m << 8) | (m >>> 8);
+                    (((positionBitboard >>> 1) | (positionBitboard << 7) | (positionBitboard >>> 9)) & Bitboard.CLEAR_FILE_H) |
+                    (((positionBitboard << 1) | (positionBitboard << 9) | (positionBitboard >>> 7)) & Bitboard.CLEAR_FILE_A) |
+                    (positionBitboard << 8) | (positionBitboard >>> 8);
 
-            kingAttacks[square] = mask;
+            kingMoves[square] = mask;
         }
 
-        return kingAttacks;
+        return kingMoves;
     }
 
     /**
      * Calculate every possible position of movement and attack for any color knight.
      *
-     * @return The precomputed lookup table for any color knight.
+     * @return A precomputed lookup table.
      */
-    private static long[] calcKnightAttacks() {
-        var knightAttacks = new long[64];
+    private static long[] calcKnightMovesAndAttacks() {
+        var knightMoves = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long m = 1L << square;
+            long positionBitboard = 1L << square;
             long mask =
-                    (((m <<  6) | (m >>> 10)) & Bitboard.CLEAR_FILE_GH) |
-                    (((m << 15) | (m >>> 17)) & Bitboard.CLEAR_FILE_H) |
-                    (((m << 17) | (m >>> 15)) & Bitboard.CLEAR_FILE_A) |
-                    (((m << 10) | (m >>>  6)) & Bitboard.CLEAR_FILE_AB);
+                    (((positionBitboard <<  6) | (positionBitboard >>> 10)) & Bitboard.CLEAR_FILE_GH) |
+                    (((positionBitboard << 15) | (positionBitboard >>> 17)) & Bitboard.CLEAR_FILE_H) |
+                    (((positionBitboard << 17) | (positionBitboard >>> 15)) & Bitboard.CLEAR_FILE_A) |
+                    (((positionBitboard << 10) | (positionBitboard >>>  6)) & Bitboard.CLEAR_FILE_AB);
 
-            knightAttacks[square] = mask;
+            knightMoves[square] = mask;
         }
 
-        return knightAttacks;
+        return knightMoves;
+    }
+
+    /**
+     * Calculate every possible position of attack for any white pawn.
+     *
+     * @return A precomputed lookup table.
+     */
+    private static long[] calcWhitePawnAttacks() {
+        var pawnAttacks = new long[64];
+
+        for (var square = 0; square < 64; square++) {
+            long positionBitboard = 1L << square;
+            long rightBitboard = (positionBitboard << 9) & Bitboard.CLEAR_FILE_A;
+            long leftBitboard = (positionBitboard << 7) & Bitboard.CLEAR_FILE_H;
+
+            pawnAttacks[square] = rightBitboard | leftBitboard;
+        }
+
+        return pawnAttacks;
+    }
+
+    /**
+     * Calculate every possible position of attack for any black pawn.
+     *
+     * @return A precomputed lookup table.
+     */
+    private static long[] calcBlackPawnAttacks() {
+        var pawnAttacks = new long[64];
+
+        for (var square = 0; square < 64; square++) {
+            long positionBitboard = 1L << square;
+            long rightBitboard = (positionBitboard >>> 9) & Bitboard.CLEAR_FILE_H;
+            long leftBitboard = (positionBitboard >>> 7) & Bitboard.CLEAR_FILE_A;
+
+            pawnAttacks[square] = rightBitboard | leftBitboard;
+        }
+
+        return pawnAttacks;
     }
 
     //-------------------------------------------------
