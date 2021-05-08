@@ -25,11 +25,18 @@ public class Main {
         keyboard.close();
         */
 
-        var m = new Move();
-        m.setFrom(28);
-        m.setTo(56);
+        // e2e4
+        /*
+        var m = new Move(Piece.BLACK_QUEEN, 28, 56);
+        m.setSpecialMoveFlag(Move.SpecialMoveFlag.PAWN_START);
+
+        System.out.println(m.getPiece());
         System.out.println(m.getFrom());
         System.out.println(m.getTo());
+        System.out.println(m.getCapturedPieceType());
+        System.out.println(m.getPromotedPieceType());
+        System.out.println(m.getSpecialMoveFlag());
+        */
 
         //Board board = new Board();
         Board board = new Board("rnbqkbnr/pp4pp/2p2p2/1N2N3/8/3pp3/PPPPPPPP/R1BQKB1R w KQkq - 0 1");
@@ -37,15 +44,6 @@ public class Main {
         System.out.println(board);
 
         MoveGenerator moveGenerator = new MoveGenerator();
-
-        /*
-        moveGenerator.addPawnMoves(
-                Piece.WHITE_PAWN,
-                board.getWhitePawns(),
-                board.getBlackPieces(),
-                board.getAllPieces()
-        );
-        */
 
         moveGenerator.addPawnMoves(
                 Piece.BLACK_PAWN,

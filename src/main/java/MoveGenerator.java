@@ -30,7 +30,7 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
-     * A list with all moves.
+     * A list with all generated moves.
      */
     private final ArrayList<Move> moves = new ArrayList<>();
 

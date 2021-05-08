@@ -7,19 +7,19 @@ public enum Piece {
     // Pieces
     //-------------------------------------------------
 
-    WHITE_PAWN("♟ ", "P ", 'P'),
-    WHITE_KNIGHT("♞ ", "N ", 'N'),
-    WHITE_BISHOP("♝ ", "B ", 'B'),
-    WHITE_ROOK("♜ ", "R ", 'R'),
-    WHITE_QUEEN("♛ ", "Q ", 'Q'),
-    WHITE_KING("♚ ", "K ", 'K'),
+    WHITE_PAWN("♟ ", "P ", 'P', PieceType.PAWN, 0),
+    WHITE_KNIGHT("♞ ", "N ", 'N', PieceType.KNIGHT, 1),
+    WHITE_BISHOP("♝ ", "B ", 'B', PieceType.BISHOP, 2),
+    WHITE_ROOK("♜ ", "R ", 'R', PieceType.ROOK, 3),
+    WHITE_QUEEN("♛ ", "Q ", 'Q', PieceType.QUEEN, 4),
+    WHITE_KING("♚ ", "K ", 'K', PieceType.KING, 5),
 
-    BLACK_PAWN("♙ ", "p ", 'p'),
-    BLACK_KNIGHT("♘ ", "n ", 'n'),
-    BLACK_BISHOP("♗ ", "b ", 'b'),
-    BLACK_ROOK("♖ ", "r ", 'r'),
-    BLACK_QUEEN("♕ ", "q ", 'q'),
-    BLACK_KING("♔ ", "k ", 'k');
+    BLACK_PAWN("♙ ", "p ", 'p', PieceType.PAWN, 6),
+    BLACK_KNIGHT("♘ ", "n ", 'n', PieceType.KNIGHT, 7),
+    BLACK_BISHOP("♗ ", "b ", 'b', PieceType.BISHOP, 8),
+    BLACK_ROOK("♖ ", "r ", 'r', PieceType.ROOK, 9),
+    BLACK_QUEEN("♕ ", "q ", 'q', PieceType.QUEEN, 10),
+    BLACK_KING("♔ ", "k ", 'k', PieceType.KING, 11);
 
     //-------------------------------------------------
     // Member
@@ -43,6 +43,21 @@ public enum Piece {
      */
     public final char moveLetter;
 
+    /**
+     * The type of the piece.
+     */
+    public final PieceType pieceType;
+
+    /**
+     * The ordinal value.
+     */
+    public final int value;
+
+    /**
+     * To get the Piece by ordinal value.
+     */
+    public final Piece[] values = new Piece[12];
+
     //-------------------------------------------------
     // Ctors.
     //-------------------------------------------------
@@ -53,10 +68,15 @@ public enum Piece {
      * @param symbol {@link #symbol}
      * @param letter {@link #letter}
      * @param moveLetter {@link #moveLetter}
+     * @param pieceType {@link #pieceType}
+     * @param value {@link #value}
      */
-    Piece(String symbol, String letter, char moveLetter) {
+    Piece(String symbol, String letter, char moveLetter, PieceType pieceType, int value) {
         this.symbol = symbol;
         this.letter = letter;
         this.moveLetter = moveLetter;
+        this.pieceType = pieceType;
+        this.value = value;
+        this.values[value] = this;
     }
 }
