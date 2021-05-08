@@ -27,17 +27,19 @@ public enum Piece {
 
     /**
      * UTF8 Chess symbol.
-     * Used for a simple gui representation of the board.
+     * Used for a pretty readable string representation of this piece in a chessboard.
      */
     public final String symbol;
 
     /**
-     * Used for a simple gui representation of the board.
+     * Used for a readable string representation of this piece in a chessboard.
      */
     public final String letter;
 
     /**
      * Used for the chess notation.
+     * White pieces are represented as upper case letters and black pieces are
+     * represented as lower case letters.
      */
     public final char moveLetter;
 

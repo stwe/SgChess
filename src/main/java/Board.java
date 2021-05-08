@@ -94,83 +94,83 @@ public class Board {
     //-------------------------------------------------
 
     public long getWhitePawns() {
-        return bitboards[Bitboard.WHITE_PAWNS];
+        return bitboards[Bitboard.WHITE_PAWNS_BITBOARD];
     }
 
     public long getWhiteKnights() {
-        return bitboards[Bitboard.WHITE_KNIGHTS];
+        return bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD];
     }
 
     public long getWhiteBishops() {
-        return bitboards[Bitboard.WHITE_BISHOPS];
+        return bitboards[Bitboard.WHITE_BISHOPS_BITBOARD];
     }
 
     public long getWhiteRooks() {
-        return bitboards[Bitboard.WHITE_ROOKS];
+        return bitboards[Bitboard.WHITE_ROOKS_BITBOARD];
     }
 
     public long getWhiteQueens() {
-        return bitboards[Bitboard.WHITE_QUEENS];
+        return bitboards[Bitboard.WHITE_QUEENS_BITBOARD];
     }
 
     public long getWhiteKing() {
-        return bitboards[Bitboard.WHITE_KING];
+        return bitboards[Bitboard.WHITE_KING_BITBOARD];
     }
 
     public long getBlackPawns() {
-        return bitboards[Bitboard.BLACK_PAWNS];
+        return bitboards[Bitboard.BLACK_PAWNS_BITBOARD];
     }
 
     public long getBlackKnights() {
-        return bitboards[Bitboard.BLACK_KNIGHTS];
+        return bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD];
     }
 
     public long getBlackBishops() {
-        return bitboards[Bitboard.BLACK_BISHOPS];
+        return bitboards[Bitboard.BLACK_BISHOPS_BITBOARD];
     }
 
     public long getBlackRooks() {
-        return bitboards[Bitboard.BLACK_ROOKS];
+        return bitboards[Bitboard.BLACK_ROOKS_BITBOARD];
     }
 
     public long getBlackQueens() {
-        return bitboards[Bitboard.BLACK_QUEENS];
+        return bitboards[Bitboard.BLACK_QUEENS_BITBOARD];
     }
 
     public long getBlackKing() {
-        return bitboards[Bitboard.BLACK_KING];
+        return bitboards[Bitboard.BLACK_KING_BITBOARD];
     }
 
     public long getWhitePieces() {
-        return bitboards[Bitboard.ALL_WHITE_PIECES];
+        return bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD];
     }
 
     public long getBlackPieces() {
-        return bitboards[Bitboard.ALL_BLACK_PIECES];
+        return bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD];
     }
 
     public long getAllPawns() {
-        return bitboards[Bitboard.ALL_PAWNS];
+        return bitboards[Bitboard.ALL_PAWNS_BITBOARD];
     }
 
     public long getAllKnights() {
-        return bitboards[Bitboard.ALL_KNIGHTS];
+        return bitboards[Bitboard.ALL_KNIGHTS_BITBOARD];
     }
 
     public long getAllBishops() {
-        return bitboards[Bitboard.ALL_BISHOPS];
+        return bitboards[Bitboard.ALL_BISHOPS_BITBOARD];
     }
 
     public long getAllRooks() {
-        return bitboards[Bitboard.ALL_ROOKS];
+        return bitboards[Bitboard.ALL_ROOKS_BITBOARD];
     }
 
     public long getAllQueens() {
-        return bitboards[Bitboard.ALL_QUEENS];
+        return bitboards[Bitboard.ALL_QUEENS_BITBOARD];
     }
 
     public long getAllKings() {
-        return bitboards[Bitboard.ALL_KINGS];
+        return bitboards[Bitboard.ALL_KINGS_BITBOARD];
     }
 
     public long getAllPieces() {
@@ -326,41 +326,41 @@ public class Board {
                     break;
 
                 case 'P' :
-                    bitboards[Bitboard.WHITE_PAWNS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'N' :
-                    bitboards[Bitboard.WHITE_KNIGHTS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'B' :
-                    bitboards[Bitboard.WHITE_BISHOPS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'R' :
-                    bitboards[Bitboard.WHITE_ROOKS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'Q' :
-                    bitboards[Bitboard.WHITE_QUEENS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'K' :
-                    bitboards[Bitboard.WHITE_KING] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
 
                 case 'p' :
-                    bitboards[Bitboard.BLACK_PAWNS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'n' :
-                    bitboards[Bitboard.BLACK_KNIGHTS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'b' :
-                    bitboards[Bitboard.BLACK_BISHOPS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'r' :
-                    bitboards[Bitboard.BLACK_ROOKS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'q' :
-                    bitboards[Bitboard.BLACK_QUEENS] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 case 'k' :
-                    bitboards[Bitboard.BLACK_KING] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + ch);
@@ -376,30 +376,30 @@ public class Board {
      * Updates all bitboards that consist of several other bitboards.
      */
     private void updateCommonBitboards() {
-        bitboards[Bitboard.ALL_WHITE_PIECES] =
-                bitboards[Bitboard.WHITE_PAWNS] |
-                bitboards[Bitboard.WHITE_KNIGHTS] |
-                bitboards[Bitboard.WHITE_BISHOPS] |
-                bitboards[Bitboard.WHITE_ROOKS] |
-                bitboards[Bitboard.WHITE_QUEENS] |
-                bitboards[Bitboard.WHITE_KING];
+        bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD] =
+                bitboards[Bitboard.WHITE_PAWNS_BITBOARD] |
+                bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD] |
+                bitboards[Bitboard.WHITE_BISHOPS_BITBOARD] |
+                bitboards[Bitboard.WHITE_ROOKS_BITBOARD] |
+                bitboards[Bitboard.WHITE_QUEENS_BITBOARD] |
+                bitboards[Bitboard.WHITE_KING_BITBOARD];
 
-        bitboards[Bitboard.ALL_BLACK_PIECES] =
-                bitboards[Bitboard.BLACK_PAWNS] |
-                bitboards[Bitboard.BLACK_KNIGHTS] |
-                bitboards[Bitboard.BLACK_BISHOPS] |
-                bitboards[Bitboard.BLACK_ROOKS] |
-                bitboards[Bitboard.BLACK_QUEENS] |
-                bitboards[Bitboard.BLACK_KING];
+        bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD] =
+                bitboards[Bitboard.BLACK_PAWNS_BITBOARD] |
+                bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD] |
+                bitboards[Bitboard.BLACK_BISHOPS_BITBOARD] |
+                bitboards[Bitboard.BLACK_ROOKS_BITBOARD] |
+                bitboards[Bitboard.BLACK_QUEENS_BITBOARD] |
+                bitboards[Bitboard.BLACK_KING_BITBOARD];
 
-        bitboards[Bitboard.ALL_PAWNS] = bitboards[Bitboard.WHITE_PAWNS] | bitboards[Bitboard.BLACK_PAWNS];
-        bitboards[Bitboard.ALL_KNIGHTS] = bitboards[Bitboard.WHITE_KNIGHTS] | bitboards[Bitboard.BLACK_KNIGHTS];
-        bitboards[Bitboard.ALL_BISHOPS] = bitboards[Bitboard.WHITE_BISHOPS] | bitboards[Bitboard.BLACK_BISHOPS];
-        bitboards[Bitboard.ALL_ROOKS] = bitboards[Bitboard.WHITE_ROOKS] | bitboards[Bitboard.BLACK_ROOKS];
-        bitboards[Bitboard.ALL_QUEENS] = bitboards[Bitboard.WHITE_QUEENS] | bitboards[Bitboard.BLACK_QUEENS];
-        bitboards[Bitboard.ALL_KINGS] = bitboards[Bitboard.WHITE_KING] | bitboards[Bitboard.BLACK_KING];
+        bitboards[Bitboard.ALL_PAWNS_BITBOARD] = bitboards[Bitboard.WHITE_PAWNS_BITBOARD] | bitboards[Bitboard.BLACK_PAWNS_BITBOARD];
+        bitboards[Bitboard.ALL_KNIGHTS_BITBOARD] = bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD] | bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD];
+        bitboards[Bitboard.ALL_BISHOPS_BITBOARD] = bitboards[Bitboard.WHITE_BISHOPS_BITBOARD] | bitboards[Bitboard.BLACK_BISHOPS_BITBOARD];
+        bitboards[Bitboard.ALL_ROOKS_BITBOARD] = bitboards[Bitboard.WHITE_ROOKS_BITBOARD] | bitboards[Bitboard.BLACK_ROOKS_BITBOARD];
+        bitboards[Bitboard.ALL_QUEENS_BITBOARD] = bitboards[Bitboard.WHITE_QUEENS_BITBOARD] | bitboards[Bitboard.BLACK_QUEENS_BITBOARD];
+        bitboards[Bitboard.ALL_KINGS_BITBOARD] = bitboards[Bitboard.WHITE_KING_BITBOARD] | bitboards[Bitboard.BLACK_KING_BITBOARD];
 
-        allPiecesBitboard = bitboards[Bitboard.ALL_WHITE_PIECES] | bitboards[Bitboard.ALL_BLACK_PIECES];
+        allPiecesBitboard = bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD] | bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD];
     }
 
     //-------------------------------------------------

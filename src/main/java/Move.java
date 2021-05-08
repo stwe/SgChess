@@ -3,6 +3,56 @@
  */
 public class Move {
 
+    // from, to (6)
+    // captured (4)
+    // ep, pawn start (1)
+    // promoted piece (4)
+    // castle (1)
+
+    private int move;
+
+    //-------------------------------------------------
+    // From
+    //-------------------------------------------------
+
+    public int getFrom() {
+        // 0x3F = 000000111111
+        return move & 0x3F;
+    }
+
+    public void setFrom(int bitIndex) {
+        // clear first 6 bits
+        move &= ~0x3F;
+        // mask on the first 6 bits an OR with bitIndex
+        move |= (bitIndex & 0x3F);
+    }
+
+    //-------------------------------------------------
+    // To
+    //-------------------------------------------------
+
+    public int getTo() {
+        // 0xFC0 = 111111000000
+        return (move & 0xFC0) >>> 6;
+    }
+
+    public void setTo(int bitIndex) {
+        move &= ~0xFC0;
+        move |= (bitIndex & 0x3F) << 6;
+    }
+
+    //-------------------------------------------------
+    // Captured
+    //-------------------------------------------------
+
+    public int getCaptured() {
+        return 0;
+    }
+
+    public void setCaptured() {
+
+    }
+
     //-------------------------------------------------
     // Member
     //-------------------------------------------------
@@ -25,6 +75,8 @@ public class Move {
     //-------------------------------------------------
     // Ctors.
     //-------------------------------------------------
+
+    public Move() {}
 
     /**
      * Constructs a new {@link Move} object.

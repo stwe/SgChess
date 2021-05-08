@@ -22,32 +22,32 @@ public class Bitboard {
     /**
      * The index for the white pawns initial location bitboard.
      */
-    public static final int WHITE_PAWNS = 0;
+    public static final int WHITE_PAWNS_BITBOARD = 0;
 
     /**
      * The index for the white knights initial location bitboard.
      */
-    public static final int WHITE_KNIGHTS = 1;
+    public static final int WHITE_KNIGHTS_BITBOARD = 1;
 
     /**
      * The index for the white bishops initial location bitboard.
      */
-    public static final int WHITE_BISHOPS = 2;
+    public static final int WHITE_BISHOPS_BITBOARD = 2;
 
     /**
      * The index for the white rooks initial location bitboard.
      */
-    public static final int WHITE_ROOKS = 3;
+    public static final int WHITE_ROOKS_BITBOARD = 3;
 
     /**
      * The index for the white queens initial location bitboard.
      */
-    public static final int WHITE_QUEENS = 4;
+    public static final int WHITE_QUEENS_BITBOARD = 4;
 
     /**
      * The index for the white king initial location bitboard.
      */
-    public static final int WHITE_KING = 5;
+    public static final int WHITE_KING_BITBOARD = 5;
 
     //-------------------------------------------------
     // Bitboard Index - Black
@@ -56,32 +56,32 @@ public class Bitboard {
     /**
      * The index for the black pawns initial location bitboard.
      */
-    public static final int BLACK_PAWNS = 6;
+    public static final int BLACK_PAWNS_BITBOARD = 6;
 
     /**
      * The index for the black knights initial location bitboard.
      */
-    public static final int BLACK_KNIGHTS = 7;
+    public static final int BLACK_KNIGHTS_BITBOARD = 7;
 
     /**
      * The index for the black bishops initial location bitboard.
      */
-    public static final int BLACK_BISHOPS = 8;
+    public static final int BLACK_BISHOPS_BITBOARD = 8;
 
     /**
      * The index for the black rooks initial location bitboard.
      */
-    public static final int BLACK_ROOKS = 9;
+    public static final int BLACK_ROOKS_BITBOARD = 9;
 
     /**
      * The index for the black queens initial location bitboard.
      */
-    public static final int BLACK_QUEENS = 10;
+    public static final int BLACK_QUEENS_BITBOARD = 10;
 
     /**
      * The index for the black king initial location bitboard.
      */
-    public static final int BLACK_KING = 11;
+    public static final int BLACK_KING_BITBOARD = 11;
 
     //-------------------------------------------------
     // Bitboard Index - All
@@ -90,48 +90,49 @@ public class Bitboard {
     /**
      * The index for the white pieces initial location bitboard.
      */
-    public static final int ALL_WHITE_PIECES = 12;
+    public static final int ALL_WHITE_PIECES_BITBOARD = 12;
 
     /**
      * The index for the black pieces initial location bitboard.
      */
-    public static final int ALL_BLACK_PIECES = 13;
+    public static final int ALL_BLACK_PIECES_BITBOARD = 13;
 
     /**
      * The index for the all pawns initial location bitboard.
      */
-    public static final int ALL_PAWNS = 14;
+    public static final int ALL_PAWNS_BITBOARD = 14;
 
     /**
      * The index for the all knights initial location bitboard.
      */
-    public static final int ALL_KNIGHTS = 15;
+    public static final int ALL_KNIGHTS_BITBOARD = 15;
 
     /**
      * The index for the all bishops initial location bitboard.
      */
-    public static final int ALL_BISHOPS = 16;
+    public static final int ALL_BISHOPS_BITBOARD = 16;
 
     /**
      * The index for the all rooks initial location bitboard.
      */
-    public static final int ALL_ROOKS = 17;
+    public static final int ALL_ROOKS_BITBOARD = 17;
 
     /**
      * The index for the all queens initial location bitboard.
      */
-    public static final int ALL_QUEENS = 18;
+    public static final int ALL_QUEENS_BITBOARD = 18;
 
     /**
      * The index for the all kings initial location bitboard.
      */
-    public static final int ALL_KINGS = 19;
+    public static final int ALL_KINGS_BITBOARD = 19;
 
     //-------------------------------------------------
     // Squares
     //-------------------------------------------------
 
     /*
+      Little endian rank file mapping of each square.
       Position A1 is the least signficant bit (LSB), bit 0, of the 64 bit number and H8 is the
       most significant bit (MSB), bit 63. The squares will be assigned in a left to right, bottom to top ordering to
       each bit index in the 64 bit number from LSB to MSB.
@@ -232,7 +233,8 @@ public class Bitboard {
     }
 
     /**
-     * Returns the bit index for a given square bitboard (for example square E4 => returns bit index 28).
+     * Returns the bit index for a given square (Little endian rank-file (LERF) mapping) bitboard
+     * (for example square E4 => returns bit index 28).
      *
      * @param square A square bitboard.
      *
@@ -243,6 +245,7 @@ public class Bitboard {
     }
 
     /**
+     * Little endian rank-file (LERF) mapping.
      * Returns the square bitboard for a given bit index.
      */
     public static final long[] SQUARES = {
@@ -352,7 +355,7 @@ public class Bitboard {
     //-------------------------------------------------
 
     /**
-     * Renders a bitboard in the console.
+     * A chessboard representation of this bitboard.
      *
      * @param bitboard The bitboard which should be output.
      */
@@ -377,7 +380,7 @@ public class Bitboard {
     }
 
     /**
-     * Renders a bitboard in the console as string.
+     * A pretty readable string representation of this bitboard.
      *
      * @param bitboard The bitboard which should be output.
      */
