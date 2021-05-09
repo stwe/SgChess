@@ -65,11 +65,11 @@ public enum Piece {
     /**
      * Constructs a new {@link Piece} enum.
      *
-     * @param symbol {@link #symbol}
-     * @param letter {@link #letter}
-     * @param moveLetter {@link #moveLetter}
-     * @param pieceType {@link #pieceType}
-     * @param value {@link #value}
+     * @param symbol {@link #symbol}.
+     * @param letter {@link #letter}.
+     * @param moveLetter {@link #moveLetter}.
+     * @param pieceType {@link #pieceType}.
+     * @param value {@link #value}.
      */
     Piece(String symbol, String letter, char moveLetter, PieceType pieceType, int value) {
         this.symbol = symbol;

@@ -105,7 +105,7 @@ public class MoveGenerator {
 
             switch (piece) {
                 case WHITE_PAWN:
-                    movesBitboard = getWhitePawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
+                    addWhitePawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
                     break;
                 case BLACK_PAWN:
                     movesBitboard = getBlackPawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
@@ -125,17 +125,15 @@ public class MoveGenerator {
     }
 
     /**
-     * Computing white pawn movements bitboard.
+     * Computing white pawn movements.
      *
      * @see <a href="http://pages.cs.wisc.edu/~psilord/blog/data/chess-pages/nonsliding.html">Nonsliding Pieces</a>
      *
      * @param fromBitIndex The bit index of the white pawn.
      * @param blackPiecesBitboard The bitboard with all black pieces (enemies).
      * @param allPiecesBitboard A bitboard with all pieces. All pieces can block.
-     *
-     * @return White pawns valid movements bitboard.
      */
-    private static long getWhitePawnMoves(int fromBitIndex, long blackPiecesBitboard, long allPiecesBitboard) {
+    private void addWhitePawnMoves(int fromBitIndex, long blackPiecesBitboard, long allPiecesBitboard) {
         long whitePawnBitboard = 1L << fromBitIndex;
 
         // check the single space infront of the white pawn
@@ -147,9 +145,120 @@ public class MoveGenerator {
         // calc attacks
         long attacksBitboard = Attack.whitePawnAttacks[fromBitIndex] & blackPiecesBitboard;
 
-        // return possible moves
-        return (firstStepBitboard | twoStepsBitboard) | attacksBitboard;
+        // add moves
+        // todo
+        addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
+        addPawnStartMoves(Piece.WHITE_PAWN, fromBitIndex, twoStepsBitboard);
+        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_8);
+        addCaptureMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_8);
+        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_8);
+        //addEnPassantMoves();
     }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+
+    private void addQuietMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+            var move = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard)
+            );
+
+            moves.add(move);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    private void addPawnStartMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+            var move = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    Move.MoveFlag.PAWN_START
+            );
+
+            moves.add(move);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    private void addPromotionMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+            // knight
+            var promoteKnight = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    PieceType.KNIGHT,
+                    Move.MoveFlag.PROMOTION
+            );
+
+            moves.add(promoteKnight);
+
+            // bishop
+            var promoteBishop = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    PieceType.BISHOP,
+                    Move.MoveFlag.PROMOTION
+            );
+
+            moves.add(promoteBishop);
+
+            // rook
+            var promoteRook = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    PieceType.ROOK,
+                    Move.MoveFlag.PROMOTION
+            );
+
+            moves.add(promoteRook);
+
+            // queen
+            var promoteQueen = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    PieceType.QUEEN,
+                    Move.MoveFlag.PROMOTION
+            );
+
+            moves.add(promoteQueen);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    private void addCaptureMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+            var move = new Move(
+                    piece,
+                    fromBitIndex,
+                    Long.numberOfTrailingZeros(movesBitboard),
+                    // todo: welche Figur wird geschlagen?
+                    Move.MoveFlag.CAPTURE
+            );
+
+            moves.add(move);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+
+
 
     /**
      * Computing black pawn movements bitboard.

@@ -8,19 +8,34 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * Flags that indicate special moves.
+     * Move flags.
      */
-    public enum SpecialMoveFlag {
+    public enum MoveFlag {
         NORMAL(0),
-        PROMOTION(1),
+        PROMOTION(1), // todo: promotion_capture?
         ENPASSANT(2),
         CASTLING(3),
-        PAWN_START(4);
+        PAWN_START(4),
+        CAPTURE(5);
 
+        /**
+         * The ordinal value.
+         */
         public int value;
 
-        SpecialMoveFlag(int value) {
+        /**
+         * To get the flag by ordinal value.
+         */
+        public final MoveFlag[] values = new MoveFlag[6];
+
+        /**
+         * Constructs a new {@link MoveFlag} enum.
+         *
+         * @param value {@link #value}
+         */
+        MoveFlag(int value) {
             this.value = value;
+            this.values[value] = this;
         }
     }
 
@@ -38,7 +53,7 @@ public class Move {
      * <p>bit  6 - 11: <b>to</b> square (0 - 63)</p>
      * <p>bit 12 - 14: <b>captured piece</b> type (0 - 6)</p>
      * <p>bit 15 - 17: <b>promoted piece</b> type (0 - 6)</p>
-     * <p>bit 18 - 20: <b>special move flag</b> (0 - 4)</p>
+     * <p>bit 18 - 20: <b>special move flag</b> (0 - 5)</p>
      * <p>bit 21 - 24: <b>piece</b>(0 - 11)</p>
      * <p></p>
      * <pre>
@@ -51,7 +66,8 @@ public class Move {
      *                                                promotion = 1,
      *                                                en passant = 2,
      *                                                castling = 3,
-     *                                                pawn start = 4
+     *                                                pawn start = 4,
+     *                                                capture = 5
      * 0000 0001 1110 0000 0000 0000 0000 0000 -> piece (4 bits)
      * </pre>
      */
@@ -152,16 +168,25 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * Get captured piece type.
+     * Get captured {@link PieceType} ordinal value.
      *
-     * @return The captured piece type.
+     * @return The captured {@link PieceType} ordinal value.
      */
-    public int getCapturedPieceType() {
+    public int getCapturedPieceTypeValue() {
         return (move & 28672) >>> 12;
     }
 
     /**
-     * Set captured piece type.
+     * Get the captured {@link PieceType} object.
+     *
+     * @return A {@link PieceType} object.
+     */
+    public PieceType getCapturedPieceType() {
+        return PieceType.values()[getCapturedPieceTypeValue()];
+    }
+
+    /**
+     * Set captured {@link PieceType}.
      *
      * @param pieceType {@link PieceType}.
      */
@@ -175,16 +200,25 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * Get promoted piece type.
+     * Get promoted {@link PieceType} ordinal value.
      *
-     * @return The promoted piece type.
+     * @return The promoted {@link PieceType} ordinal value.
      */
-    public int getPromotedPieceType() {
+    public int getPromotedPieceTypeValue() {
         return (move & 229376) >>> 15;
     }
 
     /**
-     * Set promoted piece type.
+     * Get the promoted {@link PieceType} object.
+     *
+     * @return A {@link PieceType} object.
+     */
+    public PieceType getPromotedPieceType() {
+        return PieceType.values()[getPromotedPieceTypeValue()];
+    }
+
+    /**
+     * Set promoted {@link PieceType}.
      *
      * @param pieceType {@link PieceType}.
      */
@@ -198,30 +232,52 @@ public class Move {
     }
 
     //-------------------------------------------------
-    // Special move flag
+    // Move flag
     //-------------------------------------------------
 
-    // todo
-    // isDoublePawnPush
-    // isEnPassant
-    // isCastling
-
     /**
-     * Get special move flag.
+     * Get {@link MoveFlag} ordinal value.
      *
-     * @return The special move flag.
+     * @return A {@link MoveFlag} ordinal value.
      */
-    public int getSpecialMoveFlag() {
+    public int getMoveFlagValue() {
         return (move & 1835008) >>> 18;
     }
 
     /**
-     * Set special move flag.
+     * Get the {@link MoveFlag} object.
      *
-     * @param flag {@link SpecialMoveFlag}.
+     * @return A {@link MoveFlag} object.
      */
-    public void setSpecialMoveFlag(SpecialMoveFlag flag) {
-        if (flag == SpecialMoveFlag.NORMAL) {
+    public MoveFlag getMoveFlag() {
+        return MoveFlag.values()[getMoveFlagValue()];
+    }
+
+    /**
+     * Checks whether the promotion move flag is set.
+     *
+     * @return True is the move a promotion move.
+     */
+    public boolean isPromotionMove() {
+        return getMoveFlag() == MoveFlag.PROMOTION;
+    }
+
+    /**
+     * Checks whether the captured move flag is set.
+     *
+     * @return True is the move a captured move.
+     */
+    public boolean isCapturedMove() {
+        return getMoveFlag() == MoveFlag.CAPTURE;
+    }
+
+    /**
+     * Set a {@link MoveFlag}.
+     *
+     * @param flag {@link MoveFlag}.
+     */
+    public void setMoveFlag(MoveFlag flag) {
+        if (flag == MoveFlag.NORMAL) {
             return;
         }
 
@@ -234,9 +290,9 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * Get the piece ordinal value of this move.
+     * Get the {@link Piece} ordinal value of this move.
      *
-     * @return The ordinal value of the piece.
+     * @return The ordinal value of the {@link Piece}.
      */
     public int getPieceValue() {
         return (move & 31457280) >>> 21;
@@ -252,7 +308,7 @@ public class Move {
     }
 
     /**
-     * Set the piece of this move.
+     * Set the {@link Piece} of this move.
      *
      * @param piece {@link Piece}.
      */
@@ -297,11 +353,11 @@ public class Move {
      * @param piece The piece of this move.
      * @param from The from square bit index.
      * @param to The target square bit index.
-     * @param flag The special move flag.
+     * @param flag The move flag.
      */
-    public Move(Piece piece, int from, int to, SpecialMoveFlag flag) {
+    public Move(Piece piece, int from, int to, MoveFlag flag) {
         this(piece, from, to);
-        setSpecialMoveFlag(flag);
+        setMoveFlag(flag);
     }
 
     /**
@@ -311,9 +367,9 @@ public class Move {
      * @param from The from square bit index.
      * @param to The target square bit index.
      * @param promotedPieceType The promoted piece type.
-     * @param flag The special move flag.
+     * @param flag The move flag.
      */
-    public Move(Piece piece, int from, int to, PieceType promotedPieceType, SpecialMoveFlag flag) {
+    public Move(Piece piece, int from, int to, PieceType promotedPieceType, MoveFlag flag) {
         this(piece, from, to, flag);
         setPromotedPieceType(promotedPieceType);
     }
@@ -326,9 +382,9 @@ public class Move {
      * @param to The target square bit index.
      * @param capturedPieceType The captured piece type.
      * @param promotedPieceType The promoted piece type.
-     * @param flag The special move flag.
+     * @param flag The move flag.
      */
-    public Move(Piece piece, int from, int to, PieceType capturedPieceType, PieceType promotedPieceType, SpecialMoveFlag flag) {
+    public Move(Piece piece, int from, int to, PieceType capturedPieceType, PieceType promotedPieceType, MoveFlag flag) {
         this(piece, from, to, promotedPieceType, flag);
         setCapturedPieceType(capturedPieceType);
     }
@@ -339,8 +395,23 @@ public class Move {
 
     @Override
     public String toString() {
+
+        String promotedStr = "";
+        if (isPromotionMove()) {
+            promotedStr = " promoted piece type: " + getPromotedPieceType();
+        }
+
+        String capturedStr = "";
+        if (isCapturedMove()) {
+            capturedStr = " captured piece type: " + getCapturedPieceType();
+        }
+
         return "Piece: " + getPiece().moveLetter +
                 " from: " + Bitboard.SQUARE_STRINGS[getFrom()] +
-                " to: " + Bitboard.SQUARE_STRINGS[getTo()];
+                " to: " + Bitboard.SQUARE_STRINGS[getTo()] +
+                " flag: " + getMoveFlag() +
+                promotedStr +
+                capturedStr +
+                " (score: " + score + ")";
     }
 }
