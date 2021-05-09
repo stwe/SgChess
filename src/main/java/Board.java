@@ -6,6 +6,14 @@ import java.util.Objects;
 public class Board {
 
     //-------------------------------------------------
+    // Types
+    //-------------------------------------------------
+
+    private enum Color {
+        WHITE, BLACK
+    }
+
+    //-------------------------------------------------
     // Constants
     //-------------------------------------------------
 
@@ -68,6 +76,14 @@ public class Board {
      */
     private long allPiecesBitboard = 0L;
 
+    private Color colorToMove = Color.WHITE;
+
+    private int castlingRights;
+
+    private int epIndex = 0;
+
+    private final MoveGenerator moveGenerator;
+
     //-------------------------------------------------
     // Ctors.
     //-------------------------------------------------
@@ -87,6 +103,15 @@ public class Board {
     public Board(String fen) {
         initWithFen(Objects.requireNonNull(fen, "fen must not be null"));
         updateCommonBitboards();
+
+        moveGenerator = new MoveGenerator();
+
+        moveGenerator.addPawnMoves(
+                Piece.WHITE_PAWN,
+                getWhitePawns(),
+                getBlackPieces(),
+                getAllPieces()
+        );
     }
 
     //-------------------------------------------------
@@ -195,6 +220,15 @@ public class Board {
         return colored;
     }
 
+    /**
+     * Get {@link #moveGenerator}.
+     *
+     * @return {@link #moveGenerator}.
+     */
+    public MoveGenerator getMoveGenerator() {
+        return moveGenerator;
+    }
+
     //-------------------------------------------------
     // Setter
     //-------------------------------------------------
@@ -290,6 +324,7 @@ public class Board {
             throw new RuntimeException("Invalid FEN record given.");
         }
 
+        // pieces
         var piecePlacement = fenFields[0].split("/");
         if (piecePlacement.length != 8) {
             throw new RuntimeException("Invalid piece placement.");
@@ -299,6 +334,19 @@ public class Board {
         for (var pieces : piecePlacement) {
             setBitboards(pieces, currentRank);
             currentRank--;
+        }
+
+        // color to move
+        colorToMove = fenFields[1].equals("w") ? Color.WHITE : Color.BLACK;
+
+        // castling
+        // todo
+
+        // en passant
+        if (!fenFields[3].equals("-")) {
+            var file = (104 - fenFields[3].charAt(0)) + 1;
+            var rank = Integer.parseInt(fenFields[3].substring(1)) - 1;
+            epIndex = Bitboard.getSquareByFileAndRank(file, rank);
         }
     }
 
