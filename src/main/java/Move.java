@@ -272,6 +272,15 @@ public class Move {
     }
 
     /**
+     * Checks whether the pawn start flag is set.
+     *
+     * @return True is the move a pawn start move.
+     */
+    public boolean isPawnStartMove() {
+        return getMoveFlag() == MoveFlag.PAWN_START;
+    }
+
+    /**
      * Set a {@link MoveFlag}.
      *
      * @param flag {@link MoveFlag}.

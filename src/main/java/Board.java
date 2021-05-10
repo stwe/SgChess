@@ -104,7 +104,7 @@ public class Board {
         initWithFen(Objects.requireNonNull(fen, "fen must not be null"));
         updateCommonBitboards();
 
-        moveGenerator = new MoveGenerator();
+        moveGenerator = new MoveGenerator(this);
 
         moveGenerator.addPawnMoves(
                 Piece.WHITE_PAWN,
@@ -218,6 +218,33 @@ public class Board {
      */
     public boolean isColored() {
         return colored;
+    }
+
+    /**
+     * Get {@link #colorToMove}.
+     *
+     * @return {@link #colorToMove}.
+     */
+    public Color getColorToMove() {
+        return colorToMove;
+    }
+
+    /**
+     * Get {@link #castlingRights}.
+     *
+     * @return {@link #castlingRights}.
+     */
+    public int getCastlingRights() {
+        return castlingRights;
+    }
+
+    /**
+     * Get {@link #epIndex}.
+     *
+     * @return {@link #epIndex}.
+     */
+    public int getEpIndex() {
+        return epIndex;
     }
 
     /**

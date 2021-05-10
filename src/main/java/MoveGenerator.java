@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.util.Objects;
+
+import static java.lang.Math.abs;
 
 /*
      8 | 56 57 58 59 60 61 62 63
@@ -30,9 +33,27 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
+     * The parent {@link Board} object.
+     */
+    private final Board board;
+
+    /**
      * A list with all generated moves.
      */
     private final ArrayList<Move> moves = new ArrayList<>();
+
+    //-------------------------------------------------
+    // Ctors.
+    //-------------------------------------------------
+
+    /**
+     * Constructs a new {@link MoveGenerator} object.
+     *
+     * @param board The parent {@link Board} object.
+     */
+    public MoveGenerator(Board board) {
+        this.board = Objects.requireNonNull(board, "board must not be null");
+    }
 
     //-------------------------------------------------
     // Getter
@@ -90,7 +111,7 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the white and black pawns.
+     * Add moves for the white and black pawns.
      *
      * @param piece Specifies for which color of pawn the moves are to be added (WHITE_PAWN or BLACK_PAWN).
      * @param piecesBitboard A bitboard with all the white or black pawns.
@@ -98,29 +119,52 @@ public class MoveGenerator {
      * @param allPiecesBitboard A bitboard with all pieces.
      */
     public void addPawnMoves(Piece piece, long piecesBitboard, long enemyPiecesBitboard, long allPiecesBitboard) {
+        // en passant
+        switch (piece) {
+            case WHITE_PAWN:
+                addWhiteEnPassantMoves();
+                break;
+            case BLACK_PAWN:
+                //addBlackEnPassantMoves(piece);
+                break;
+            default:
+        }
+
+        // other pawn moves
         while (piecesBitboard != 0) {
             var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
-
-            var movesBitboard = 0L;
 
             switch (piece) {
                 case WHITE_PAWN:
                     addWhitePawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
                     break;
                 case BLACK_PAWN:
-                    movesBitboard = getBlackPawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
+                    //movesBitboard = getBlackPawnMoves(fromBitIndex, enemyPiecesBitboard, allPiecesBitboard);
                     break;
                 default:
             }
 
-            while (movesBitboard != 0) {
-                var move = new Move(piece, fromBitIndex, Long.numberOfTrailingZeros(movesBitboard));
-                moves.add(move);
-
-                movesBitboard &= movesBitboard - 1;
-            }
-
             piecesBitboard &= piecesBitboard - 1;
+        }
+    }
+
+    /**
+     * Computing white pawn en passant movements.
+     */
+    private void addWhiteEnPassantMoves() {
+        var whitePawnsBitboard = board.getWhitePawns() & Bitboard.MASK_RANK_5;
+
+        if (board.getEpIndex() != 0) {
+            while (whitePawnsBitboard != 0) {
+                var enemyDestination = board.getEpIndex() - 8;
+                var fromBitIndex = Long.numberOfTrailingZeros(whitePawnsBitboard);
+                if (abs(fromBitIndex - enemyDestination) == 1) {
+                    var move = new Move(Piece.WHITE_PAWN, fromBitIndex, board.getEpIndex(), Move.MoveFlag.ENPASSANT);
+                    moves.add(move);
+                }
+
+                whitePawnsBitboard &= whitePawnsBitboard - 1;
+            }
         }
     }
 
@@ -146,13 +190,11 @@ public class MoveGenerator {
         long attacksBitboard = Attack.whitePawnAttacks[fromBitIndex] & blackPiecesBitboard;
 
         // add moves
-        // todo
         addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
         addPawnStartMoves(Piece.WHITE_PAWN, fromBitIndex, twoStepsBitboard);
         addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_8);
         addCaptureMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_8);
         addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_8);
-        //addEnPassantMoves();
     }
 
 
