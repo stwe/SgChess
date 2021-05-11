@@ -227,12 +227,11 @@ public class MoveGenerator {
         long attacksBitboard = Attack.blackPawnAttacks[fromBitIndex] & whitePiecesBitboard;
 
         // add moves
-        // todo
-        addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
-        //addPawnStartMoves(Piece.WHITE_PAWN, fromBitIndex, twoStepsBitboard);
-        //addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_8);
-        //addCaptureMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_8);
-        //addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_8);
+        addQuietMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_1);
+        addPawnStartMoves(Piece.BLACK_PAWN, fromBitIndex, twoStepsBitboard);
+        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_1);
+        addCaptureMoves(Piece.BLACK_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_1);
+        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_1);
     }
 
     /**

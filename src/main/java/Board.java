@@ -118,10 +118,19 @@ public class Board {
 
         moveGenerator = new MoveGenerator(this);
 
+        /*
         moveGenerator.addPawnMoves(
                 Piece.WHITE_PAWN,
                 getWhitePawns(),
                 getBlackPieces(),
+                getAllPieces()
+        );
+        */
+
+        moveGenerator.addPawnMoves(
+                Piece.BLACK_PAWN,
+                getBlackPawns(),
+                getWhitePieces(),
                 getAllPieces()
         );
     }

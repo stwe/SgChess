@@ -26,7 +26,10 @@ public class Main {
         */
 
         // white pawns, 26 moves
-        var board = new Board("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
+        //var board = new Board("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
+
+        // black pawns, 26 moves
+        var board = new Board("rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1");
 
         board.setColored(true);
         System.out.println(board);
