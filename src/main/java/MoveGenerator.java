@@ -173,7 +173,21 @@ public class MoveGenerator {
      * Computing black pawn en passant movements.
      */
     private void addBlackEnPassantMoves() {
-        // todo
+        var blackPawnsBitboard = board.getBlackPawns() & Bitboard.MASK_RANK_4;
+
+        if (board.getEpIndex() != 0) {
+            while (blackPawnsBitboard != 0) {
+                var enemyDestination = board.getEpIndex() + 8;
+                var fromBitIndex = Long.numberOfTrailingZeros(blackPawnsBitboard);
+                if (abs(fromBitIndex - enemyDestination) == 1) {
+                    var move = new Move(Piece.BLACK_PAWN, fromBitIndex, board.getEpIndex());
+                    move.setMoveFlag(Move.MoveFlag.ENPASSANT);
+                    moves.add(move);
+                }
+
+                blackPawnsBitboard &= blackPawnsBitboard - 1;
+            }
+        }
     }
 
     /**
