@@ -51,8 +51,8 @@ public class Move {
      *
      * <p>bit  0 -  5: <b>from</b> square (0 - 63)</p>
      * <p>bit  6 - 11: <b>to</b> square (0 - 63)</p>
-     * <p>bit 12 - 14: <b>captured piece</b> type (0 - 6)</p>
-     * <p>bit 15 - 17: <b>promoted piece</b> type (0 - 6)</p>
+     * <p>bit 12 - 14: <b>captured piece type</b> (0 - 6)</p>
+     * <p>bit 15 - 17: <b>promoted piece type</b> (0 - 6)</p>
      * <p>bit 18 - 20: <b>special move flag</b> (0 - 5)</p>
      * <p>bit 21 - 24: <b>piece</b>(0 - 11)</p>
      * <p></p>
@@ -341,61 +341,6 @@ public class Move {
         setPiece(piece);
         setFrom(from);
         setTo(to);
-    }
-
-    /**
-     * Constructs a new {@link Move} object.
-     *
-     * @param piece The piece of this move.
-     * @param from The from square bit index.
-     * @param to The target square bit index.
-     * @param capturedPieceType The captured piece type.
-     */
-    public Move(Piece piece, int from, int to, PieceType capturedPieceType) {
-        this(piece, from, to);
-        setCapturedPieceType(capturedPieceType);
-    }
-
-    /**
-     * Constructs a new {@link Move} object.
-     *
-     * @param piece The piece of this move.
-     * @param from The from square bit index.
-     * @param to The target square bit index.
-     * @param flag The move flag.
-     */
-    public Move(Piece piece, int from, int to, MoveFlag flag) {
-        this(piece, from, to);
-        setMoveFlag(flag);
-    }
-
-    /**
-     * Constructs a new {@link Move} object.
-     *
-     * @param piece The piece of this move.
-     * @param from The from square bit index.
-     * @param to The target square bit index.
-     * @param promotedPieceType The promoted piece type.
-     * @param flag The move flag.
-     */
-    public Move(Piece piece, int from, int to, PieceType promotedPieceType, MoveFlag flag) {
-        this(piece, from, to, flag);
-        setPromotedPieceType(promotedPieceType);
-    }
-
-    /**
-     * Constructs a new {@link Move} object.
-     *
-     * @param piece The piece of this move.
-     * @param from The from square bit index.
-     * @param to The target square bit index.
-     * @param capturedPieceType The captured piece type.
-     * @param promotedPieceType The promoted piece type.
-     * @param flag The move flag.
-     */
-    public Move(Piece piece, int from, int to, PieceType capturedPieceType, PieceType promotedPieceType, MoveFlag flag) {
-        this(piece, from, to, promotedPieceType, flag);
-        setCapturedPieceType(capturedPieceType);
     }
 
     //-------------------------------------------------

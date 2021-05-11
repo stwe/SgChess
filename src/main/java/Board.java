@@ -76,12 +76,24 @@ public class Board {
      */
     private long allPiecesBitboard = 0L;
 
+    /**
+     * Denoting who is on the move.
+     */
     private Color colorToMove = Color.WHITE;
 
+    /**
+     * An integer containing castling rights.
+     */
     private int castlingRights;
 
+    /**
+     * The bit index of the En Passant target square.
+     */
     private int epIndex = 0;
 
+    /**
+     * A {@link MoveGenerator} object.
+     */
     private final MoveGenerator moveGenerator;
 
     //-------------------------------------------------
