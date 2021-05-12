@@ -9,7 +9,7 @@ public class Board {
     // Types
     //-------------------------------------------------
 
-    private enum Color {
+    public enum Color {
         WHITE, BLACK
     }
 
@@ -117,22 +117,6 @@ public class Board {
         updateCommonBitboards();
 
         moveGenerator = new MoveGenerator(this);
-
-        /*
-        moveGenerator.addPawnMoves(
-                Piece.WHITE_PAWN,
-                getWhitePawns(),
-                getBlackPieces(),
-                getAllPieces()
-        );
-        */
-
-        moveGenerator.addPawnMoves(
-                Piece.BLACK_PAWN,
-                getBlackPawns(),
-                getWhitePieces(),
-                getAllPieces()
-        );
     }
 
     //-------------------------------------------------

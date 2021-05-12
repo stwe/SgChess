@@ -53,6 +53,7 @@ public class MoveGenerator {
      */
     public MoveGenerator(Board board) {
         this.board = Objects.requireNonNull(board, "board must not be null");
+        addMoves();
     }
 
     //-------------------------------------------------
@@ -76,10 +77,15 @@ public class MoveGenerator {
      * The method adds moves for the nonsliding pieces except pawns (Knight, King).
      *
      * @param piece Specifies for which type of piece the moves are to be added.
+     * @param moveFlag The {@link Move.MoveFlag}. <b>Normal</b> (for the quiet moves) and <b>Capture</b> are accepted flags.
      * @param piecesBitboard A bitboard with all the knights or the king.
      * @param possiblePositionsBitboard This prevents own pieces from being captured.
      */
-    public void addNonslidingPiecesMoves(Piece piece, long piecesBitboard, long possiblePositionsBitboard) {
+    public void addNonslidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long possiblePositionsBitboard) {
+        if (moveFlag != Move.MoveFlag.NORMAL && moveFlag != Move.MoveFlag.CAPTURE) {
+            return;
+        }
+
         while (piecesBitboard != 0) {
             var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
 
@@ -97,9 +103,10 @@ public class MoveGenerator {
                 default:
             }
 
-            while (movesBitboard != 0) {
-                moves.add(new Move(piece, fromBitIndex, Long.numberOfTrailingZeros(movesBitboard)));
-                movesBitboard &= movesBitboard - 1;
+            if (moveFlag == Move.MoveFlag.NORMAL) {
+                addQuietMoves(piece, fromBitIndex, movesBitboard);
+            } else {
+                addCaptureMoves(piece, fromBitIndex, movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -471,6 +478,99 @@ public class MoveGenerator {
             moves.add(move);
 
             movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    //-------------------------------------------------
+    // Init
+    //-------------------------------------------------
+
+    private void addMoves() {
+        if (board.getColorToMove() == Board.Color.WHITE) {
+
+            // pawns
+
+            addPawnMoves(
+                    Piece.WHITE_PAWN,
+                    board.getWhitePawns(),
+                    board.getBlackPieces(),
+                    board.getAllPieces()
+            );
+
+            // knights
+
+            addNonslidingPiecesMoves(
+                    Piece.WHITE_KNIGHT,
+                    Move.MoveFlag.NORMAL,
+                    board.getWhiteKnights(),
+                    ~board.getAllPieces()
+            );
+
+            addNonslidingPiecesMoves(
+                    Piece.WHITE_KNIGHT,
+                    Move.MoveFlag.CAPTURE,
+                    board.getWhiteKnights(),
+                    board.getBlackPieces()
+            );
+
+            // king
+
+            addNonslidingPiecesMoves(
+                    Piece.WHITE_KING,
+                    Move.MoveFlag.NORMAL,
+                    board.getWhiteKing(),
+                    ~board.getAllPieces()
+            );
+
+            addNonslidingPiecesMoves(
+                    Piece.WHITE_KING,
+                    Move.MoveFlag.CAPTURE,
+                    board.getWhiteKing(),
+                    board.getBlackPieces()
+            );
+
+        } else {
+
+            // pawns
+
+            addPawnMoves(
+                    Piece.BLACK_PAWN,
+                    board.getBlackPawns(),
+                    board.getWhitePieces(),
+                    board.getAllPieces()
+            );
+
+            // knights
+
+            addNonslidingPiecesMoves(
+                    Piece.BLACK_KNIGHT,
+                    Move.MoveFlag.NORMAL,
+                    board.getBlackKnights(),
+                    ~board.getAllPieces()
+            );
+
+            addNonslidingPiecesMoves(
+                    Piece.BLACK_KNIGHT,
+                    Move.MoveFlag.CAPTURE,
+                    board.getBlackKnights(),
+                    board.getWhitePieces()
+            );
+
+            // king
+
+            addNonslidingPiecesMoves(
+                    Piece.BLACK_KING,
+                    Move.MoveFlag.NORMAL,
+                    board.getBlackKing(),
+                    ~board.getAllPieces()
+            );
+
+            addNonslidingPiecesMoves(
+                    Piece.BLACK_KING,
+                    Move.MoveFlag.CAPTURE,
+                    board.getBlackKing(),
+                    board.getWhitePieces()
+            );
         }
     }
 }
