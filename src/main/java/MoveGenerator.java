@@ -113,6 +113,58 @@ public class MoveGenerator {
         }
     }
 
+    /**
+     * Add king side castling move.
+     *
+     * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
+     * @param kingBitboard A bitboard with the white or black king.
+     */
+    private void addKingSideCastlingMove(Piece piece, long kingBitboard) {
+        switch (piece) {
+            case WHITE_KING:
+                if (board.isKingSideCastlingAllowed(Board.Color.WHITE)) {
+                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 6);
+                    move.setMoveFlag(Move.MoveFlag.CASTLING);
+                    moves.add(move);
+                }
+                break;
+            case BLACK_KING:
+                if (board.isKingSideCastlingAllowed(Board.Color.BLACK)) {
+                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 62);
+                    move.setMoveFlag(Move.MoveFlag.CASTLING);
+                    moves.add(move);
+                }
+                break;
+            default:
+        }
+    }
+
+    /**
+     * Add queen side castling move.
+     *
+     * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
+     * @param kingBitboard A bitboard with the white or black king.
+     */
+    private void addQueenSideCastlingMove(Piece piece, long kingBitboard) {
+        switch (piece) {
+            case WHITE_KING:
+                if (board.isQueenSideCastlingAllowed(Board.Color.WHITE)) {
+                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 2);
+                    move.setMoveFlag(Move.MoveFlag.CASTLING);
+                    moves.add(move);
+                }
+                break;
+            case BLACK_KING:
+                if (board.isQueenSideCastlingAllowed(Board.Color.BLACK)) {
+                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 58);
+                    move.setMoveFlag(Move.MoveFlag.CASTLING);
+                    moves.add(move);
+                }
+                break;
+            default:
+        }
+    }
+
     //-------------------------------------------------
     // Nonsliding pieces (Pawn)
     //-------------------------------------------------
@@ -506,6 +558,8 @@ public class MoveGenerator {
 
             addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.NORMAL, board.getWhiteKing(), ~board.getAllPieces());
             addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.CAPTURE, board.getWhiteKing(), board.getBlackPieces());
+            addKingSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
+            addQueenSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
 
             // rooks
 
@@ -535,6 +589,8 @@ public class MoveGenerator {
 
             addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.NORMAL, board.getBlackKing(), ~board.getAllPieces());
             addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.CAPTURE, board.getBlackKing(), board.getWhitePieces());
+            addKingSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
+            addQueenSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
 
             // rooks
 
