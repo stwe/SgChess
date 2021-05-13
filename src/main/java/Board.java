@@ -81,8 +81,13 @@ public class Board {
      */
     private Color colorToMove = Color.WHITE;
 
+    /*
+     RIGHT BIT : white king side, white queen side, black king side, black queen side : LEFT BIT
+     e.g. the order is 1111 = qkQK
+    */
+
     /**
-     * An integer containing castling rights.
+     * A packed integer containing castling rights.
      */
     private int castlingRights;
 
@@ -381,16 +386,23 @@ public class Board {
         }
 
         // color to move
-        colorToMove = fenFields[1].equals("w") ? Color.WHITE : Color.BLACK;
+        if (fenFields[1].equals("w")) {
+            colorToMove = Color.WHITE;
+        } else if (fenFields[1].equals("b")) {
+            colorToMove = Color.BLACK;
+        } else {
+            throw new RuntimeException("Invalid color for to play given.");
+        }
 
-        // castling
-        // todo
+        // castling rights
+        setCastlingRights(fenFields[2]);
 
         // en passant
         if (!fenFields[3].equals("-")) {
             var file = (104 - fenFields[3].charAt(0)) + 1;
             var rank = Integer.parseInt(fenFields[3].substring(1)) - 1;
             epIndex = Bitboard.getSquareByFileAndRank(file, rank);
+            // todo: add to movelist?
         }
     }
 
@@ -453,6 +465,41 @@ public class Board {
                     break;
                 case 'k' :
                     bitboards[Bitboard.BLACK_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + ch);
+            }
+        }
+    }
+
+    /**
+     * Set {@link #castlingRights} from a given string.
+     *
+     * @param castleString The castling rights.
+     */
+    private void setCastlingRights(String castleString) {
+        castlingRights = 0;
+
+        // The symbol "-" designates that neither side may castle.
+        if (castleString.equals("-")) {
+            return;
+        }
+
+        // Uppercase letters come first to indicate White's castling availability, followed by lowercase letters for Black's.
+        // The letter "k" indicates that kingside castling is available, while "q" means that a player may castle queenside.
+        for (var ch : castleString.toCharArray()) {
+            switch (ch) {
+                case 'K':
+                    castlingRights |= 1;
+                    break;
+                case 'Q':
+                    castlingRights |= 2;
+                    break;
+                case 'k':
+                    castlingRights |= 4;
+                    break;
+                case 'q':
+                    castlingRights |= 8;
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + ch);

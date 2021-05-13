@@ -59,7 +59,7 @@ public class Main {
         keyboard.close();
         */
 
-        var board = new Board(BISHOPS);
+        var board = new Board();
         board.setColored(true);
         System.out.println(board);
 
