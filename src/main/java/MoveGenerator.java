@@ -513,6 +513,15 @@ public class MoveGenerator {
             addSlidingPiecesMoves(Piece.WHITE_ROOK, Move.MoveFlag.NORMAL, board.getWhiteRooks(), board.getAllPieces(), ~board.getAllPieces());
             addSlidingPiecesMoves(Piece.WHITE_ROOK, Move.MoveFlag.CAPTURE, board.getWhiteRooks(), board.getAllPieces(), board.getBlackPieces());
 
+            // queens
+
+            addSlidingPiecesMoves(Piece.WHITE_QUEEN, Move.MoveFlag.NORMAL, board.getWhiteQueens(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.WHITE_QUEEN, Move.MoveFlag.CAPTURE, board.getWhiteQueens(), board.getAllPieces(), board.getBlackPieces());
+
+            // bishops
+
+
+
         } else {
 
             // pawns
@@ -533,6 +542,15 @@ public class MoveGenerator {
 
             addSlidingPiecesMoves(Piece.BLACK_ROOK, Move.MoveFlag.NORMAL, board.getBlackRooks(), board.getAllPieces(), ~board.getAllPieces());
             addSlidingPiecesMoves(Piece.BLACK_ROOK, Move.MoveFlag.CAPTURE, board.getBlackRooks(), board.getAllPieces(), board.getWhitePieces());
+
+            // queens
+
+            addSlidingPiecesMoves(Piece.BLACK_QUEEN, Move.MoveFlag.NORMAL, board.getBlackQueens(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.BLACK_QUEEN, Move.MoveFlag.CAPTURE, board.getBlackQueens(), board.getAllPieces(), board.getWhitePieces());
+
+            // bishops
+
+
         }
     }
 }

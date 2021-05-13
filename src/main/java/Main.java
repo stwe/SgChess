@@ -8,7 +8,7 @@ public class Main {
     /**
      * 26 pawn moves
      */
-    private static final String BLACK_PAWNS = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1";
+    private static final String BLACK_PAWNS = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R w KQkq e3 0 1";
 
     /**
      * b: 11 knight moves + 5 king moves
@@ -23,10 +23,10 @@ public class Main {
     private static final String ROOKS = "6k1/8/5r2/8/1nR5/5N2/8/6K1 w - - 0 1";
 
     /**
-     * b:
-     * w:
+     * b: 17 queen moves + 14 knights moves + 5 king moves
+     * w: 22 queen moves + 10 knights moves + 5 king moves
      */
-    private static final String QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1 ";
+    private static final String QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 w - - 0 1 ";
 
     /**
      * b:
@@ -59,7 +59,7 @@ public class Main {
         keyboard.close();
         */
 
-        var board = new Board(ROOKS);
+        var board = new Board(QUEENS);
         board.setColored(true);
         System.out.println(board);
 
