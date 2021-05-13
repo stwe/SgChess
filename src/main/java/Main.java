@@ -29,10 +29,10 @@ public class Main {
     private static final String QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 w - - 0 1 ";
 
     /**
-     * b:
-     * w:
+     * b: 13 bishops moves + 14 knights moves + 5 king moves
+     * w: 11 bishops moves + 11 knights moves + 5 king moves
      */
-    private static final String BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1 ";
+    private static final String BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 w - - 0 1 ";
 
     public static void main(String[] args) {
         /*
@@ -59,7 +59,7 @@ public class Main {
         keyboard.close();
         */
 
-        var board = new Board(QUEENS);
+        var board = new Board(BISHOPS);
         board.setColored(true);
         System.out.println(board);
 

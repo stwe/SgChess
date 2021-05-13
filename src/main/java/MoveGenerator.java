@@ -493,7 +493,6 @@ public class MoveGenerator {
 
     private void addMoves() {
         if (board.getColorToMove() == Board.Color.WHITE) {
-
             // pawns
 
             addPawnMoves(Piece.WHITE_PAWN, board.getWhitePawns(), board.getBlackPieces(), board.getAllPieces());
@@ -520,10 +519,9 @@ public class MoveGenerator {
 
             // bishops
 
-
-
+            addSlidingPiecesMoves(Piece.WHITE_BISHOP, Move.MoveFlag.NORMAL, board.getWhiteBishops(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.WHITE_BISHOP, Move.MoveFlag.CAPTURE, board.getWhiteBishops(), board.getAllPieces(), board.getBlackPieces());
         } else {
-
             // pawns
 
             addPawnMoves(Piece.BLACK_PAWN, board.getBlackPawns(), board.getWhitePieces(), board.getAllPieces());
@@ -550,7 +548,8 @@ public class MoveGenerator {
 
             // bishops
 
-
+            addSlidingPiecesMoves(Piece.BLACK_BISHOP, Move.MoveFlag.NORMAL, board.getBlackBishops(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.BLACK_BISHOP, Move.MoveFlag.CAPTURE, board.getBlackBishops(), board.getAllPieces(), board.getWhitePieces());
         }
     }
 }
