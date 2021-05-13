@@ -10,7 +10,13 @@ public class Board {
     //-------------------------------------------------
 
     public enum Color {
-        WHITE, BLACK
+        WHITE(0), BLACK(1);
+
+        public int value;
+
+        Color(int value) {
+            this.value = value;
+        }
     }
 
     //-------------------------------------------------
@@ -81,13 +87,9 @@ public class Board {
      */
     private Color colorToMove = Color.WHITE;
 
-    /*
-     RIGHT BIT : white king side, white queen side, black king side, black queen side : LEFT BIT
-     e.g. the order is 1111 = qkQK
-    */
-
     /**
      * A packed integer containing castling rights.
+     * The order is 1111 = qkQK
      */
     private int castlingRights;
 
@@ -289,6 +291,34 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // Castling
+    //-------------------------------------------------
+
+    /**
+     * Check if queen side castling allowed.
+     *
+     * @param color The player.
+     *
+     * @return boolean
+     */
+    public boolean isQueenSideCastlingAllowed(Color color) {
+        // bit pos 1 and 3
+        return ((castlingRights >>> (1 + 2 * color.value)) & 1) != 0;
+    }
+
+    /**
+     * Check if king side castling allowed.
+     *
+     * @param color The player.
+     *
+     * @return boolean
+     */
+    public boolean isKingSideCastlingAllowed(Color color) {
+        // bis pos 0 and 2
+        return ((castlingRights >>> (2 * color.value)) & 1) != 0;
+    }
+
+    //-------------------------------------------------
     // Print
     //-------------------------------------------------
 
@@ -344,7 +374,7 @@ public class Board {
             }
 
             if (rank == 6) {
-                s.append("    castling rights: ");
+                s.append("    castling rights: ").append(castlingRightsToString());
             }
 
             s.append("\n");
@@ -352,6 +382,30 @@ public class Board {
         }
 
         s.append("   a   b   c   d   e   f   g   h");
+
+        return s.toString();
+    }
+
+    /**
+     * Returns a string with the castling rights.
+     *
+     * @return String with castling rights.
+     */
+    public String castlingRightsToString() {
+        StringBuilder s = new StringBuilder();
+
+        if (isKingSideCastlingAllowed(Color.WHITE)) {
+            s.append("K");
+        }
+        if (isQueenSideCastlingAllowed(Color.WHITE)) {
+            s.append("Q");
+        }
+        if (isKingSideCastlingAllowed(Color.BLACK)) {
+            s.append("k");
+        }
+        if (isQueenSideCastlingAllowed(Color.BLACK)) {
+            s.append("q");
+        }
 
         return s.toString();
     }
