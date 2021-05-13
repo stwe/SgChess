@@ -375,11 +375,16 @@ public class MoveGenerator {
      * The method adds moves for the sliding pieces (Rook, Bishop or Queen).
      *
      * @param piece Specifies for which type of piece the moves are to be added.
+     * @param moveFlag The {@link Move.MoveFlag}. <b>Normal</b> (for the quiet moves) and <b>Capture</b> are accepted flags.
      * @param piecesBitboard A bitboard with all the rooks, bishops or queens.
      * @param allPiecesBitboard A bitboard with all pieces.
      * @param possiblePositionsBitboard This prevents own pieces from being captured.
      */
-    public void addSlidingPiecesMoves(Piece piece, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
+    public void addSlidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
+        if (moveFlag != Move.MoveFlag.NORMAL && moveFlag != Move.MoveFlag.CAPTURE) {
+            return;
+        }
+
         while (piecesBitboard != 0) {
             var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
 
@@ -401,9 +406,10 @@ public class MoveGenerator {
                 default:
             }
 
-            while (movesBitboard != 0) {
-                moves.add(new Move(piece, fromBitIndex, Long.numberOfTrailingZeros(movesBitboard)));
-                movesBitboard &= movesBitboard - 1;
+            if (moveFlag == Move.MoveFlag.NORMAL) {
+                addQuietMoves(piece, fromBitIndex, movesBitboard);
+            } else {
+                addCaptureMoves(piece, fromBitIndex, movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -490,87 +496,43 @@ public class MoveGenerator {
 
             // pawns
 
-            addPawnMoves(
-                    Piece.WHITE_PAWN,
-                    board.getWhitePawns(),
-                    board.getBlackPieces(),
-                    board.getAllPieces()
-            );
+            addPawnMoves(Piece.WHITE_PAWN, board.getWhitePawns(), board.getBlackPieces(), board.getAllPieces());
 
             // knights
 
-            addNonslidingPiecesMoves(
-                    Piece.WHITE_KNIGHT,
-                    Move.MoveFlag.NORMAL,
-                    board.getWhiteKnights(),
-                    ~board.getAllPieces()
-            );
-
-            addNonslidingPiecesMoves(
-                    Piece.WHITE_KNIGHT,
-                    Move.MoveFlag.CAPTURE,
-                    board.getWhiteKnights(),
-                    board.getBlackPieces()
-            );
+            addNonslidingPiecesMoves(Piece.WHITE_KNIGHT, Move.MoveFlag.NORMAL, board.getWhiteKnights(), ~board.getAllPieces());
+            addNonslidingPiecesMoves(Piece.WHITE_KNIGHT, Move.MoveFlag.CAPTURE, board.getWhiteKnights(), board.getBlackPieces());
 
             // king
 
-            addNonslidingPiecesMoves(
-                    Piece.WHITE_KING,
-                    Move.MoveFlag.NORMAL,
-                    board.getWhiteKing(),
-                    ~board.getAllPieces()
-            );
+            addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.NORMAL, board.getWhiteKing(), ~board.getAllPieces());
+            addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.CAPTURE, board.getWhiteKing(), board.getBlackPieces());
 
-            addNonslidingPiecesMoves(
-                    Piece.WHITE_KING,
-                    Move.MoveFlag.CAPTURE,
-                    board.getWhiteKing(),
-                    board.getBlackPieces()
-            );
+            // rooks
+
+            addSlidingPiecesMoves(Piece.WHITE_ROOK, Move.MoveFlag.NORMAL, board.getWhiteRooks(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.WHITE_ROOK, Move.MoveFlag.CAPTURE, board.getWhiteRooks(), board.getAllPieces(), board.getBlackPieces());
 
         } else {
 
             // pawns
 
-            addPawnMoves(
-                    Piece.BLACK_PAWN,
-                    board.getBlackPawns(),
-                    board.getWhitePieces(),
-                    board.getAllPieces()
-            );
+            addPawnMoves(Piece.BLACK_PAWN, board.getBlackPawns(), board.getWhitePieces(), board.getAllPieces());
 
             // knights
 
-            addNonslidingPiecesMoves(
-                    Piece.BLACK_KNIGHT,
-                    Move.MoveFlag.NORMAL,
-                    board.getBlackKnights(),
-                    ~board.getAllPieces()
-            );
-
-            addNonslidingPiecesMoves(
-                    Piece.BLACK_KNIGHT,
-                    Move.MoveFlag.CAPTURE,
-                    board.getBlackKnights(),
-                    board.getWhitePieces()
-            );
+            addNonslidingPiecesMoves(Piece.BLACK_KNIGHT, Move.MoveFlag.NORMAL, board.getBlackKnights(), ~board.getAllPieces());
+            addNonslidingPiecesMoves(Piece.BLACK_KNIGHT, Move.MoveFlag.CAPTURE, board.getBlackKnights(), board.getWhitePieces());
 
             // king
 
-            addNonslidingPiecesMoves(
-                    Piece.BLACK_KING,
-                    Move.MoveFlag.NORMAL,
-                    board.getBlackKing(),
-                    ~board.getAllPieces()
-            );
+            addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.NORMAL, board.getBlackKing(), ~board.getAllPieces());
+            addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.CAPTURE, board.getBlackKing(), board.getWhitePieces());
 
-            addNonslidingPiecesMoves(
-                    Piece.BLACK_KING,
-                    Move.MoveFlag.CAPTURE,
-                    board.getBlackKing(),
-                    board.getWhitePieces()
-            );
+            // rooks
+
+            addSlidingPiecesMoves(Piece.BLACK_ROOK, Move.MoveFlag.NORMAL, board.getBlackRooks(), board.getAllPieces(), ~board.getAllPieces());
+            addSlidingPiecesMoves(Piece.BLACK_ROOK, Move.MoveFlag.CAPTURE, board.getBlackRooks(), board.getAllPieces(), board.getWhitePieces());
         }
     }
 }

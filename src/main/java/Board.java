@@ -330,6 +330,18 @@ public class Board {
                 s.append("|");
             }
 
+            if (rank == 8) {
+                s.append("    on the move: ").append(colorToMove);
+            }
+
+            if (rank == 7) {
+                s.append("    total possible moves: ").append(moveGenerator.getMoves().size());
+            }
+
+            if (rank == 6) {
+                s.append("    castling rights: ");
+            }
+
             s.append("\n");
             s.append(" +---+---+---+---+---+---+---+---+\n");
         }

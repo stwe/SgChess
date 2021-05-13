@@ -16,6 +16,24 @@ public class Main {
      */
     private static final String KNIGHTS_AND_KINGS = "5k2/1n6/4n3/6N1/8/3N4/8/5K2 w - - 0 1";
 
+    /**
+     * b: 12 rook moves + 6 knight moves + 5 king moves
+     * w: 13 rook moves + 7 knight moves + 5 king moves
+     */
+    private static final String ROOKS = "6k1/8/5r2/8/1nR5/5N2/8/6K1 w - - 0 1";
+
+    /**
+     * b:
+     * w:
+     */
+    private static final String QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1 ";
+
+    /**
+     * b:
+     * w:
+     */
+    private static final String BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1 ";
+
     public static void main(String[] args) {
         /*
         int i = 0;
@@ -41,7 +59,7 @@ public class Main {
         keyboard.close();
         */
 
-        var board = new Board(BLACK_PAWNS);
+        var board = new Board(ROOKS);
         board.setColored(true);
         System.out.println(board);
 
@@ -49,6 +67,5 @@ public class Main {
         for (var move : mlist) {
             System.out.println(move);
         }
-        System.out.println("Total: " + mlist.size() + " moves.");
     }
 }
