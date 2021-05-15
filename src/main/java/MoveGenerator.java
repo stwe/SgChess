@@ -114,7 +114,7 @@ public class MoveGenerator {
     }
 
     /**
-     * Add king side castling move.
+     * Add a king side castling move if is allowed and possible.
      *
      * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
      * @param kingBitboard A bitboard with the white or black king.
@@ -123,16 +123,20 @@ public class MoveGenerator {
         switch (piece) {
             case WHITE_KING:
                 if (board.isKingSideCastlingAllowed(Board.Color.WHITE)) {
-                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 6);
-                    move.setMoveFlag(Move.MoveFlag.CASTLING);
-                    moves.add(move);
+                    if (isKingSideCastlingPossible(piece)) {
+                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 6);
+                        move.setMoveFlag(Move.MoveFlag.CASTLING);
+                        moves.add(move);
+                    }
                 }
                 break;
             case BLACK_KING:
                 if (board.isKingSideCastlingAllowed(Board.Color.BLACK)) {
-                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 62);
-                    move.setMoveFlag(Move.MoveFlag.CASTLING);
-                    moves.add(move);
+                    if (isKingSideCastlingPossible(piece)) {
+                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 62);
+                        move.setMoveFlag(Move.MoveFlag.CASTLING);
+                        moves.add(move);
+                    }
                 }
                 break;
             default:
@@ -140,7 +144,55 @@ public class MoveGenerator {
     }
 
     /**
-     * Add queen side castling move.
+     * Check if king side castling is possible.
+     *
+     * @param piece A white or black king {@link Piece}.
+     *
+     * @return boolean
+     */
+    private boolean isKingSideCastlingPossible(Piece piece) {
+        var bitboardToBeFree = 0L;
+
+        switch (piece) {
+            case WHITE_KING:
+                // check if squares between the rook and the king are free
+                bitboardToBeFree = Bitboard.F1 | Bitboard.G1;
+                if ((bitboardToBeFree & board.getAllPieces()) != 0) {
+                    // if not, skip attack check and return false
+                    return false;
+                }
+
+                // check if squares between the rook and the king are not attacked
+                // E1 = 4, F1 = 5, G1 = 6
+                for (var i = 4; i <= 6; i++) {
+                    if (board.isSquareAttacked(i, Board.Color.WHITE)) {
+                        return false;
+                    }
+                }
+
+                break;
+            case BLACK_KING:
+                bitboardToBeFree = Bitboard.F8 | Bitboard.G8;
+                if ((bitboardToBeFree & board.getAllPieces()) != 0) {
+                    return false;
+                }
+
+                // E8 = 60, F8 = 61, G8 = 62
+                for (var i = 60; i <= 62; i++) {
+                    if (board.isSquareAttacked(i, Board.Color.BLACK)) {
+                        return false;
+                    }
+                }
+
+                break;
+            default:
+        }
+
+        return true;
+    }
+
+    /**
+     * Add queen side castling move if is allowed and possible.
      *
      * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
      * @param kingBitboard A bitboard with the white or black king.
@@ -149,20 +201,72 @@ public class MoveGenerator {
         switch (piece) {
             case WHITE_KING:
                 if (board.isQueenSideCastlingAllowed(Board.Color.WHITE)) {
-                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 2);
-                    move.setMoveFlag(Move.MoveFlag.CASTLING);
-                    moves.add(move);
+                    if (isQueenSideCastlingPossible(piece)) {
+                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 2);
+                        move.setMoveFlag(Move.MoveFlag.CASTLING);
+                        moves.add(move);
+                    }
                 }
                 break;
             case BLACK_KING:
                 if (board.isQueenSideCastlingAllowed(Board.Color.BLACK)) {
-                    var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 58);
-                    move.setMoveFlag(Move.MoveFlag.CASTLING);
-                    moves.add(move);
+                    if (isQueenSideCastlingPossible(piece)) {
+                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 58);
+                        move.setMoveFlag(Move.MoveFlag.CASTLING);
+                        moves.add(move);
+                    }
                 }
                 break;
             default:
         }
+    }
+
+    /**
+     * Check if queen side castling is possible.
+     *
+     * @param piece A white or black king {@link Piece}.
+     *
+     * @return boolean
+     */
+    private boolean isQueenSideCastlingPossible(Piece piece) {
+        var bitboardToBeFree = 0L;
+
+        switch (piece) {
+            case WHITE_KING:
+                // check if squares between the rook and the king are free
+                bitboardToBeFree = Bitboard.B1 | Bitboard.C1 | Bitboard.D1;
+                if ((bitboardToBeFree & board.getAllPieces()) != 0) {
+                    // if not, skip attack check and return false
+                    return false;
+                }
+
+                // check if squares between the rook and the king are not attacked
+                // E1 = 4, D1 = 3, C1 = 2
+                for (var i = 4; i >= 2; i--) {
+                    if (board.isSquareAttacked(i, Board.Color.WHITE)) {
+                        return false;
+                    }
+                }
+
+                break;
+            case BLACK_KING:
+                bitboardToBeFree = Bitboard.B8 | Bitboard.C8 | Bitboard.D8;
+                if ((bitboardToBeFree & board.getAllPieces()) != 0) {
+                    return false;
+                }
+
+                // E8 = 60, D8 = 59, C8 = 58
+                for (var i = 60; i >= 58; i--) {
+                    if (board.isSquareAttacked(i, Board.Color.BLACK)) {
+                        return false;
+                    }
+                }
+
+                break;
+            default:
+        }
+
+        return true;
     }
 
     //-------------------------------------------------

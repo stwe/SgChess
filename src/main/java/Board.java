@@ -300,7 +300,7 @@ public class Board {
     //-------------------------------------------------
 
     /**
-     * Check if queen side castling allowed.
+     * Check if queen side castling is allowed.
      *
      * @param color The player.
      *
@@ -312,7 +312,7 @@ public class Board {
     }
 
     /**
-     * Check if king side castling allowed.
+     * Check if king side castling is allowed.
      *
      * @param color The player.
      *
@@ -326,6 +326,8 @@ public class Board {
     //-------------------------------------------------
     // Move piece
     //-------------------------------------------------
+
+    // todo
 
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
         movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
@@ -344,6 +346,103 @@ public class Board {
 
     private void removePiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] &= ~(Bitboard.SQUARES[bitIndex]);
+    }
+
+    //-------------------------------------------------
+    // Attacked
+    //-------------------------------------------------
+
+    /**
+     * Checks whether a square is under attack.
+     *
+     * @param bitIndex The bit index of the attacked square.
+     * @param color Which {@link Color} is attacked.
+     *
+     * @return boolean
+     */
+    public boolean isSquareAttacked(int bitIndex, Color color) {
+        // Kann ein schwarzer Bauer auf F1 angreifen?
+        // Dafür betrachten wir die Situation aus Sicht eines weißen Bauern auf F1,
+        // der angreifen möchte (also umgekehrt).
+
+        // check if a white square is being attacked
+        if (color == Color.WHITE) {
+            // black pawns
+            if ((Attack.whitePawnAttacks[bitIndex] & getBlackPawns()) != 0) {
+                System.out.println("Black pawn attacks square: " + bitIndex);
+                return true;
+            }
+
+            // black knights
+            if ((Attack.knightMovesAndAttacks[bitIndex] & getBlackKnights()) != 0) {
+                System.out.println("Black knight attacks square: " + bitIndex);
+                return true;
+            }
+
+            // black king
+            if ((Attack.kingMovesAndAttacks[bitIndex] & getBlackKing()) != 0) {
+                System.out.println("Black king attacks square: " + bitIndex);
+                return true;
+            }
+
+            // black bishops
+            if ((Attack.getBishopMoves(bitIndex, allPiecesBitboard) & getBlackBishops()) != 0) {
+                System.out.println("Black bishop attacks square: " + bitIndex);
+                return true;
+            }
+
+            // black rooks
+            if ((Attack.getRookMoves(bitIndex, allPiecesBitboard) & getBlackRooks()) != 0) {
+                System.out.println("Black rook attacks square: " + bitIndex);
+                return true;
+            }
+
+            // black queens
+            if ((Attack.getQueenMoves(bitIndex, allPiecesBitboard) & getBlackQueens()) != 0) {
+                System.out.println("Black queen attacks square: " + bitIndex);
+                return true;
+            }
+        }
+
+        // check if a black square is being attacked
+
+        // white pawns
+        if ((Attack.blackPawnAttacks[bitIndex] & getWhitePawns()) != 0) {
+            System.out.println("White pawn attacks square: " + bitIndex);
+            return true;
+        }
+
+        // white knights
+        if ((Attack.knightMovesAndAttacks[bitIndex] & getWhiteKnights()) != 0) {
+            System.out.println("White knight attacks square: " + bitIndex);
+            return true;
+        }
+
+        // white king
+        if ((Attack.kingMovesAndAttacks[bitIndex] & getWhiteKing()) != 0) {
+            System.out.println("White king attacks square: " + bitIndex);
+            return true;
+        }
+
+        // white bishops
+        if ((Attack.getBishopMoves(bitIndex, allPiecesBitboard) & getWhiteBishops()) != 0) {
+            System.out.println("White bishop attacks square: " + bitIndex);
+            return true;
+        }
+
+        // white rooks
+        if ((Attack.getRookMoves(bitIndex, allPiecesBitboard) & getWhiteRooks()) != 0) {
+            System.out.println("White rook attacks square: " + bitIndex);
+            return true;
+        }
+
+        // white queens
+        if ((Attack.getQueenMoves(bitIndex, allPiecesBitboard) & getWhiteQueens()) != 0) {
+            System.out.println("White queen attacks square: " + bitIndex);
+            return true;
+        }
+
+        return false;
     }
 
     //-------------------------------------------------

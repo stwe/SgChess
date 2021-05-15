@@ -61,29 +61,31 @@ public class Main {
         keyboard.close();
         */
 
+        //var board = new Board("rnb5/ppp2ppp/5r2/2b5/8/6n1/3pp1kq/R3K2R w KQ - 0 1");
+        //var board = new Board("r3k2r/6P1/2Q2N2/4R2B/2B5/8/PPPPPP1P/RN2K3 b Qkq - 0 1");
         var board = new Board();
         board.setColored(true);
         System.out.println(board);
 
-        board.movePiece(
-                Bitboard.getSquareBitIndex(Bitboard.E2),
-                Bitboard.getSquareBitIndex(Bitboard.E4),
-                PieceType.PAWN, Board.Color.WHITE
-        );
-        System.out.println(board);
-
-        board.movePiece(
-                Bitboard.getSquareBitIndex(Bitboard.E4),
-                Bitboard.getSquareBitIndex(Bitboard.E2),
-                PieceType.PAWN, Board.Color.WHITE
-        );
-        System.out.println(board);
-
         /*
+        board.movePiece(
+                Bitboard.getSquareBitIndex(Bitboard.E2),
+                Bitboard.getSquareBitIndex(Bitboard.E4),
+                PieceType.PAWN, Board.Color.WHITE
+        );
+        System.out.println(board);
+
+        board.movePiece(
+                Bitboard.getSquareBitIndex(Bitboard.E4),
+                Bitboard.getSquareBitIndex(Bitboard.E2),
+                PieceType.PAWN, Board.Color.WHITE
+        );
+        System.out.println(board);
+        */
+
         var mlist = board.getMoveGenerator().getMoves();
         for (var move : mlist) {
             System.out.println(move);
         }
-        */
     }
 }
