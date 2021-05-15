@@ -103,6 +103,11 @@ public class Board {
      */
     private final MoveGenerator moveGenerator;
 
+    /**
+     * The current Zobrist key.
+     */
+    public long zkey;
+
     //-------------------------------------------------
     // Ctors.
     //-------------------------------------------------
@@ -319,6 +324,29 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // Move piece
+    //-------------------------------------------------
+
+    public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
+        movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
+        zkey ^= Zkey.piece[color.value][pieceType.value][fromBitIndex];
+        zkey ^= Zkey.piece[color.value][pieceType.value][toBitIndex];
+    }
+
+    private void movePiece(int fromBitIndex, int toBitIndex, int bitboardNr) {
+        removePiece(fromBitIndex, bitboardNr);
+        addPiece(toBitIndex, bitboardNr);
+    }
+
+    private void addPiece(int bitIndex, int bitboardNr) {
+        bitboards[bitboardNr] |= Bitboard.SQUARES[bitIndex];
+    }
+
+    private void removePiece(int bitIndex, int bitboardNr) {
+        bitboards[bitboardNr] &= ~(Bitboard.SQUARES[bitIndex]);
+    }
+
+    //-------------------------------------------------
     // Print
     //-------------------------------------------------
 
@@ -366,15 +394,19 @@ public class Board {
             }
 
             if (rank == 8) {
-                s.append("    on the move: ").append(colorToMove);
+                s.append("    On the move: ").append(colorToMove);
             }
 
             if (rank == 7) {
-                s.append("    total possible moves: ").append(moveGenerator.getMoves().size());
+                s.append("    Total possible moves: ").append(moveGenerator.getMoves().size());
             }
 
             if (rank == 6) {
-                s.append("    castling rights: ").append(castlingRightsToString());
+                s.append("    Castling rights: ").append(castlingRightsToString());
+            }
+
+            if (rank == 5) {
+                s.append("    Zobrist key: ").append(zkey);
             }
 
             s.append("\n");

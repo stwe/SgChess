@@ -34,8 +34,7 @@ public class Main {
      */
     private static final String BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 w - - 0 1 ";
 
-    private static final String CASTLE1 = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-    private static final String CASTLE2 = "3rk2r/8/8/8/8/8/6p1/R3K2R w KQk - 0 1";
+    private static final String TEST48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 
     public static void main(String[] args) {
         /*
@@ -62,13 +61,29 @@ public class Main {
         keyboard.close();
         */
 
-        var board = new Board(CASTLE1);
+        var board = new Board();
         board.setColored(true);
         System.out.println(board);
 
+        board.movePiece(
+                Bitboard.getSquareBitIndex(Bitboard.E2),
+                Bitboard.getSquareBitIndex(Bitboard.E4),
+                PieceType.PAWN, Board.Color.WHITE
+        );
+        System.out.println(board);
+
+        board.movePiece(
+                Bitboard.getSquareBitIndex(Bitboard.E4),
+                Bitboard.getSquareBitIndex(Bitboard.E2),
+                PieceType.PAWN, Board.Color.WHITE
+        );
+        System.out.println(board);
+
+        /*
         var mlist = board.getMoveGenerator().getMoves();
         for (var move : mlist) {
             System.out.println(move);
         }
+        */
     }
 }

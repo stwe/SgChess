@@ -21,6 +21,18 @@ public enum PieceType {
     public final PieceType[] values = new PieceType[7];
 
     /**
+     * Returns the bitboard index of a white or black piece type.
+     *
+     * @param pieceType The {@link PieceType}.
+     * @param color {@link Board.Color}.
+     *
+     * @return An index.
+     */
+    public static int getBitboardNumber(PieceType pieceType, Board.Color color) {
+        return (pieceType.value + color.value * 6) - 1;
+    }
+
+    /**
      * Constructs a new {@link PieceType} enum.
      *
      * @param value {@link #value}.
