@@ -16,12 +16,12 @@ public enum PieceType {
     public int value;
 
     /**
-     * To get the PieceType by ordinal value.
+     * To get the {@link PieceType} by ordinal value.
      */
     public final PieceType[] values = new PieceType[7];
 
     /**
-     * Returns the bitboard index of a white or black piece type.
+     * Returns the bitboard index of a white or black {@link PieceType}.
      *
      * @param pieceType The {@link PieceType}.
      * @param color {@link Board.Color}.
@@ -39,5 +39,6 @@ public enum PieceType {
      */
     PieceType(int value) {
         this.value = value;
+        this.values[value] = this;
     }
 }

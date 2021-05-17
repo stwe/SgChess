@@ -73,6 +73,11 @@ public class Attack {
     public static final long[] blackPawnAttacks;
 
     /**
+     * Possible positions of attack for any pawn.
+     */
+    public static final long[][] pawnAttacks;
+
+    /**
      * Rook magic objects.
      */
     private static final Magic[] rookMagics;
@@ -92,6 +97,7 @@ public class Attack {
         knightMovesAndAttacks = calcKnightMovesAndAttacks();
         whitePawnAttacks = calcWhitePawnAttacks();
         blackPawnAttacks = calcBlackPawnAttacks();
+        pawnAttacks = addPawnAttacks();
 
         /*
             Rook on e4:
@@ -129,21 +135,107 @@ public class Attack {
     }
 
     //-------------------------------------------------
-    // Get moves && attacks
+    // Sliding piece moves
     //-------------------------------------------------
 
-    public static long getRookMoves(int from, long allPieces) {
-        var magic = rookMagics[from];
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[from] >>> magic.shift)];
+    /**
+     * Get moves for any color rook.
+     *
+     * @param bitIndex The bit index of the from square.
+     * @param allPieces The bitboard with all pieces.
+     *
+     * @return A bitboard with all rook moves.
+     */
+    public static long getRookMoves(int bitIndex, long allPieces) {
+        var magic = rookMagics[bitIndex];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[bitIndex] >>> magic.shift)];
     }
 
-    public static long getBishopMoves(int from, long allPieces) {
-        var magic = bishopMagics[from];
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[from] >>> magic.shift)];
+    /**
+     * Get moves for any color bishop.
+     *
+     * @param bitIndex The bit index of the from square.
+     * @param allPieces The bitboard with all pieces.
+     *
+     * @return A bitboard with all bishop moves.
+     */
+    public static long getBishopMoves(int bitIndex, long allPieces) {
+        var magic = bishopMagics[bitIndex];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[bitIndex] >>> magic.shift)];
     }
 
-    public static long getQueenMoves(int from, long allPieces) {
-        return getRookMoves(from, allPieces) | getBishopMoves(from, allPieces);
+    /**
+     * Get moves for any color queen.
+     *
+     * @param bitIndex The bit index of the from square.
+     * @param allPieces The bitboard with all pieces.
+     *
+     * @return A bitboard with all queen moves.
+     */
+    public static long getQueenMoves(int bitIndex, long allPieces) {
+        return getRookMoves(bitIndex, allPieces) | getBishopMoves(bitIndex, allPieces);
+    }
+
+    //-------------------------------------------------
+    // Square attacks
+    //-------------------------------------------------
+
+    /**
+     * Get a bitboard with all attackers to a given square.
+     *
+     * @param bitIndex The bit index of the attacked square.
+     * @param color Which {@link Board.Color} is under attack.
+     * @param board A {@link Board} object.
+     *
+     * @return The bitboard with all attackers.
+     */
+    public static long getAttackersToSquare(int bitIndex, Board.Color color, Board board) {
+        var enemy = color.getEnemyColor();
+
+        var attackers = 0L;
+        attackers |= getPawnAttacksByColor(color)[bitIndex] & board.getPawnsByColor(enemy);
+        attackers |= knightMovesAndAttacks[bitIndex] & board.getKnightsByColor(enemy);
+        attackers |= kingMovesAndAttacks[bitIndex] & board.getKingByColor(enemy);
+        attackers |= getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemy);
+        attackers |= getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemy);
+        attackers |= getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemy);
+
+        return attackers;
+    }
+
+    /**
+     * Checks whether a square is under attack.
+     *
+     * @param bitIndex The bit index of the attacked square.
+     * @param color Which {@link Board.Color} is under attack.
+     * @param board A {@link Board} object.
+     *
+     * @return boolean
+     */
+    public static boolean isSquareAttacked(int bitIndex, Board.Color color, Board board) {
+        var enemy = color.getEnemyColor();
+
+        if ((getPawnAttacksByColor(color)[bitIndex] & board.getPawnsByColor(enemy)) != 0) {
+            return true;
+        }
+
+        if ((knightMovesAndAttacks[bitIndex] & board.getKnightsByColor(enemy)) != 0) {
+            return true;
+        }
+
+        if ((kingMovesAndAttacks[bitIndex] & board.getKingByColor(enemy)) != 0) {
+            return true;
+        }
+
+        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemy)) != 0) {
+            return true;
+        }
+
+        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemy)) != 0) {
+            return true;
+        }
+
+        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemy)) != 0;
     }
 
     //-------------------------------------------------
@@ -546,6 +638,42 @@ public class Attack {
         }
 
         return pawnAttacks;
+    }
+
+    /**
+     * Add every possible position of attack for any pawn.
+     *
+     * @return A precomputed lookup table.
+     */
+    private static long[][] addPawnAttacks() {
+        var pawnAttacks = new long[2][64];
+
+        pawnAttacks[Board.Color.WHITE.value] = whitePawnAttacks;
+        pawnAttacks[Board.Color.BLACK.value] = blackPawnAttacks;
+
+        return pawnAttacks;
+    }
+
+    /**
+     * Get pawn attacks table by color value.
+     *
+     * @param color White (0) or black (1) pawns.
+     *
+     * @return The precomputed pawn attacks.
+     */
+    public static long[] getPawnAttacksByColor(int color) {
+        return pawnAttacks[color];
+    }
+
+    /**
+     * Get pawn attacks table by color.
+     *
+     * @param color WHITE or BLACK pawns.
+     *
+     * @return The precomputed pawn attacks.
+     */
+    public static long[] getPawnAttacksByColor(Board.Color color) {
+        return getPawnAttacksByColor(color.value);
     }
 
     //-------------------------------------------------
