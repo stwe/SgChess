@@ -1,5 +1,8 @@
-import java.util.HashMap;
-import java.util.Map;
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
 
 /**
  * Bitboard constants and utils.
@@ -222,29 +225,6 @@ public class Bitboard {
     public static final long H8 = G8 << 1;
 
     /**
-     * Creates the square bitboard bit indices.
-     */
-    private static final Map<Long, Integer> squareBitIndex;
-    static {
-        squareBitIndex = new HashMap<>();
-        for (var i = 0; i < 64; i++) {
-            squareBitIndex.put(1L << i, i);
-        }
-    }
-
-    /**
-     * Returns the bit index for a given square (Little endian rank-file (LERF) mapping) bitboard
-     * (for example square E4 => returns bit index 28).
-     *
-     * @param square A square bitboard.
-     *
-     * @return The bit index.
-     */
-    public static int getSquareBitIndex(long square) {
-        return squareBitIndex.get(square);
-    }
-
-    /**
      * Little endian rank-file (LERF) mapping.
      * Returns the square bitboard for a given bit index.
      */
@@ -272,6 +252,45 @@ public class Bitboard {
             "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
             "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"
     };
+
+    //-------------------------------------------------
+    // Squares Bit Index
+    //-------------------------------------------------
+
+    /**
+     * Returns the bit index for a given square (Little endian rank-file (LERF) mapping) bitboard
+     * (for example square E4 => returns bit index 28).
+     */
+    public enum BitIndex {
+        A1_IDX, B1_IDX, C1_IDX, D1_IDX, E1_IDX, F1_IDX, G1_IDX, H1_IDX,
+        A2_IDX, B2_IDX, C2_IDX, D2_IDX, E2_IDX, F2_IDX, G2_IDX, H2_IDX,
+        A3_IDX, B3_IDX, C3_IDX, D3_IDX, E3_IDX, F3_IDX, G3_IDX, H3_IDX,
+        A4_IDX, B4_IDX, C4_IDX, D4_IDX, E4_IDX, F4_IDX, G4_IDX, H4_IDX,
+        A5_IDX, B5_IDX, C5_IDX, D5_IDX, E5_IDX, F5_IDX, G5_IDX, H5_IDX,
+        A6_IDX, B6_IDX, C6_IDX, D6_IDX, E6_IDX, F6_IDX, G6_IDX, H6_IDX,
+        A7_IDX, B7_IDX, C7_IDX, D7_IDX, E7_IDX, F7_IDX, G7_IDX, H7_IDX,
+        A8_IDX, B8_IDX, C8_IDX, D8_IDX, E8_IDX, F8_IDX, G8_IDX, H8_IDX
+    }
+
+    //-------------------------------------------------
+    // Files && Ranks
+    //-------------------------------------------------
+
+    /**
+     * A vertical line on the chessboard.
+     */
+    public enum File {
+        FILE_A, FILE_B, FILE_C, FILE_D,
+        FILE_E, FILE_F, FILE_G, FILE_H
+    }
+
+    /**
+     * A horizontal line on the chessboard.
+     */
+    public enum Rank {
+        RANK_1, RANK_2, RANK_3, RANK_4,
+        RANK_5, RANK_6, RANK_7, RANK_8
+    }
 
     //-------------------------------------------------
     // Clear && Mask
@@ -325,29 +344,40 @@ public class Bitboard {
     //-------------------------------------------------
 
     /**
-     * Checks whether a bit is set on the given File and Rank position on a bitboard.
+     * Checks whether a bit is set on the given bitboard {@link BitIndex}.
      *
      * @param bitboard The bitboard to be checked.
-     * @param file A vertical line on the chessboard.
-     * @param rank A horizontal line on the chessboard.
+     * @param bitIndex The {@link BitIndex} of a square.
      *
      * @return boolean
      */
-    public static boolean isBitSet(long bitboard, int file, int rank) {
-        var square = getSquareByFileAndRank(file, rank);
-        return (1L << square) == ((1L << square) & bitboard); // todo
+    public static boolean isBitSet(long bitboard, BitIndex bitIndex) {
+        return (SQUARES[bitIndex.ordinal()] & bitboard) != 0;
     }
 
     /**
-     * Converting 2D coordinates into 1D index.
+     * Checks whether a bit is set on the given bitboard {@link File} and {@link Rank} position.
      *
-     * @param file A vertical line on the chessboard.
-     * @param rank A horizontal line on the chessboard.
+     * @param bitboard The bitboard to be checked.
+     * @param file A {@link File}.
+     * @param rank A {@link Rank}.
      *
-     * @return int
+     * @return boolean
      */
-    public static int getSquareByFileAndRank(int file, int rank) {
-        return 8 * rank + file;
+    public static boolean isBitSet(long bitboard, File file, Rank rank) {
+        return isBitSet(bitboard, getBitIndexByFileAndRank(file, rank));
+    }
+
+    /**
+     * Converting 2D {@link File} and {@link Rank} into 1D {@link BitIndex}.
+     *
+     * @param file A {@link File}.
+     * @param rank A {@link Rank}.
+     *
+     * @return {@link BitIndex}
+     */
+    public static BitIndex getBitIndexByFileAndRank(File file, Rank rank) {
+        return BitIndex.values()[8 * rank.ordinal() + file.ordinal()];
     }
 
     //-------------------------------------------------
@@ -362,13 +392,13 @@ public class Bitboard {
     public static void printBitboard(long bitboard) {
         String s;
         System.out.println();
-        for (var rank = 8; rank >= 1; rank--) {
 
-            s = rank + "| ";
+        for (var rank = Rank.RANK_8.ordinal(); rank >= Rank.RANK_1.ordinal(); rank--) {
+            s = (rank + 1) + "| ";
             System.out.print(s);
 
-            for (var file = 1; file <= 8; file++) {
-                var ch = isBitSet(bitboard, file - 1, rank - 1) ? "1 " : "0 ";
+            for (var file : File.values()) {
+                var ch = isBitSet(bitboard, file, Rank.values()[rank]) ? "1 " : "0 ";
                 System.out.print(ch);
             }
 
