@@ -1,3 +1,9 @@
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
+
 import java.util.Objects;
 
 /**
@@ -6,13 +12,17 @@ import java.util.Objects;
 public class Board {
 
     //-------------------------------------------------
-    // Types
+    // Color
     //-------------------------------------------------
 
     public enum Color {
         WHITE(0), BLACK(1);
 
         public int value;
+
+        public Color getEnemyColor() {
+            return this.value == 0 ? BLACK : WHITE;
+        }
 
         Color(int value) {
             this.value = value;
@@ -23,35 +33,10 @@ public class Board {
     // Constants
     //-------------------------------------------------
 
-    // ANSI escape sequences
-
+    /**
+     * All attributes off.
+     */
     private static final String ANSI_RESET = "\u001B[0m";
-
-    private static final String ANSI_BLACK = "\u001B[30;1m";
-    private static final String ANSI_RED = "\u001B[31;1m";
-    private static final String ANSI_GREEN = "\u001B[32;1m";
-    private static final String ANSI_YELLOW = "\u001B[33;1m";
-    private static final String ANSI_BLUE = "\u001B[34;1m";
-    private static final String ANSI_PURPLE = "\u001B[35;1m";
-    private static final String ANSI_CYAN = "\u001B[36;1m";
-    private static final String ANSI_WHITE = "\u001B[37;1m";
-
-    private static final String ANSI_BLACK_BACKGROUND = "\u001B[40;1m";
-    private static final String ANSI_RED_BACKGROUND = "\u001B[41;1m";
-    private static final String ANSI_GREEN_BACKGROUND = "\u001B[42;1m";
-    private static final String ANSI_YELLOW_BACKGROUND = "\u001B[43;1m";
-    private static final String ANSI_BLUE_BACKGROUND = "\u001B[44;1m";
-    private static final String ANSI_PURPLE_BACKGROUND = "\u001B[45;1m";
-    private static final String ANSI_CYAN_BACKGROUND = "\u001B[46;1m";
-    private static final String ANSI_WHITE_BACKGROUND = "\u001B[47;1m";
-
-    // board and pieces colors
-
-    private static final String BOARD_WHITE = ANSI_BLACK;
-    private static final String BOARD_BLACK = ANSI_BLACK;
-
-    private static final String PIECE_WHITE = "\u001B[38;5;15m";
-    private static final String PIECE_BLACK = ANSI_RED;
 
     /**
      * The FEN for the starting position.
@@ -61,16 +46,6 @@ public class Board {
     //-------------------------------------------------
     // Member
     //-------------------------------------------------
-
-    /**
-     * The toString method uses the UTF8 chess pieces.
-     */
-    private boolean showUnicodeSymbols = false;
-
-    /**
-     * The board is output in color.
-     */
-    private boolean colored = true;
 
     /**
      * The bitboards to represent the positions of each kind and color of piece on a chessboard.
@@ -99,14 +74,11 @@ public class Board {
     private int epIndex = 0;
 
     /**
-     * A {@link MoveGenerator} object.
-     */
-    private final MoveGenerator moveGenerator;
-
-    /**
      * The current Zobrist key.
      */
     public long zkey;
+
+    public long kingAttackers = 0L;
 
     //-------------------------------------------------
     // Ctors.
@@ -127,12 +99,10 @@ public class Board {
     public Board(String fen) {
         initWithFen(Objects.requireNonNull(fen, "fen must not be null"));
         updateCommonBitboards();
-
-        moveGenerator = new MoveGenerator(this);
     }
 
     //-------------------------------------------------
-    // Getter
+    // Getter - white pieces
     //-------------------------------------------------
 
     public long getWhitePawns() {
@@ -159,6 +129,10 @@ public class Board {
         return bitboards[Bitboard.WHITE_KING_BITBOARD];
     }
 
+    //-------------------------------------------------
+    // Getter - black pieces
+    //-------------------------------------------------
+
     public long getBlackPawns() {
         return bitboards[Bitboard.BLACK_PAWNS_BITBOARD];
     }
@@ -182,6 +156,10 @@ public class Board {
     public long getBlackKing() {
         return bitboards[Bitboard.BLACK_KING_BITBOARD];
     }
+
+    //-------------------------------------------------
+    // Getter - all pieces
+    //-------------------------------------------------
 
     public long getWhitePieces() {
         return bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD];
@@ -219,23 +197,37 @@ public class Board {
         return allPiecesBitboard;
     }
 
-    /**
-     * Get {@link #showUnicodeSymbols}.
-     *
-     * @return boolean
-     */
-    public boolean isShowUnicodeSymbols() {
-        return showUnicodeSymbols;
+    //-------------------------------------------------
+    // Getter - pieces by color
+    //-------------------------------------------------
+
+    public long getPawns(Color color) {
+        return color == Color.WHITE ? getWhitePawns() : getBlackPawns();
     }
 
-    /**
-     * Get {@link #colored}.
-     *
-     * @return boolean
-     */
-    public boolean isColored() {
-        return colored;
+    public long getKnights(Color color) {
+        return color == Color.WHITE ? getWhiteKnights() : getBlackKnights();
     }
+
+    public long getBishops(Color color) {
+        return color == Color.WHITE ? getWhiteBishops() : getBlackBishops();
+    }
+
+    public long getRooks(Color color) {
+        return color == Color.WHITE ? getWhiteRooks() : getBlackRooks();
+    }
+
+    public long getQueens(Color color) {
+        return color == Color.WHITE ? getWhiteQueens() : getBlackQueens();
+    }
+
+    public long getKing(Color color) {
+        return color == Color.WHITE ? getWhiteKing() : getBlackKing();
+    }
+
+    //-------------------------------------------------
+    // Getter
+    //-------------------------------------------------
 
     /**
      * Get {@link #colorToMove}.
@@ -264,37 +256,6 @@ public class Board {
         return epIndex;
     }
 
-    /**
-     * Get {@link #moveGenerator}.
-     *
-     * @return {@link #moveGenerator}.
-     */
-    public MoveGenerator getMoveGenerator() {
-        return moveGenerator;
-    }
-
-    //-------------------------------------------------
-    // Setter
-    //-------------------------------------------------
-
-    /**
-     * Set {@link #showUnicodeSymbols}.
-     *
-     * @param showUnicodeSymbols {@link #showUnicodeSymbols}.
-     */
-    public void setShowUnicodeSymbols(boolean showUnicodeSymbols) {
-        this.showUnicodeSymbols = showUnicodeSymbols;
-    }
-
-    /**
-     * Set {@link #colored}.
-     *
-     * @param colored {@link #colored}
-     */
-    public void setColored(boolean colored) {
-        this.colored = colored;
-    }
-
     //-------------------------------------------------
     // Castling
     //-------------------------------------------------
@@ -302,7 +263,7 @@ public class Board {
     /**
      * Check if queen side castling is allowed.
      *
-     * @param color The player.
+     * @param color The color for which to check.
      *
      * @return boolean
      */
@@ -314,7 +275,7 @@ public class Board {
     /**
      * Check if king side castling is allowed.
      *
-     * @param color The player.
+     * @param color The color for which to check.
      *
      * @return boolean
      */
@@ -328,6 +289,23 @@ public class Board {
     //-------------------------------------------------
 
     // todo
+
+    public void makeMove(Move move) {
+        // extract from, to etc
+        // schreibe move in die history
+        // handle special moves
+        // hash in/out
+
+        // call movePiece
+
+        // illigeale Züge zurücknehmen
+    }
+
+    /*
+    Variante:
+    movePiece from -> to
+    die Funktion findet selbst heraus, welche Figure mit welcher Farbe auf from steht
+    */
 
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
         movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
@@ -349,100 +327,29 @@ public class Board {
     }
 
     //-------------------------------------------------
-    // Attacked
+    // Perft
     //-------------------------------------------------
 
-    /**
-     * Checks whether a square is under attack.
-     *
-     * @param bitIndex The bit index of the attacked square.
-     * @param color Which {@link Color} is attacked.
-     *
-     * @return boolean
-     */
-    public boolean isSquareAttacked(int bitIndex, Color color) {
-        // Kann ein schwarzer Bauer auf F1 angreifen?
-        // Dafür betrachten wir die Situation aus Sicht eines weißen Bauern auf F1,
-        // der angreifen möchte (also umgekehrt).
+    public int perft(int depth) {
+        var nodes = 0;
 
-        // check if a white square is being attacked
-        if (color == Color.WHITE) {
-            // black pawns
-            if ((Attack.whitePawnAttacks[bitIndex] & getBlackPawns()) != 0) {
-                System.out.println("Black pawn attacks square: " + bitIndex);
-                return true;
-            }
-
-            // black knights
-            if ((Attack.knightMovesAndAttacks[bitIndex] & getBlackKnights()) != 0) {
-                System.out.println("Black knight attacks square: " + bitIndex);
-                return true;
-            }
-
-            // black king
-            if ((Attack.kingMovesAndAttacks[bitIndex] & getBlackKing()) != 0) {
-                System.out.println("Black king attacks square: " + bitIndex);
-                return true;
-            }
-
-            // black bishops
-            if ((Attack.getBishopMoves(bitIndex, allPiecesBitboard) & getBlackBishops()) != 0) {
-                System.out.println("Black bishop attacks square: " + bitIndex);
-                return true;
-            }
-
-            // black rooks
-            if ((Attack.getRookMoves(bitIndex, allPiecesBitboard) & getBlackRooks()) != 0) {
-                System.out.println("Black rook attacks square: " + bitIndex);
-                return true;
-            }
-
-            // black queens
-            if ((Attack.getQueenMoves(bitIndex, allPiecesBitboard) & getBlackQueens()) != 0) {
-                System.out.println("Black queen attacks square: " + bitIndex);
-                return true;
-            }
+        if (depth == 0) {
+            return 1;
         }
 
-        // check if a black square is being attacked
+        var moveGenerator = new MoveGenerator(this);
 
-        // white pawns
-        if ((Attack.blackPawnAttacks[bitIndex] & getWhitePawns()) != 0) {
-            System.out.println("White pawn attacks square: " + bitIndex);
-            return true;
+        // todo: legale Züge ermitteln und zurückgeben
+        var moves = moveGenerator.generateLegalMoves();
+        for (var move : moves) {
+            makeMove(move);
+
+            nodes += perft(depth - 1);
+
+            //undoMove(move);
         }
 
-        // white knights
-        if ((Attack.knightMovesAndAttacks[bitIndex] & getWhiteKnights()) != 0) {
-            System.out.println("White knight attacks square: " + bitIndex);
-            return true;
-        }
-
-        // white king
-        if ((Attack.kingMovesAndAttacks[bitIndex] & getWhiteKing()) != 0) {
-            System.out.println("White king attacks square: " + bitIndex);
-            return true;
-        }
-
-        // white bishops
-        if ((Attack.getBishopMoves(bitIndex, allPiecesBitboard) & getWhiteBishops()) != 0) {
-            System.out.println("White bishop attacks square: " + bitIndex);
-            return true;
-        }
-
-        // white rooks
-        if ((Attack.getRookMoves(bitIndex, allPiecesBitboard) & getWhiteRooks()) != 0) {
-            System.out.println("White rook attacks square: " + bitIndex);
-            return true;
-        }
-
-        // white queens
-        if ((Attack.getQueenMoves(bitIndex, allPiecesBitboard) & getWhiteQueens()) != 0) {
-            System.out.println("White queen attacks square: " + bitIndex);
-            return true;
-        }
-
-        return false;
+        return nodes;
     }
 
     //-------------------------------------------------
@@ -455,33 +362,33 @@ public class Board {
 
         s.append(" +---+---+---+---+---+---+---+---+\n");
 
-        for (var rank = 8; rank >= 1; rank--) {
+        for (var rank = Bitboard.Rank.RANK_8.ordinal(); rank >= Bitboard.Rank.RANK_1.ordinal(); rank--) {
             s.append(rank).append("|");
 
-            for (var file = 1; file <= 8; file++) {
-                var piece = getPieceString(file - 1, rank - 1);
+            for (var file : Bitboard.File.values()) {
+                var piece = getPieceString(file, Bitboard.Rank.values()[rank]);
 
                 // set square background
-                if (colored) {
-                    if (file % 2 == 1 && rank % 2 == 0) {
-                        s.append(BOARD_WHITE);
+                if (Config.COLORED) {
+                    if (file.ordinal() % 2 == 1 && rank % 2 == 0) {
+                        s.append(Config.BOARD_WHITE);
                     }
-                    if (file % 2 == 0 && rank % 2 == 0) {
-                        s.append(BOARD_BLACK);
+                    if (file.ordinal() % 2 == 0 && rank % 2 == 0) {
+                        s.append(Config.BOARD_BLACK);
                     }
 
-                    if (file % 2 == 1 && rank % 2 == 1) {
-                        s.append(BOARD_BLACK);
+                    if (file.ordinal() % 2 == 1 && rank % 2 == 1) {
+                        s.append(Config.BOARD_BLACK);
                     }
-                    if (file % 2 == 0 && rank % 2 == 1) {
-                        s.append(BOARD_WHITE);
+                    if (file.ordinal() % 2 == 0 && rank % 2 == 1) {
+                        s.append(Config.BOARD_WHITE);
                     }
                 }
 
                 // append piece
                 if (piece.equals("")) {
                     s.append("   ");
-                    if (colored) {
+                    if (Config.COLORED) {
                         s.append(ANSI_RESET);
                     }
                 } else {
@@ -497,14 +404,10 @@ public class Board {
             }
 
             if (rank == 7) {
-                s.append("    Total possible moves: ").append(moveGenerator.getMoves().size());
-            }
-
-            if (rank == 6) {
                 s.append("    Castling rights: ").append(castlingRightsToString());
             }
 
-            if (rank == 5) {
+            if (rank == 6) {
                 s.append("    Zobrist key: ").append(zkey);
             }
 
@@ -586,7 +489,7 @@ public class Board {
         if (!fenFields[3].equals("-")) {
             var file = (104 - fenFields[3].charAt(0)) + 1;
             var rank = Integer.parseInt(fenFields[3].substring(1)) - 1;
-            epIndex = Bitboard.getSquareByFileAndRank(file, rank);
+            //epIndex = Bitboard.getSquareByFileAndRank(file, rank);
             // todo: add to movelist?
         }
     }
@@ -615,41 +518,41 @@ public class Board {
                     break;
 
                 case 'P' :
-                    bitboards[Bitboard.WHITE_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'N' :
-                    bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'B' :
-                    bitboards[Bitboard.WHITE_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'R' :
-                    bitboards[Bitboard.WHITE_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'Q' :
-                    bitboards[Bitboard.WHITE_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'K' :
-                    bitboards[Bitboard.WHITE_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.WHITE_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
 
                 case 'p' :
-                    bitboards[Bitboard.BLACK_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_PAWNS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'n' :
-                    bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_KNIGHTS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'b' :
-                    bitboards[Bitboard.BLACK_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_BISHOPS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'r' :
-                    bitboards[Bitboard.BLACK_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_ROOKS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'q' :
-                    bitboards[Bitboard.BLACK_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_QUEENS_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 case 'k' :
-                    bitboards[Bitboard.BLACK_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getSquareByFileAndRank(++x, currentRank)];
+                    bitboards[Bitboard.BLACK_KING_BITBOARD] |= Bitboard.SQUARES[Bitboard.getBitIndexByFileAndRank(Bitboard.File.values()[++x], Bitboard.Rank.values()[currentRank]).ordinal()];
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + ch);
@@ -726,6 +629,10 @@ public class Board {
         allPiecesBitboard = bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD] | bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD];
     }
 
+    public void updateKingAttackers() {
+        //kingAttackers = Attack.getAttackersToSquare(colorToMove, Long.numberOfTrailingZeros(getKingByColor(colorToMove)), this);
+    }
+
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------
@@ -738,77 +645,77 @@ public class Board {
      *
      * @return The String for the square.
      */
-    private String getPieceString(int file, int rank) {
+    private String getPieceString(Bitboard.File file, Bitboard.Rank rank) {
         if (Bitboard.isBitSet(getWhitePawns(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_PAWN.symbol + ANSI_RESET : Piece.WHITE_PAWN.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_PAWN.letter + ANSI_RESET : Piece.WHITE_PAWN.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_PAWN.symbol + ANSI_RESET : Piece.WHITE_PAWN.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_PAWN.letter + ANSI_RESET : Piece.WHITE_PAWN.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteKnights(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_KNIGHT.symbol + ANSI_RESET : Piece.WHITE_KNIGHT.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_KNIGHT.letter + ANSI_RESET : Piece.WHITE_KNIGHT.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KNIGHT.symbol + ANSI_RESET : Piece.WHITE_KNIGHT.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KNIGHT.letter + ANSI_RESET : Piece.WHITE_KNIGHT.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteBishops(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_BISHOP.symbol + ANSI_RESET : Piece.WHITE_BISHOP.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_BISHOP.letter + ANSI_RESET : Piece.WHITE_BISHOP.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_BISHOP.symbol + ANSI_RESET : Piece.WHITE_BISHOP.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_BISHOP.letter + ANSI_RESET : Piece.WHITE_BISHOP.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteRooks(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_ROOK.symbol + ANSI_RESET : Piece.WHITE_ROOK.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_ROOK.letter + ANSI_RESET : Piece.WHITE_ROOK.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_ROOK.symbol + ANSI_RESET : Piece.WHITE_ROOK.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_ROOK.letter + ANSI_RESET : Piece.WHITE_ROOK.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteQueens(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_QUEEN.symbol + ANSI_RESET : Piece.WHITE_QUEEN.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_QUEEN.letter + ANSI_RESET : Piece.WHITE_QUEEN.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_QUEEN.symbol + ANSI_RESET : Piece.WHITE_QUEEN.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_QUEEN.letter + ANSI_RESET : Piece.WHITE_QUEEN.letter;
         }
 
         if (Bitboard.isBitSet(getWhiteKing(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_WHITE + Piece.WHITE_KING.symbol + ANSI_RESET : Piece.WHITE_KING.symbol
-                    : colored ? PIECE_WHITE + Piece.WHITE_KING.letter + ANSI_RESET : Piece.WHITE_KING.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KING.symbol + ANSI_RESET : Piece.WHITE_KING.symbol
+                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KING.letter + ANSI_RESET : Piece.WHITE_KING.letter;
         }
 
         if (Bitboard.isBitSet(getBlackPawns(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_PAWN.symbol + ANSI_RESET : Piece.BLACK_PAWN.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_PAWN.letter + ANSI_RESET : Piece.BLACK_PAWN.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_PAWN.symbol + ANSI_RESET : Piece.BLACK_PAWN.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_PAWN.letter + ANSI_RESET : Piece.BLACK_PAWN.letter;
         }
 
         if (Bitboard.isBitSet(getBlackKnights(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_KNIGHT.symbol + ANSI_RESET : Piece.BLACK_KNIGHT.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_KNIGHT.letter + ANSI_RESET : Piece.BLACK_KNIGHT.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KNIGHT.symbol + ANSI_RESET : Piece.BLACK_KNIGHT.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KNIGHT.letter + ANSI_RESET : Piece.BLACK_KNIGHT.letter;
         }
 
         if (Bitboard.isBitSet(getBlackBishops(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_BISHOP.symbol + ANSI_RESET : Piece.BLACK_BISHOP.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_BISHOP.letter + ANSI_RESET : Piece.BLACK_BISHOP.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_BISHOP.symbol + ANSI_RESET : Piece.BLACK_BISHOP.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_BISHOP.letter + ANSI_RESET : Piece.BLACK_BISHOP.letter;
         }
 
         if (Bitboard.isBitSet(getBlackRooks(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_ROOK.symbol + ANSI_RESET : Piece.BLACK_ROOK.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_ROOK.letter + ANSI_RESET : Piece.BLACK_ROOK.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_ROOK.symbol + ANSI_RESET : Piece.BLACK_ROOK.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_ROOK.letter + ANSI_RESET : Piece.BLACK_ROOK.letter;
         }
 
         if (Bitboard.isBitSet(getBlackQueens(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_QUEEN.symbol + ANSI_RESET : Piece.BLACK_QUEEN.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_QUEEN.letter + ANSI_RESET : Piece.BLACK_QUEEN.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_QUEEN.symbol + ANSI_RESET : Piece.BLACK_QUEEN.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_QUEEN.letter + ANSI_RESET : Piece.BLACK_QUEEN.letter;
         }
 
         if (Bitboard.isBitSet(getBlackKing(), file, rank)) {
-            return showUnicodeSymbols ?
-                      colored ? PIECE_BLACK + Piece.BLACK_KING.symbol  + ANSI_RESET : Piece.BLACK_KING.symbol
-                    : colored ? PIECE_BLACK + Piece.BLACK_KING.letter + ANSI_RESET : Piece.BLACK_KING.letter;
+            return Config.UNICODE_SYMBOLS ?
+                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KING.symbol  + ANSI_RESET : Piece.BLACK_KING.symbol
+                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KING.letter + ANSI_RESET : Piece.BLACK_KING.letter;
         }
 
         return "";

@@ -1,27 +1,13 @@
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 import static java.lang.Math.abs;
-
-/*
-     8 | 56 57 58 59 60 61 62 63
-     7 | 48 49 50 51 52 53 54 55
-     6 | 40 41 42 43 44 45 46 47
-     5 | 32 33 34 35 36 37 38 39
-     4 | 24 25 26 27 28 29 30 31
-     3 | 16 17 18 19 20 21 22 23
-     2 |  8  9 10 11 12 13 14 15
-     1 |  0  1  2  3  4  5  6  7
-       -------------------------
-          A  B  C  D  E  F  G  H
-
-  Left shift '<<' means +1 on the chessboard
-  Right shift '>>>' means -1 on the chessboard
-
-  +7  +8  +9
-  -1   0  +1
-  -9  -8  -7
-*/
 
 /**
  * Represents a MoveGenerator object.
@@ -74,7 +60,7 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the nonsliding pieces except pawns (Knight, King).
+     * The method adds moves for the nonsliding pieces (knight, king) except pawns.
      *
      * @param piece Specifies for which type of piece the moves are to be added.
      * @param moveFlag The {@link Move.MoveFlag}. <b>Normal</b> (for the quiet moves) and <b>Capture</b> are accepted flags.
@@ -87,26 +73,26 @@ public class MoveGenerator {
         }
 
         while (piecesBitboard != 0) {
-            var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
+            var fromBitIndex = Bitboard.getLsb(piecesBitboard);
 
             var movesBitboard = 0L;
 
             switch (piece) {
                 case WHITE_KNIGHT:
                 case BLACK_KNIGHT:
-                    movesBitboard = Attack.knightMovesAndAttacks[fromBitIndex] & possiblePositionsBitboard;
+                    movesBitboard = Attack.getKnightMoves(fromBitIndex) & possiblePositionsBitboard;
                     break;
                 case WHITE_KING:
                 case BLACK_KING:
-                    movesBitboard = Attack.kingMovesAndAttacks[fromBitIndex] & possiblePositionsBitboard;
+                    movesBitboard = Attack.getKingMoves(fromBitIndex) & possiblePositionsBitboard;
                     break;
                 default:
             }
 
             if (moveFlag == Move.MoveFlag.NORMAL) {
-                addQuietMoves(piece, fromBitIndex, movesBitboard);
+                addQuietMoves(piece, fromBitIndex.ordinal(), movesBitboard);
             } else {
-                addCaptureMoves(piece, fromBitIndex, movesBitboard);
+                addCaptureMoves(piece, fromBitIndex.ordinal(), movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -162,12 +148,12 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // check if squares between the rook and the king are not attacked
-                // E1 = 4, F1 = 5, G1 = 6
-                for (var i = 4; i <= 6; i++) {
-                    if (board.isSquareAttacked(i, Board.Color.WHITE)) {
-                        return false;
-                    }
+                // check if E1 and squares between the rook and the king (F1, G1) are not attacked
+                if (Attack.areOneOrMoreSquaresAttacked(
+                        Board.Color.WHITE, board,
+                        Bitboard.BitIndex.E1_IDX, Bitboard.BitIndex.F1_IDX, Bitboard.BitIndex.G1_IDX)
+                ) {
+                    return false;
                 }
 
                 break;
@@ -177,11 +163,12 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // E8 = 60, F8 = 61, G8 = 62
-                for (var i = 60; i <= 62; i++) {
-                    if (board.isSquareAttacked(i, Board.Color.BLACK)) {
-                        return false;
-                    }
+                // check if E8 and squares between the rook and the king (F8, G8) are not attacked
+                if (Attack.areOneOrMoreSquaresAttacked(
+                        Board.Color.WHITE, board,
+                        Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.F8_IDX, Bitboard.BitIndex.G8_IDX)
+                ) {
+                    return false;
                 }
 
                 break;
@@ -240,12 +227,12 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // check if squares between the rook and the king are not attacked
-                // E1 = 4, D1 = 3, C1 = 2
-                for (var i = 4; i >= 2; i--) {
-                    if (board.isSquareAttacked(i, Board.Color.WHITE)) {
-                        return false;
-                    }
+                // check if E1 and the squares between the rook and the king (D1, C1) are not attacked
+                if (Attack.areOneOrMoreSquaresAttacked(
+                        Board.Color.WHITE, board,
+                        Bitboard.BitIndex.E1_IDX, Bitboard.BitIndex.D1_IDX, Bitboard.BitIndex.C1_IDX)
+                ) {
+                    return false;
                 }
 
                 break;
@@ -255,11 +242,12 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // E8 = 60, D8 = 59, C8 = 58
-                for (var i = 60; i >= 58; i--) {
-                    if (board.isSquareAttacked(i, Board.Color.BLACK)) {
-                        return false;
-                    }
+                // check if E8 and the squares between the rook and the king (D8, C8) are not attacked
+                if (Attack.areOneOrMoreSquaresAttacked(
+                        Board.Color.WHITE, board,
+                        Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.D8_IDX, Bitboard.BitIndex.C8_IDX)
+                ) {
+                    return false;
                 }
 
                 break;
@@ -372,7 +360,7 @@ public class MoveGenerator {
         long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_3) << 8) & ~allPiecesBitboard;
 
         // calc attacks
-        long attacksBitboard = Attack.whitePawnAttacks[fromBitIndex] & blackPiecesBitboard;
+        long attacksBitboard = Attack.getWhitePawnAttacks(Bitboard.BitIndex.values()[fromBitIndex]) & blackPiecesBitboard;
 
         // add moves
         addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
@@ -401,7 +389,7 @@ public class MoveGenerator {
         long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_6) >>> 8) & ~allPiecesBitboard;
 
         // calc attacks
-        long attacksBitboard = Attack.blackPawnAttacks[fromBitIndex] & whitePiecesBitboard;
+        long attacksBitboard = Attack.getBlackPawnAttacks(Bitboard.BitIndex.values()[fromBitIndex]) & whitePiecesBitboard;
 
         // add moves
         addQuietMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_1);
@@ -542,7 +530,7 @@ public class MoveGenerator {
         }
 
         while (piecesBitboard != 0) {
-            var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
+            var fromBitIndex = Bitboard.getLsb(piecesBitboard);
 
             var movesBitboard = 0L;
 
@@ -563,9 +551,9 @@ public class MoveGenerator {
             }
 
             if (moveFlag == Move.MoveFlag.NORMAL) {
-                addQuietMoves(piece, fromBitIndex, movesBitboard);
+                addQuietMoves(piece, fromBitIndex.ordinal(), movesBitboard);
             } else {
-                addCaptureMoves(piece, fromBitIndex, movesBitboard);
+                addCaptureMoves(piece, fromBitIndex.ordinal(), movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -641,6 +629,37 @@ public class MoveGenerator {
 
             movesBitboard &= movesBitboard - 1;
         }
+    }
+
+    //-------------------------------------------------
+    // Legal moves
+    //-------------------------------------------------
+
+    public ArrayList<Move> generateLegalMoves() {
+        var moves = new ArrayList<Move>();
+
+        // alle king attackers holen
+        board.updateKingAttackers();
+
+        // is check?
+        if (board.kingAttackers != 0) {
+            System.out.println("Is check");
+
+            Bitboard.printBitboard(board.kingAttackers);
+
+            // generateEvasionMoves
+
+            // slider herausarbeiten
+            var sliders = board.kingAttackers & ~board.getBlackPawns() & ~board.getBlackKnights();
+            Bitboard.printBitboard(sliders);
+
+            var t = 0;
+        }
+
+        // generatePseudoLegalMoves
+
+
+        return moves;
     }
 
     //-------------------------------------------------

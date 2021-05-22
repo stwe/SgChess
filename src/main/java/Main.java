@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 public class Main {
 
     /**
@@ -36,7 +38,7 @@ public class Main {
 
     private static final String TEST48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, IllegalAccessException {
         /*
         int i = 0;
 
@@ -61,31 +63,22 @@ public class Main {
         keyboard.close();
         */
 
-        //var board = new Board("rnb5/ppp2ppp/5r2/2b5/8/6n1/3pp1kq/R3K2R w KQ - 0 1");
-        //var board = new Board("r3k2r/6P1/2Q2N2/4R2B/2B5/8/PPPPPP1P/RN2K3 b Qkq - 0 1");
+
+
+
+        ConfigLoader.load(Config.class, "/config.properties");
+
+        //var board = new Board("r1b1kbnr/ppp3pp/8/4pp2/4PP1q/P2n4/1PPp2PP/RNBQKBNR w KQkq - 0 1");
         var board = new Board();
-        board.setColored(true);
         System.out.println(board);
 
-        /*
-        board.movePiece(
-                Bitboard.getSquareBitIndex(Bitboard.E2),
-                Bitboard.getSquareBitIndex(Bitboard.E4),
-                PieceType.PAWN, Board.Color.WHITE
-        );
-        System.out.println(board);
+        var mg = new MoveGenerator(board);
+        mg.generateLegalMoves();
 
-        board.movePiece(
-                Bitboard.getSquareBitIndex(Bitboard.E4),
-                Bitboard.getSquareBitIndex(Bitboard.E2),
-                PieceType.PAWN, Board.Color.WHITE
-        );
-        System.out.println(board);
-        */
-
-        var mlist = board.getMoveGenerator().getMoves();
+        var mlist = mg.getMoves();
         for (var move : mlist) {
             System.out.println(move);
         }
+        System.out.println("Total moves: " + mlist.size());
     }
 }

@@ -150,6 +150,13 @@ public class Bitboard {
       1 |  0  1  2  3  4  5  6  7
         -------------------------
            A  B  C  D  E  F  G  H
+
+      Left shift '<<' means +1 on the chessboard
+      Right shift '>>>' means -1 on the chessboard
+
+      +7  +8  +9
+      -1   0  +1
+      -9  -8  -7
     */
 
     public static final long A1 = 1L;

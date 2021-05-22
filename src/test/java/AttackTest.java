@@ -136,4 +136,23 @@ class AttackTest {
         assertFalse(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.G1_IDX, board));
         assertFalse(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.F2_IDX, board));
     }
+
+    @Test
+    void areOneOrMoreSquaresAttacked() {
+        var board = new Board("rn2k1nr/pp3ppp/2p5/q1bpP3/4PPP1/7b/PPP4P/RNBQKBNR w KQkq - 0 1");
+
+        assertTrue(Attack.areOneOrMoreSquaresAttacked(
+                Board.Color.WHITE,
+                board,
+                Bitboard.BitIndex.E1_IDX, Bitboard.BitIndex.F1_IDX, Bitboard.BitIndex.G1_IDX
+                )
+        );
+
+        assertFalse(Attack.areOneOrMoreSquaresAttacked(
+                Board.Color.WHITE,
+                board,
+                Bitboard.BitIndex.A1_IDX, Bitboard.BitIndex.B1_IDX, Bitboard.BitIndex.C1_IDX
+                )
+        );
+    }
 }

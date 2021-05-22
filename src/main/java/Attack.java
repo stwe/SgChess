@@ -263,12 +263,12 @@ public class Attack {
         var enemyColor = color.getEnemyColor();
 
         var attackersBitboard = 0L;
-        attackersBitboard |= getKingMoves(bitIndex) & board.getKingByColor(enemyColor);
-        attackersBitboard |= getKnightMoves(bitIndex) & board.getKnightsByColor(enemyColor);
-        attackersBitboard |= getPawnAttacks(color, bitIndex) & board.getPawnsByColor(enemyColor);
-        attackersBitboard |= getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemyColor);
-        attackersBitboard |= getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemyColor);
-        attackersBitboard |= getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemyColor);
+        attackersBitboard |= getKingMoves(bitIndex) & board.getKing(enemyColor);
+        attackersBitboard |= getKnightMoves(bitIndex) & board.getKnights(enemyColor);
+        attackersBitboard |= getPawnAttacks(color, bitIndex) & board.getPawns(enemyColor);
+        attackersBitboard |= getRookMoves(bitIndex, board.getAllPieces()) & board.getRooks(enemyColor);
+        attackersBitboard |= getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishops(enemyColor);
+        attackersBitboard |= getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueens(enemyColor);
 
         return attackersBitboard;
     }
@@ -285,27 +285,46 @@ public class Attack {
     public static boolean isSquareAttacked(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
         var enemyColor = color.getEnemyColor();
 
-        if ((getKingMoves(bitIndex) & board.getKingByColor(enemyColor)) != 0) {
+        if ((getKingMoves(bitIndex) & board.getKing(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getKnightMoves(bitIndex) & board.getKnightsByColor(enemyColor)) != 0) {
+        if ((getKnightMoves(bitIndex) & board.getKnights(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getPawnAttacks(color, bitIndex) & board.getPawnsByColor(enemyColor)) != 0) {
+        if ((getPawnAttacks(color, bitIndex) & board.getPawns(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemyColor)) != 0) {
+        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooks(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemyColor)) != 0) {
+        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishops(enemyColor)) != 0) {
             return true;
         }
 
-        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemyColor)) != 0;
+        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueens(enemyColor)) != 0;
+    }
+
+    /**
+     * Checks if one or more squares are attacked.
+     *
+     * @param color Which {@link Board.Color} is under attack.
+     * @param board A {@link Board} object.
+     * @param bitIndices The {@link Bitboard.BitIndex} of the squares which are under attack.
+     *
+     * @return boolean
+     */
+    public static boolean areOneOrMoreSquaresAttacked(Board.Color color, Board board, Bitboard.BitIndex ... bitIndices) {
+        for (var index : bitIndices) {
+            if (isSquareAttacked(color, index, board)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //-------------------------------------------------
