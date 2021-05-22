@@ -73,9 +73,10 @@ public class Main {
         System.out.println(board);
 
         var mg = new MoveGenerator(board);
-        mg.generateLegalMoves();
 
-        var mlist = mg.getMoves();
+        //mg.generateLegalMoves();
+
+        var mlist = mg.getPseudoLegalMoves();
         for (var move : mlist) {
             System.out.println(move);
         }

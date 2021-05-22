@@ -24,9 +24,9 @@ public class MoveGenerator {
     private final Board board;
 
     /**
-     * A list with all generated moves.
+     * A list with all generated pseudo legal {@link Move} objects.
      */
-    private final ArrayList<Move> moves = new ArrayList<>();
+    private final ArrayList<Move> pseudoLegalMoves = new ArrayList<>();
 
     //-------------------------------------------------
     // Ctors.
@@ -39,7 +39,7 @@ public class MoveGenerator {
      */
     public MoveGenerator(Board board) {
         this.board = Objects.requireNonNull(board, "board must not be null");
-        addMoves();
+        generatePseudoLegalMoves();
     }
 
     //-------------------------------------------------
@@ -47,27 +47,27 @@ public class MoveGenerator {
     //-------------------------------------------------
 
     /**
-     * Get {@link #moves}.
+     * Get {@link #pseudoLegalMoves}.
      *
-     * @return {@link #moves}
+     * @return {@link #pseudoLegalMoves}
      */
-    public ArrayList<Move> getMoves() {
-        return moves;
+    public ArrayList<Move> getPseudoLegalMoves() {
+        return pseudoLegalMoves;
     }
 
     //-------------------------------------------------
-    // Nonsliding pieces (Knight, King)
+    // Nonsliding pieces (knight, king)
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the nonsliding pieces (knight, king) except pawns.
+     * The method adds pseudo legal moves for the nonsliding pieces (knight, king) except pawns.
      *
-     * @param piece Specifies for which type of piece the moves are to be added.
+     * @param piece Specifies for which {@link Piece} the moves are to be added.
      * @param moveFlag The {@link Move.MoveFlag}. <b>Normal</b> (for the quiet moves) and <b>Capture</b> are accepted flags.
-     * @param piecesBitboard A bitboard with all the knights or the king.
+     * @param piecesBitboard A knights or king bitboard.
      * @param possiblePositionsBitboard This prevents own pieces from being captured.
      */
-    public void addNonslidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long possiblePositionsBitboard) {
+    private void addNonslidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long possiblePositionsBitboard) {
         if (moveFlag != Move.MoveFlag.NORMAL && moveFlag != Move.MoveFlag.CAPTURE) {
             return;
         }
@@ -90,9 +90,9 @@ public class MoveGenerator {
             }
 
             if (moveFlag == Move.MoveFlag.NORMAL) {
-                addQuietMoves(piece, fromBitIndex.ordinal(), movesBitboard);
+                addQuietMoves(piece, fromBitIndex, movesBitboard);
             } else {
-                addCaptureMoves(piece, fromBitIndex.ordinal(), movesBitboard);
+                addCaptureMoves(piece, fromBitIndex, movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
@@ -102,26 +102,26 @@ public class MoveGenerator {
     /**
      * Add a king side castling move if is allowed and possible.
      *
-     * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
-     * @param kingBitboard A bitboard with the white or black king.
+     * @param piece Specifies for which color of king {@link Piece} the move are to be added (WHITE_KING or BLACK_KING).
+     * @param kingBitboard A king bitboard.
      */
     private void addKingSideCastlingMove(Piece piece, long kingBitboard) {
         switch (piece) {
             case WHITE_KING:
                 if (board.isKingSideCastlingAllowed(Board.Color.WHITE)) {
                     if (isKingSideCastlingPossible(piece)) {
-                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 6);
+                        var move = new Move(piece, Bitboard.getLsb(kingBitboard), Bitboard.BitIndex.G1_IDX);
                         move.setMoveFlag(Move.MoveFlag.CASTLING);
-                        moves.add(move);
+                        pseudoLegalMoves.add(move);
                     }
                 }
                 break;
             case BLACK_KING:
                 if (board.isKingSideCastlingAllowed(Board.Color.BLACK)) {
                     if (isKingSideCastlingPossible(piece)) {
-                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 62);
+                        var move = new Move(piece, Bitboard.getLsb(kingBitboard), Bitboard.BitIndex.G8_IDX);
                         move.setMoveFlag(Move.MoveFlag.CASTLING);
-                        moves.add(move);
+                        pseudoLegalMoves.add(move);
                     }
                 }
                 break;
@@ -141,14 +141,14 @@ public class MoveGenerator {
 
         switch (piece) {
             case WHITE_KING:
-                // check if squares between the rook and the king are free
+                // check if squares (F1, G1) between the rook and the king are free
                 bitboardToBeFree = Bitboard.F1 | Bitboard.G1;
                 if ((bitboardToBeFree & board.getAllPieces()) != 0) {
                     // if not, skip attack check and return false
                     return false;
                 }
 
-                // check if E1 and squares between the rook and the king (F1, G1) are not attacked
+                // check if E1 and the squares F1, G1 are not attacked
                 if (Attack.areOneOrMoreSquaresAttacked(
                         Board.Color.WHITE, board,
                         Bitboard.BitIndex.E1_IDX, Bitboard.BitIndex.F1_IDX, Bitboard.BitIndex.G1_IDX)
@@ -163,7 +163,6 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // check if E8 and squares between the rook and the king (F8, G8) are not attacked
                 if (Attack.areOneOrMoreSquaresAttacked(
                         Board.Color.WHITE, board,
                         Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.F8_IDX, Bitboard.BitIndex.G8_IDX)
@@ -181,26 +180,26 @@ public class MoveGenerator {
     /**
      * Add queen side castling move if is allowed and possible.
      *
-     * @param piece Specifies for which color of king the move are to be added (WHITE_KING or BLACK_KING).
-     * @param kingBitboard A bitboard with the white or black king.
+     * @param piece Specifies for which color of king {@link Piece} the move are to be added (WHITE_KING or BLACK_KING).
+     * @param kingBitboard A king bitboard.
      */
     private void addQueenSideCastlingMove(Piece piece, long kingBitboard) {
         switch (piece) {
             case WHITE_KING:
                 if (board.isQueenSideCastlingAllowed(Board.Color.WHITE)) {
                     if (isQueenSideCastlingPossible(piece)) {
-                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 2);
+                        var move = new Move(piece, Bitboard.getLsb(kingBitboard), Bitboard.BitIndex.C1_IDX);
                         move.setMoveFlag(Move.MoveFlag.CASTLING);
-                        moves.add(move);
+                        pseudoLegalMoves.add(move);
                     }
                 }
                 break;
             case BLACK_KING:
                 if (board.isQueenSideCastlingAllowed(Board.Color.BLACK)) {
                     if (isQueenSideCastlingPossible(piece)) {
-                        var move = new Move(piece, Long.numberOfTrailingZeros(kingBitboard), 58);
+                        var move = new Move(piece, Bitboard.getLsb(kingBitboard), Bitboard.BitIndex.C8_IDX);
                         move.setMoveFlag(Move.MoveFlag.CASTLING);
-                        moves.add(move);
+                        pseudoLegalMoves.add(move);
                     }
                 }
                 break;
@@ -220,14 +219,14 @@ public class MoveGenerator {
 
         switch (piece) {
             case WHITE_KING:
-                // check if squares between the rook and the king are free
+                // check if squares (B1, C1, D1) between the rook and the king are free
                 bitboardToBeFree = Bitboard.B1 | Bitboard.C1 | Bitboard.D1;
                 if ((bitboardToBeFree & board.getAllPieces()) != 0) {
                     // if not, skip attack check and return false
                     return false;
                 }
 
-                // check if E1 and the squares between the rook and the king (D1, C1) are not attacked
+                // check if E1 and the squares D1, C1 are not attacked
                 if (Attack.areOneOrMoreSquaresAttacked(
                         Board.Color.WHITE, board,
                         Bitboard.BitIndex.E1_IDX, Bitboard.BitIndex.D1_IDX, Bitboard.BitIndex.C1_IDX)
@@ -242,7 +241,6 @@ public class MoveGenerator {
                     return false;
                 }
 
-                // check if E8 and the squares between the rook and the king (D8, C8) are not attacked
                 if (Attack.areOneOrMoreSquaresAttacked(
                         Board.Color.WHITE, board,
                         Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.D8_IDX, Bitboard.BitIndex.C8_IDX)
@@ -258,18 +256,18 @@ public class MoveGenerator {
     }
 
     //-------------------------------------------------
-    // Nonsliding pieces (Pawn)
+    // Nonsliding pieces (pawn)
     //-------------------------------------------------
 
     /**
-     * Add moves for the white and black pawns.
+     * Add pseudo legal moves for the white and black pawns.
      *
-     * @param piece Specifies for which color of pawn the moves are to be added (WHITE_PAWN or BLACK_PAWN).
+     * @param piece Specifies for which color of pawn {@link Piece} the moves are to be added (WHITE_PAWN or BLACK_PAWN).
      * @param piecesBitboard A bitboard with all the white or black pawns.
      * @param enemyPiecesBitboard A bitboard with all enemy pieces.
      * @param allPiecesBitboard A bitboard with all pieces.
      */
-    public void addPawnMoves(Piece piece, long piecesBitboard, long enemyPiecesBitboard, long allPiecesBitboard) {
+    private void addPawnMoves(Piece piece, long piecesBitboard, long enemyPiecesBitboard, long allPiecesBitboard) {
         // en passant
         switch (piece) {
             case WHITE_PAWN:
@@ -283,7 +281,7 @@ public class MoveGenerator {
 
         // other pawn moves
         while (piecesBitboard != 0) {
-            var fromBitIndex = Long.numberOfTrailingZeros(piecesBitboard);
+            var fromBitIndex = Bitboard.getLsb(piecesBitboard);
 
             switch (piece) {
                 case WHITE_PAWN:
@@ -308,11 +306,12 @@ public class MoveGenerator {
         if (board.getEpIndex() != 0) {
             while (whitePawnsBitboard != 0) {
                 var enemyDestination = board.getEpIndex() - 8;
-                var fromBitIndex = Long.numberOfTrailingZeros(whitePawnsBitboard);
-                if (abs(fromBitIndex - enemyDestination) == 1) {
-                    var move = new Move(Piece.WHITE_PAWN, fromBitIndex, board.getEpIndex());
+                var fromBitIndex = Bitboard.getLsb(whitePawnsBitboard);
+
+                if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
+                    var move = new Move(Piece.WHITE_PAWN, fromBitIndex, Bitboard.BitIndex.values()[board.getEpIndex()]);
                     move.setMoveFlag(Move.MoveFlag.ENPASSANT);
-                    moves.add(move);
+                    pseudoLegalMoves.add(move);
                 }
 
                 whitePawnsBitboard &= whitePawnsBitboard - 1;
@@ -329,11 +328,12 @@ public class MoveGenerator {
         if (board.getEpIndex() != 0) {
             while (blackPawnsBitboard != 0) {
                 var enemyDestination = board.getEpIndex() + 8;
-                var fromBitIndex = Long.numberOfTrailingZeros(blackPawnsBitboard);
-                if (abs(fromBitIndex - enemyDestination) == 1) {
-                    var move = new Move(Piece.BLACK_PAWN, fromBitIndex, board.getEpIndex());
+                var fromBitIndex = Bitboard.getLsb(blackPawnsBitboard);
+
+                if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
+                    var move = new Move(Piece.BLACK_PAWN, fromBitIndex, Bitboard.BitIndex.values()[board.getEpIndex()]);
                     move.setMoveFlag(Move.MoveFlag.ENPASSANT);
-                    moves.add(move);
+                    pseudoLegalMoves.add(move);
                 }
 
                 blackPawnsBitboard &= blackPawnsBitboard - 1;
@@ -342,16 +342,16 @@ public class MoveGenerator {
     }
 
     /**
-     * Computing white pawn movements.
+     * Computing white pawn pseudo legal movements.
      *
      * @see <a href="http://pages.cs.wisc.edu/~psilord/blog/data/chess-pages/nonsliding.html">Nonsliding Pieces</a>
      *
-     * @param fromBitIndex The bit index of the white pawn.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the white pawn.
      * @param blackPiecesBitboard The bitboard with all black pieces (enemies).
      * @param allPiecesBitboard A bitboard with all pieces. All pieces can block.
      */
-    private void addWhitePawnMoves(int fromBitIndex, long blackPiecesBitboard, long allPiecesBitboard) {
-        long whitePawnBitboard = 1L << fromBitIndex;
+    private void addWhitePawnMoves(Bitboard.BitIndex fromBitIndex, long blackPiecesBitboard, long allPiecesBitboard) {
+        long whitePawnBitboard = Bitboard.SQUARES[fromBitIndex.ordinal()];
 
         // check the single space infront of the white pawn
         long firstStepBitboard = (whitePawnBitboard << 8) & ~allPiecesBitboard;
@@ -360,7 +360,7 @@ public class MoveGenerator {
         long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_3) << 8) & ~allPiecesBitboard;
 
         // calc attacks
-        long attacksBitboard = Attack.getWhitePawnAttacks(Bitboard.BitIndex.values()[fromBitIndex]) & blackPiecesBitboard;
+        long attacksBitboard = Attack.getWhitePawnAttacks(fromBitIndex) & blackPiecesBitboard;
 
         // add moves
         addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
@@ -371,16 +371,16 @@ public class MoveGenerator {
     }
 
     /**
-     * Computing black pawn movements.
+     * Computing black pawn pseudo legal movements.
      *
      * @see <a href="http://pages.cs.wisc.edu/~psilord/blog/data/chess-pages/nonsliding.html">Nonsliding Pieces</a>
      *
-     * @param fromBitIndex The bit index of the black pawn.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the black pawn.
      * @param whitePiecesBitboard The bitboard with all white pieces (enemies).
      * @param allPiecesBitboard A bitboard with all pieces. All pieces can block.
      */
-    private void addBlackPawnMoves(int fromBitIndex, long whitePiecesBitboard, long allPiecesBitboard) {
-        long blackPawnBitboard = 1L << fromBitIndex;
+    private void addBlackPawnMoves(Bitboard.BitIndex fromBitIndex, long whitePiecesBitboard, long allPiecesBitboard) {
+        long blackPawnBitboard = Bitboard.SQUARES[fromBitIndex.ordinal()];
 
         // check the single space infront of the black pawn
         long firstStepBitboard = (blackPawnBitboard >>> 8) & ~allPiecesBitboard;
@@ -389,7 +389,7 @@ public class MoveGenerator {
         long twoStepsBitboard = ((firstStepBitboard & Bitboard.MASK_RANK_6) >>> 8) & ~allPiecesBitboard;
 
         // calc attacks
-        long attacksBitboard = Attack.getBlackPawnAttacks(Bitboard.BitIndex.values()[fromBitIndex]) & whitePiecesBitboard;
+        long attacksBitboard = Attack.getBlackPawnAttacks(fromBitIndex) & whitePiecesBitboard;
 
         // add moves
         addQuietMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_1);
@@ -404,19 +404,19 @@ public class MoveGenerator {
      *
      * Stores move information as follows:
      * <p></p>
-     * <p><b>from: </b> the given fromBitIndex</p>
-     * <p><b>to: </b> read from the given movesBitboard</p>
-     * <p><b>captured piece type: </b> NO_PIECE(0)</p>
-     * <p><b>promoted piece type: </b> NO_PIECE(0)</p>
-     * <p><b>special move flag: </b> PAWN_START(4)</p>
-     * <p><b>piece: </b> the given piece</p>
+     * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
+     * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>promoted {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>special {@link Move.MoveFlag}: </b> PAWN_START(4)</p>
+     * <p><b>piece: </b> the given {@link Piece}</p>
      * <p></p>
      *
      * @param piece A pawn of any color.
-     * @param fromBitIndex The bit index of the given pawn.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the given pawn.
      * @param movesBitboard A bitboard with all the pawn start moves to be added.
      */
-    private void addPawnStartMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+    private void addPawnStartMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
         if (piece != Piece.WHITE_PAWN && piece != Piece.BLACK_PAWN) {
             return;
         }
@@ -425,12 +425,12 @@ public class MoveGenerator {
             var move = new Move(
                     piece,
                     fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
+                    Bitboard.getLsb(movesBitboard)
             );
 
             move.setMoveFlag(Move.MoveFlag.PAWN_START);
 
-            moves.add(move);
+            pseudoLegalMoves.add(move);
 
             movesBitboard &= movesBitboard - 1;
         }
@@ -441,19 +441,19 @@ public class MoveGenerator {
      *
      * Stores move information as follows:
      * <p></p>
-     * <p><b>from: </b> the given fromBitIndex</p>
-     * <p><b>to: </b> read from the given movesBitboard</p>
-     * <p><b>captured piece type: </b> NO_PIECE(0)</p>
-     * <p><b>promoted piece type: </b> KNIGHT(2) - QUEEN(5)</p>
-     * <p><b>special move flag: </b> PROMOTION(1)</p>
-     * <p><b>piece: </b> the given piece</p>
+     * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
+     * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>promoted {@link PieceType}: </b> KNIGHT(2) - QUEEN(5)</p>
+     * <p><b>special {@link Move.MoveFlag}: </b> PROMOTION(1)</p>
+     * <p><b>piece: </b> the given {@link Piece}</p>
      * <p></p>
      *
      * @param piece A pawn of any color.
-     * @param fromBitIndex The bit index of the given pawn.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the given pawn.
      * @param movesBitboard A bitboard with all moves to be added.
      */
-    private void addPromotionMoves(Piece piece, int fromBitIndex, long movesBitboard) {
+    private void addPromotionMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
         if (piece != Piece.WHITE_PAWN && piece != Piece.BLACK_PAWN) {
             return;
         }
@@ -463,68 +463,64 @@ public class MoveGenerator {
             var promoteKnight = new Move(
                     piece,
                     fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
+                    Bitboard.getLsb(movesBitboard)
             );
 
             promoteKnight.setMoveFlag(Move.MoveFlag.PROMOTION);
             promoteKnight.setPromotedPieceType(PieceType.KNIGHT);
-
-            moves.add(promoteKnight);
+            pseudoLegalMoves.add(promoteKnight);
 
             // bishop
             var promoteBishop = new Move(
                     piece,
                     fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
+                    Bitboard.getLsb(movesBitboard)
             );
 
             promoteBishop.setMoveFlag(Move.MoveFlag.PROMOTION);
             promoteBishop.setPromotedPieceType(PieceType.BISHOP);
-
-            moves.add(promoteBishop);
+            pseudoLegalMoves.add(promoteBishop);
 
             // rook
             var promoteRook = new Move(
                     piece,
                     fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
+                    Bitboard.getLsb(movesBitboard)
             );
 
             promoteRook.setMoveFlag(Move.MoveFlag.PROMOTION);
             promoteRook.setPromotedPieceType(PieceType.ROOK);
-
-            moves.add(promoteRook);
+            pseudoLegalMoves.add(promoteRook);
 
             // queen
             var promoteQueen = new Move(
                     piece,
                     fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
+                    Bitboard.getLsb(movesBitboard)
             );
 
             promoteQueen.setMoveFlag(Move.MoveFlag.PROMOTION);
             promoteQueen.setPromotedPieceType(PieceType.QUEEN);
-
-            moves.add(promoteQueen);
+            pseudoLegalMoves.add(promoteQueen);
 
             movesBitboard &= movesBitboard - 1;
         }
     }
 
     //-------------------------------------------------
-    // Sliding pieces (Rook, Bishop, Queen)
+    // Sliding pieces (rook, bishop, queen)
     //-------------------------------------------------
 
     /**
-     * The method adds moves for the sliding pieces (Rook, Bishop or Queen).
+     * The method adds pseudo legal moves for the sliding pieces (rook, bishop or queen).
      *
-     * @param piece Specifies for which type of piece the moves are to be added.
+     * @param piece Specifies for which type of {@link Piece} the moves are to be added.
      * @param moveFlag The {@link Move.MoveFlag}. <b>Normal</b> (for the quiet moves) and <b>Capture</b> are accepted flags.
      * @param piecesBitboard A bitboard with all the rooks, bishops or queens.
      * @param allPiecesBitboard A bitboard with all pieces.
      * @param possiblePositionsBitboard This prevents own pieces from being captured.
      */
-    public void addSlidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
+    private void addSlidingPiecesMoves(Piece piece, Move.MoveFlag moveFlag, long piecesBitboard, long allPiecesBitboard, long possiblePositionsBitboard) {
         if (moveFlag != Move.MoveFlag.NORMAL && moveFlag != Move.MoveFlag.CAPTURE) {
             return;
         }
@@ -551,83 +547,12 @@ public class MoveGenerator {
             }
 
             if (moveFlag == Move.MoveFlag.NORMAL) {
-                addQuietMoves(piece, fromBitIndex.ordinal(), movesBitboard);
+                addQuietMoves(piece, fromBitIndex, movesBitboard);
             } else {
-                addCaptureMoves(piece, fromBitIndex.ordinal(), movesBitboard);
+                addCaptureMoves(piece, fromBitIndex, movesBitboard);
             }
 
             piecesBitboard &= piecesBitboard - 1;
-        }
-    }
-
-    //-------------------------------------------------
-    // Add move
-    //-------------------------------------------------
-
-    /**
-     * Add a move that does not capture an enemy piece.
-     *
-     * Stores move information as follows:
-     * <p></p>
-     * <p><b>from: </b> the given fromBitIndex</p>
-     * <p><b>to: </b> read from the given movesBitboard</p>
-     * <p><b>captured piece type: </b> NO_PIECE(0)</p>
-     * <p><b>promoted piece type: </b> NO_PIECE(0)</p>
-     * <p><b>special move flag: </b> NORMAL(0)</p>
-     * <p><b>piece: </b> the given piece</p>
-     * <p></p>
-     *
-     * @param piece A {@link Piece} of any color.
-     * @param fromBitIndex The bit index of the given {@link Piece}.
-     * @param movesBitboard A bitboard with all the moves to be added.
-     */
-    private void addQuietMoves(Piece piece, int fromBitIndex, long movesBitboard) {
-        while (movesBitboard != 0) {
-            var move = new Move(
-                    piece,
-                    fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
-            );
-
-            moves.add(move);
-
-            movesBitboard &= movesBitboard - 1;
-        }
-    }
-
-    /**
-     * Add a move that does capture an enemy piece.
-     *
-     * Stores move information as follows:
-     * <p></p>
-     * <p><b>from: </b> the given fromBitIndex</p>
-     * <p><b>to: </b> read from the given movesBitboard</p>
-     * <p><b>captured piece type: </b> NO_PIECE(0)</p> todo: determine
-     * <p><b>promoted piece type: </b> NO_PIECE(0)</p>
-     * <p><b>special move flag: </b> CAPTURE(5)</p>
-     * <p><b>piece: </b> the given piece</p>
-     * <p></p>
-     *
-     * @param piece A {@link Piece} of any color.
-     * @param fromBitIndex The bit index of the given {@link Piece}.
-     * @param movesBitboard A bitboard with all the moves to be added.
-     */
-    private void addCaptureMoves(Piece piece, int fromBitIndex, long movesBitboard) {
-        while (movesBitboard != 0) {
-
-            // todo: determine captured piece type
-
-            var move = new Move(
-                    piece,
-                    fromBitIndex,
-                    Long.numberOfTrailingZeros(movesBitboard)
-            );
-
-            move.setMoveFlag(Move.MoveFlag.CAPTURE);
-
-            moves.add(move);
-
-            movesBitboard &= movesBitboard - 1;
         }
     }
 
@@ -658,15 +583,84 @@ public class MoveGenerator {
 
         // generatePseudoLegalMoves
 
-
         return moves;
     }
 
     //-------------------------------------------------
-    // Init
+    // Pseudo legal moves
     //-------------------------------------------------
 
-    private void addMoves() {
+    /**
+     * Add a pseudo legal move that does not capture an enemy piece.
+     *
+     * Stores move information as follows:
+     * <p></p>
+     * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
+     * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>promoted {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>special {@link Move.MoveFlag}: </b> NORMAL(0)</p>
+     * <p><b>piece: </b> the given {@link Piece}</p>
+     * <p></p>
+     *
+     * @param piece A {@link Piece} of any color.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the given {@link Piece}.
+     * @param movesBitboard A bitboard with all the moves to be added.
+     */
+    private void addQuietMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+            var move = new Move(
+                    piece,
+                    fromBitIndex,
+                    Bitboard.getLsb(movesBitboard)
+            );
+
+            pseudoLegalMoves.add(move);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    /**
+     * Add a pseudo legal move that does capture an enemy piece.
+     *
+     * Stores move information as follows:
+     * <p></p>
+     * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
+     * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p> todo: determine
+     * <p><b>promoted {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>special {@link Move.MoveFlag}: </b> CAPTURE(5)</p>
+     * <p><b>piece: </b> the given {@link Piece}</p>
+     * <p></p>
+     *
+     * @param piece A {@link Piece} of any color.
+     * @param fromBitIndex The {@link Bitboard.BitIndex} of the given {@link Piece}.
+     * @param movesBitboard A bitboard with all the moves to be added.
+     */
+    private void addCaptureMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
+        while (movesBitboard != 0) {
+
+            // todo: determine captured piece type
+
+            var move = new Move(
+                    piece,
+                    fromBitIndex,
+                    Bitboard.getLsb(movesBitboard)
+            );
+
+            move.setMoveFlag(Move.MoveFlag.CAPTURE);
+
+            pseudoLegalMoves.add(move);
+
+            movesBitboard &= movesBitboard - 1;
+        }
+    }
+
+    /**
+     * Generate and add all pseudo legal moves.
+     */
+    private void generatePseudoLegalMoves() {
         if (board.getColorToMove() == Board.Color.WHITE) {
             // pawns
 

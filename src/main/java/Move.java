@@ -1,3 +1,9 @@
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
+
 /**
  * Represents a Move object.
  */
@@ -128,15 +134,15 @@ public class Move {
     }
 
     /**
-     * Set the from square bit index.
+     * Set the from square {@link Bitboard.BitIndex}.
      *
-     * @param bitIndex A bit index (0 - 63).
+     * @param bitIndex A {@link Bitboard.BitIndex} (0 - 63).
      */
-    public void setFrom(int bitIndex) {
+    public void setFrom(Bitboard.BitIndex bitIndex) {
         // clear first 6 bits
         move &= ~63;
         // mask on the first 6 bits an OR with bitIndex
-        move |= (bitIndex & 63);
+        move |= (bitIndex.ordinal() & 63);
     }
 
     //-------------------------------------------------
@@ -154,13 +160,13 @@ public class Move {
     }
 
     /**
-     * Set the target square bit index.
+     * Set the target square {@link Bitboard.BitIndex}.
      *
-     * @param bitIndex A bit index (0 - 63).
+     * @param bitIndex A {@link Bitboard.BitIndex} (0 - 63).
      */
-    public void setTo(int bitIndex) {
+    public void setTo(Bitboard.BitIndex bitIndex) {
         move &= ~4032;
-        move |= (bitIndex & 63) << 6;
+        move |= (bitIndex.ordinal() & 63) << 6;
     }
 
     //-------------------------------------------------
@@ -333,11 +339,11 @@ public class Move {
     /**
      * Constructs a new {@link Move} object.
      *
-     * @param piece The piece of this move.
-     * @param from The from square bit index.
-     * @param to The target square bit index.
+     * @param piece The {@link Piece} of this move.
+     * @param from The from square {@link Bitboard.BitIndex}.
+     * @param to The target square {@link Bitboard.BitIndex}.
      */
-    public Move(Piece piece, int from, int to) {
+    public Move(Piece piece, Bitboard.BitIndex from, Bitboard.BitIndex to) {
         setPiece(piece);
         setFrom(from);
         setTo(to);
