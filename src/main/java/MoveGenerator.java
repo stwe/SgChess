@@ -5,7 +5,9 @@
  */
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 
@@ -53,6 +55,24 @@ public class MoveGenerator {
      */
     public ArrayList<Move> getPseudoLegalMoves() {
         return pseudoLegalMoves;
+    }
+
+    //-------------------------------------------------
+    // Filter
+    //-------------------------------------------------
+
+    /**
+     * Filter the pseudo legal moves list by {@link Piece}.
+     *
+     * @param piece The {@link Piece} to filter by.
+     *
+     * @return The filtered list.
+     */
+    public List<Move> filterPseudoLegalMovesBy(Piece piece) {
+        return pseudoLegalMoves
+                .stream()
+                .filter(e -> e.getPiece() == piece)
+                .collect(Collectors.toList());
     }
 
     //-------------------------------------------------
@@ -303,13 +323,13 @@ public class MoveGenerator {
     private void addWhiteEnPassantMoves() {
         var whitePawnsBitboard = board.getWhitePawns() & Bitboard.MASK_RANK_5;
 
-        if (board.getEpIndex() != 0) {
+        if (board.getEpIndex() != Bitboard.BitIndex.NO_SQUARE) {
             while (whitePawnsBitboard != 0) {
-                var enemyDestination = board.getEpIndex() - 8;
+                var enemyDestination = board.getEpIndex().ordinal() - 8;
                 var fromBitIndex = Bitboard.getLsb(whitePawnsBitboard);
 
                 if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
-                    var move = new Move(Piece.WHITE_PAWN, fromBitIndex, Bitboard.BitIndex.values()[board.getEpIndex()]);
+                    var move = new Move(Piece.WHITE_PAWN, fromBitIndex, board.getEpIndex());
                     move.setMoveFlag(Move.MoveFlag.ENPASSANT);
                     pseudoLegalMoves.add(move);
                 }
@@ -325,13 +345,13 @@ public class MoveGenerator {
     private void addBlackEnPassantMoves() {
         var blackPawnsBitboard = board.getBlackPawns() & Bitboard.MASK_RANK_4;
 
-        if (board.getEpIndex() != 0) {
+        if (board.getEpIndex() != Bitboard.BitIndex.NO_SQUARE) {
             while (blackPawnsBitboard != 0) {
-                var enemyDestination = board.getEpIndex() + 8;
+                var enemyDestination = board.getEpIndex().ordinal() + 8;
                 var fromBitIndex = Bitboard.getLsb(blackPawnsBitboard);
 
                 if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
-                    var move = new Move(Piece.BLACK_PAWN, fromBitIndex, Bitboard.BitIndex.values()[board.getEpIndex()]);
+                    var move = new Move(Piece.BLACK_PAWN, fromBitIndex, board.getEpIndex());
                     move.setMoveFlag(Move.MoveFlag.ENPASSANT);
                     pseudoLegalMoves.add(move);
                 }

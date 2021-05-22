@@ -69,9 +69,9 @@ public class Board {
     private int castlingRights;
 
     /**
-     * The bit index of the En Passant target square.
+     * The {@link Bitboard.BitIndex} of the En Passant target square.
      */
-    private int epIndex = 0;
+    private Bitboard.BitIndex epIndex = Bitboard.BitIndex.NO_SQUARE;
 
     /**
      * The current Zobrist key.
@@ -248,15 +248,15 @@ public class Board {
     }
 
     /**
-     * Get {@link #epIndex}.
+     * Get {@link Bitboard.BitIndex}.
      *
-     * @return {@link #epIndex}.
+     * @return {@link Bitboard.BitIndex}
      */
-    public int getEpIndex() {
+    public Bitboard.BitIndex getEpIndex() {
         return epIndex;
     }
 
-    //-------------------------------------------------
+//-------------------------------------------------
     // Castling
     //-------------------------------------------------
 
@@ -489,7 +489,10 @@ public class Board {
         if (!fenFields[3].equals("-")) {
             var file = (104 - fenFields[3].charAt(0)) + 1;
             var rank = Integer.parseInt(fenFields[3].substring(1)) - 1;
-            //epIndex = Bitboard.getSquareByFileAndRank(file, rank);
+            epIndex = Bitboard.getBitIndexByFileAndRank(
+                    Bitboard.File.values()[file],
+                    Bitboard.Rank.values()[rank]
+            );
             // todo: add to movelist?
         }
     }
