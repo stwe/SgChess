@@ -1,3 +1,9 @@
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
+
 import java.util.HashMap;
 
 /**
@@ -53,37 +59,32 @@ public class Attack {
     //-------------------------------------------------
 
     /**
-     * Possible positions of movement and attack for any color king.
+     * Possible positions of movement for any color king.
      */
-    public static final long[] kingMovesAndAttacks;
+    private static final long[] kingMoveBitboards;
 
     /**
-     * Possible positions of movement and attack for any color knight.
+     * Possible positions of movement for any color knight.
      */
-    public static final long[] knightMovesAndAttacks;
+    private static final long[] knightMoveBitboards;
 
     /**
      * Possible positions of attack for any white pawn.
      */
-    public static final long[] whitePawnAttacks;
+    private static final long[] whitePawnAttackBitboards;
 
     /**
      * Possible positions of attack for any black pawn.
      */
-    public static final long[] blackPawnAttacks;
+    private static final long[] blackPawnAttackBitboards;
 
     /**
-     * Possible positions of attack for any pawn.
-     */
-    public static final long[][] pawnAttacks;
-
-    /**
-     * Rook magic objects.
+     * Rook {@link Magic} objects.
      */
     private static final Magic[] rookMagics;
 
     /**
-     * Bishop magic objects.
+     * Bishop {@link Magic} objects.
      */
     private static final Magic[] bishopMagics;
 
@@ -92,12 +93,10 @@ public class Attack {
     //-------------------------------------------------
 
     static {
-
-        kingMovesAndAttacks = calcKingMovesAndAttacks();
-        knightMovesAndAttacks = calcKnightMovesAndAttacks();
-        whitePawnAttacks = calcWhitePawnAttacks();
-        blackPawnAttacks = calcBlackPawnAttacks();
-        pawnAttacks = addPawnAttacks();
+        kingMoveBitboards = calcKingMoveBitboards();
+        knightMoveBitboards = calcKnightMoveBitboards();
+        whitePawnAttackBitboards = calcWhitePawnAttackBitboards();
+        blackPawnAttackBitboards = calcBlackPawnAttackBitboards();
 
         /*
             Rook on e4:
@@ -135,44 +134,115 @@ public class Attack {
     }
 
     //-------------------------------------------------
-    // Sliding piece moves
+    // Nonsliding pieces
+    //-------------------------------------------------
+
+    /**
+     * Get moves for any color king.
+     *
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
+     *
+     * @return A bitboard with all king moves.
+     */
+    public static long getKingMoves(Bitboard.BitIndex bitIndex) {
+        return kingMoveBitboards[bitIndex.ordinal()];
+    }
+
+    /**
+     * Get moves for any color knight.
+     *
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
+     *
+     * @return A bitboard with all knight moves.
+     */
+    public static long getKnightMoves(Bitboard.BitIndex bitIndex) {
+        return knightMoveBitboards[bitIndex.ordinal()];
+    }
+
+    /**
+     * Get white pawn attacks.
+     *
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
+     *
+     * @return A bitboard with all white pawn attacks.
+     */
+    public static long getWhitePawnAttacks(Bitboard.BitIndex bitIndex) {
+        return whitePawnAttackBitboards[bitIndex.ordinal()];
+    }
+
+    /**
+     * Get black pawn attacks.
+     *
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
+     *
+     * @return A bitboard with all black pawn attacks.
+     */
+    public static long getBlackPawnAttacks(Bitboard.BitIndex bitIndex) {
+        return blackPawnAttackBitboards[bitIndex.ordinal()];
+    }
+
+    /**
+     * Get pawn attacks by {@link Board.Color} and {@link Bitboard.BitIndex}.
+     *
+     * @param color {@link Board.Color}.
+     *
+     * @return A bitboard with all pawn attacks.
+     */
+    public static long getPawnAttacks(Board.Color color, Bitboard.BitIndex bitIndex) {
+        var attacksBitboard = 0L;
+
+        switch (color) {
+            case WHITE:
+                attacksBitboard = getWhitePawnAttacks(bitIndex);
+                break;
+            case BLACK:
+                attacksBitboard = getBlackPawnAttacks(bitIndex);
+                break;
+            default:
+        }
+
+        return attacksBitboard;
+    }
+
+    //-------------------------------------------------
+    // Sliding pieces
     //-------------------------------------------------
 
     /**
      * Get moves for any color rook.
      *
-     * @param bitIndex The bit index of the from square.
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
      * @param allPieces The bitboard with all pieces.
      *
      * @return A bitboard with all rook moves.
      */
-    public static long getRookMoves(int bitIndex, long allPieces) {
-        var magic = rookMagics[bitIndex];
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[bitIndex] >>> magic.shift)];
+    public static long getRookMoves(Bitboard.BitIndex bitIndex, long allPieces) {
+        var magic = rookMagics[bitIndex.ordinal()];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * ROOK_MAGIC_NUMBERS[bitIndex.ordinal()] >>> magic.shift)];
     }
 
     /**
      * Get moves for any color bishop.
      *
-     * @param bitIndex The bit index of the from square.
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
      * @param allPieces The bitboard with all pieces.
      *
      * @return A bitboard with all bishop moves.
      */
-    public static long getBishopMoves(int bitIndex, long allPieces) {
-        var magic = bishopMagics[bitIndex];
-        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[bitIndex] >>> magic.shift)];
+    public static long getBishopMoves(Bitboard.BitIndex bitIndex, long allPieces) {
+        var magic = bishopMagics[bitIndex.ordinal()];
+        return magic.moveBoards[(int) ((allPieces & magic.blockerMask) * BISHOP_MAGIC_NUMBERS[bitIndex.ordinal()] >>> magic.shift)];
     }
 
     /**
      * Get moves for any color queen.
      *
-     * @param bitIndex The bit index of the from square.
+     * @param bitIndex The {@link Bitboard.BitIndex} of the from square.
      * @param allPieces The bitboard with all pieces.
      *
      * @return A bitboard with all queen moves.
      */
-    public static long getQueenMoves(int bitIndex, long allPieces) {
+    public static long getQueenMoves(Bitboard.BitIndex bitIndex, long allPieces) {
         return getRookMoves(bitIndex, allPieces) | getBishopMoves(bitIndex, allPieces);
     }
 
@@ -183,59 +253,59 @@ public class Attack {
     /**
      * Get a bitboard with all attackers to a given square.
      *
-     * @param bitIndex The bit index of the attacked square.
      * @param color Which {@link Board.Color} is under attack.
+     * @param bitIndex The {@link Bitboard.BitIndex} of the square which is under attack.
      * @param board A {@link Board} object.
      *
      * @return The bitboard with all attackers.
      */
-    public static long getAttackersToSquare(int bitIndex, Board.Color color, Board board) {
-        var enemy = color.getEnemyColor();
+    public static long getAttackersToSquare(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
+        var enemyColor = color.getEnemyColor();
 
-        var attackers = 0L;
-        attackers |= getPawnAttacksByColor(color)[bitIndex] & board.getPawnsByColor(enemy);
-        attackers |= knightMovesAndAttacks[bitIndex] & board.getKnightsByColor(enemy);
-        attackers |= kingMovesAndAttacks[bitIndex] & board.getKingByColor(enemy);
-        attackers |= getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemy);
-        attackers |= getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemy);
-        attackers |= getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemy);
+        var attackersBitboard = 0L;
+        attackersBitboard |= getKingMoves(bitIndex) & board.getKingByColor(enemyColor);
+        attackersBitboard |= getKnightMoves(bitIndex) & board.getKnightsByColor(enemyColor);
+        attackersBitboard |= getPawnAttacks(color, bitIndex) & board.getPawnsByColor(enemyColor);
+        attackersBitboard |= getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemyColor);
+        attackersBitboard |= getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemyColor);
+        attackersBitboard |= getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemyColor);
 
-        return attackers;
+        return attackersBitboard;
     }
 
     /**
      * Checks whether a square is under attack.
      *
-     * @param bitIndex The bit index of the attacked square.
      * @param color Which {@link Board.Color} is under attack.
+     * @param bitIndex The {@link Bitboard.BitIndex} of the square which is under attack.
      * @param board A {@link Board} object.
      *
      * @return boolean
      */
-    public static boolean isSquareAttacked(int bitIndex, Board.Color color, Board board) {
-        var enemy = color.getEnemyColor();
+    public static boolean isSquareAttacked(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
+        var enemyColor = color.getEnemyColor();
 
-        if ((getPawnAttacksByColor(color)[bitIndex] & board.getPawnsByColor(enemy)) != 0) {
+        if ((getKingMoves(bitIndex) & board.getKingByColor(enemyColor)) != 0) {
             return true;
         }
 
-        if ((knightMovesAndAttacks[bitIndex] & board.getKnightsByColor(enemy)) != 0) {
+        if ((getKnightMoves(bitIndex) & board.getKnightsByColor(enemyColor)) != 0) {
             return true;
         }
 
-        if ((kingMovesAndAttacks[bitIndex] & board.getKingByColor(enemy)) != 0) {
+        if ((getPawnAttacks(color, bitIndex) & board.getPawnsByColor(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemy)) != 0) {
+        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemyColor)) != 0) {
             return true;
         }
 
-        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooksByColor(enemy)) != 0) {
+        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishopsByColor(enemyColor)) != 0) {
             return true;
         }
 
-        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemy)) != 0;
+        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueensByColor(enemyColor)) != 0;
     }
 
     //-------------------------------------------------
@@ -556,124 +626,100 @@ public class Attack {
     }
 
     //-------------------------------------------------
-    // Precomputed lookup tables
+    // Calculate king moves
     //-------------------------------------------------
 
     /**
-     * Calculate every possible position of movement and attack for any color king.
+     * Calculate every possible position of movement for any color king.
      *
      * @return A precomputed lookup table.
      */
-    private static long[] calcKingMovesAndAttacks() {
-        var kingMoves = new long[64];
+    private static long[] calcKingMoveBitboards() {
+        var kingMoveBitboards = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long positionBitboard = 1L << square;
+            long squareBitboard = Bitboard.SQUARES[square];
             long mask =
-                    (((positionBitboard >>> 1) | (positionBitboard << 7) | (positionBitboard >>> 9)) & Bitboard.CLEAR_FILE_H) |
-                    (((positionBitboard << 1) | (positionBitboard << 9) | (positionBitboard >>> 7)) & Bitboard.CLEAR_FILE_A) |
-                    (positionBitboard << 8) | (positionBitboard >>> 8);
+                    (((squareBitboard >>> 1) | (squareBitboard << 7) | (squareBitboard >>> 9)) & Bitboard.CLEAR_FILE_H) |
+                    (((squareBitboard << 1) | (squareBitboard << 9) | (squareBitboard >>> 7)) & Bitboard.CLEAR_FILE_A) |
+                    (squareBitboard << 8) | (squareBitboard >>> 8);
 
-            kingMoves[square] = mask;
+            kingMoveBitboards[square] = mask;
         }
 
-        return kingMoves;
+        return kingMoveBitboards;
     }
+
+    //-------------------------------------------------
+    // Calculate knight moves
+    //-------------------------------------------------
 
     /**
-     * Calculate every possible position of movement and attack for any color knight.
+     * Calculate every possible position of movement for any color knight.
      *
      * @return A precomputed lookup table.
      */
-    private static long[] calcKnightMovesAndAttacks() {
-        var knightMoves = new long[64];
+    private static long[] calcKnightMoveBitboards() {
+        var knightMoveBitboards = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long positionBitboard = 1L << square;
+            long squareBitboard = Bitboard.SQUARES[square];
             long mask =
-                    (((positionBitboard <<  6) | (positionBitboard >>> 10)) & Bitboard.CLEAR_FILE_GH) |
-                    (((positionBitboard << 15) | (positionBitboard >>> 17)) & Bitboard.CLEAR_FILE_H) |
-                    (((positionBitboard << 17) | (positionBitboard >>> 15)) & Bitboard.CLEAR_FILE_A) |
-                    (((positionBitboard << 10) | (positionBitboard >>>  6)) & Bitboard.CLEAR_FILE_AB);
+                    (((squareBitboard <<  6) | (squareBitboard >>> 10)) & Bitboard.CLEAR_FILE_GH) |
+                    (((squareBitboard << 15) | (squareBitboard >>> 17)) & Bitboard.CLEAR_FILE_H) |
+                    (((squareBitboard << 17) | (squareBitboard >>> 15)) & Bitboard.CLEAR_FILE_A) |
+                    (((squareBitboard << 10) | (squareBitboard >>>  6)) & Bitboard.CLEAR_FILE_AB);
 
-            knightMoves[square] = mask;
+            knightMoveBitboards[square] = mask;
         }
 
-        return knightMoves;
+        return knightMoveBitboards;
     }
+
+    //-------------------------------------------------
+    // Calculate white pawn attacks
+    //-------------------------------------------------
 
     /**
      * Calculate every possible position of attack for any white pawn.
      *
      * @return A precomputed lookup table.
      */
-    private static long[] calcWhitePawnAttacks() {
-        var pawnAttacks = new long[64];
+    private static long[] calcWhitePawnAttackBitboards() {
+        var pawnAttackBitboards = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long positionBitboard = 1L << square;
-            long rightBitboard = (positionBitboard << 9) & Bitboard.CLEAR_FILE_A;
-            long leftBitboard = (positionBitboard << 7) & Bitboard.CLEAR_FILE_H;
+            long squareBitboard = Bitboard.SQUARES[square];
+            long rightBitboard = (squareBitboard << 9) & Bitboard.CLEAR_FILE_A;
+            long leftBitboard = (squareBitboard << 7) & Bitboard.CLEAR_FILE_H;
 
-            pawnAttacks[square] = rightBitboard | leftBitboard;
+            pawnAttackBitboards[square] = rightBitboard | leftBitboard;
         }
 
-        return pawnAttacks;
+        return pawnAttackBitboards;
     }
+
+    //-------------------------------------------------
+    // Calculate black pawn attacks
+    //-------------------------------------------------
 
     /**
      * Calculate every possible position of attack for any black pawn.
      *
      * @return A precomputed lookup table.
      */
-    private static long[] calcBlackPawnAttacks() {
-        var pawnAttacks = new long[64];
+    private static long[] calcBlackPawnAttackBitboards() {
+        var pawnAttackBitboards = new long[64];
 
         for (var square = 0; square < 64; square++) {
-            long positionBitboard = 1L << square;
-            long rightBitboard = (positionBitboard >>> 9) & Bitboard.CLEAR_FILE_H;
-            long leftBitboard = (positionBitboard >>> 7) & Bitboard.CLEAR_FILE_A;
+            long squareBitboard = Bitboard.SQUARES[square];
+            long rightBitboard = (squareBitboard >>> 9) & Bitboard.CLEAR_FILE_H;
+            long leftBitboard = (squareBitboard >>> 7) & Bitboard.CLEAR_FILE_A;
 
-            pawnAttacks[square] = rightBitboard | leftBitboard;
+            pawnAttackBitboards[square] = rightBitboard | leftBitboard;
         }
 
-        return pawnAttacks;
-    }
-
-    /**
-     * Add every possible position of attack for any pawn.
-     *
-     * @return A precomputed lookup table.
-     */
-    private static long[][] addPawnAttacks() {
-        var pawnAttacks = new long[2][64];
-
-        pawnAttacks[Board.Color.WHITE.value] = whitePawnAttacks;
-        pawnAttacks[Board.Color.BLACK.value] = blackPawnAttacks;
-
-        return pawnAttacks;
-    }
-
-    /**
-     * Get pawn attacks table by color value.
-     *
-     * @param color White (0) or black (1) pawns.
-     *
-     * @return The precomputed pawn attacks.
-     */
-    public static long[] getPawnAttacksByColor(int color) {
-        return pawnAttacks[color];
-    }
-
-    /**
-     * Get pawn attacks table by color.
-     *
-     * @param color WHITE or BLACK pawns.
-     *
-     * @return The precomputed pawn attacks.
-     */
-    public static long[] getPawnAttacksByColor(Board.Color color) {
-        return getPawnAttacksByColor(color.value);
+        return pawnAttackBitboards;
     }
 
     //-------------------------------------------------

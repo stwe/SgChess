@@ -269,7 +269,8 @@ public class Bitboard {
         A5_IDX, B5_IDX, C5_IDX, D5_IDX, E5_IDX, F5_IDX, G5_IDX, H5_IDX,
         A6_IDX, B6_IDX, C6_IDX, D6_IDX, E6_IDX, F6_IDX, G6_IDX, H6_IDX,
         A7_IDX, B7_IDX, C7_IDX, D7_IDX, E7_IDX, F7_IDX, G7_IDX, H7_IDX,
-        A8_IDX, B8_IDX, C8_IDX, D8_IDX, E8_IDX, F8_IDX, G8_IDX, H8_IDX
+        A8_IDX, B8_IDX, C8_IDX, D8_IDX, E8_IDX, F8_IDX, G8_IDX, H8_IDX,
+        NO_SQUARE
     }
 
     //-------------------------------------------------
@@ -378,6 +379,28 @@ public class Bitboard {
      */
     public static BitIndex getBitIndexByFileAndRank(File file, Rank rank) {
         return BitIndex.values()[8 * rank.ordinal() + file.ordinal()];
+    }
+
+    /**
+     * Retrieve the {@link BitIndex} of the given bitboard's least significant bit.
+     *
+     * @param bitboard The bitboard whose LSB index is retrieved.
+     *
+     * @return The {@link BitIndex} of the given bitboard's least significant bit.
+     */
+    public static BitIndex getLsb(long bitboard) {
+        return BitIndex.values()[Long.numberOfTrailingZeros(bitboard)];
+    }
+
+    /**
+     * Returns the number of one-bits.
+     *
+     * @param bitboard The bitboard whose bits are to be counted.
+     *
+     * @return The number of one-bits.
+     */
+    public static int bitCount(long bitboard) {
+        return Long.bitCount(bitboard);
     }
 
     //-------------------------------------------------

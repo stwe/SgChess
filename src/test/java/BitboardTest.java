@@ -34,4 +34,25 @@ class BitboardTest {
         assertEquals(Bitboard.BitIndex.E4_IDX, Bitboard.getBitIndexByFileAndRank(Bitboard.File.FILE_E, Bitboard.Rank.RANK_4));
         assertEquals(Bitboard.BitIndex.H8_IDX, Bitboard.getBitIndexByFileAndRank(Bitboard.File.FILE_H, Bitboard.Rank.RANK_8));
     }
+
+    @Test
+    void getLsb() {
+        assertEquals(0, Bitboard.getLsb(1L).ordinal());
+        assertEquals(2, Bitboard.getLsb(4L).ordinal());
+        assertEquals(10, Bitboard.getLsb(3072L).ordinal());
+
+        assertEquals(64, Bitboard.getLsb(0L).ordinal()); // no one-bits = 64 (NO_SQUARE)
+
+        // use the start position
+        var board = new Board();
+        assertEquals(4, Bitboard.getLsb(board.getWhiteKing()).ordinal());
+        assertEquals(Bitboard.BitIndex.D1_IDX, Bitboard.getLsb(board.getWhiteQueens()));
+    }
+
+    @Test
+    void bitCount() {
+        // use the start position
+        var board = new Board();
+        assertEquals(32, Bitboard.bitCount(board.getAllPieces()));
+    }
 }
