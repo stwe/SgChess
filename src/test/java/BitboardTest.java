@@ -11,6 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class BitboardTest {
 
     @Test
+    void getSquareBitboardFromBitIndex() {
+        assertEquals(Bitboard.A1, Bitboard.getSquareBitboardFromBitIndex(Bitboard.BitIndex.A1_IDX));
+        assertEquals(Bitboard.H8, Bitboard.getSquareBitboardFromBitIndex(Bitboard.BitIndex.H8_IDX));
+    }
+
+    @Test
     void isBitSet() {
         // use the start position
         var board = new Board();

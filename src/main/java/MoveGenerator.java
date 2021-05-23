@@ -371,7 +371,7 @@ public class MoveGenerator {
      * @param allPiecesBitboard A bitboard with all pieces. All pieces can block.
      */
     private void addWhitePawnMoves(Bitboard.BitIndex fromBitIndex, long blackPiecesBitboard, long allPiecesBitboard) {
-        long whitePawnBitboard = Bitboard.SQUARES[fromBitIndex.ordinal()];
+        long whitePawnBitboard = Bitboard.getSquareBitboardFromBitIndex(fromBitIndex);
 
         // check the single space infront of the white pawn
         long firstStepBitboard = (whitePawnBitboard << 8) & ~allPiecesBitboard;
@@ -400,7 +400,7 @@ public class MoveGenerator {
      * @param allPiecesBitboard A bitboard with all pieces. All pieces can block.
      */
     private void addBlackPawnMoves(Bitboard.BitIndex fromBitIndex, long whitePiecesBitboard, long allPiecesBitboard) {
-        long blackPawnBitboard = Bitboard.SQUARES[fromBitIndex.ordinal()];
+        long blackPawnBitboard = Bitboard.getSquareBitboardFromBitIndex(fromBitIndex);
 
         // check the single space infront of the black pawn
         long firstStepBitboard = (blackPawnBitboard >>> 8) & ~allPiecesBitboard;
@@ -648,7 +648,7 @@ public class MoveGenerator {
      * <p></p>
      * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
      * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
-     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p> todo: determine
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(1) PAWN .. NO_PIECE(5/6) QUEEN/KING</p> // todo
      * <p><b>promoted {@link PieceType}: </b> NO_PIECE(0)</p>
      * <p><b>special {@link Move.MoveFlag}: </b> CAPTURE(5)</p>
      * <p><b>piece: </b> the given {@link Piece}</p>
@@ -660,16 +660,17 @@ public class MoveGenerator {
      */
     private void addCaptureMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
         while (movesBitboard != 0) {
-
-            // todo: determine captured piece type
+            var toBitIndex = Bitboard.getLsb(movesBitboard);
+            var capturedPiece = board.getPieceFrom(toBitIndex);
 
             var move = new Move(
                     piece,
                     fromBitIndex,
-                    Bitboard.getLsb(movesBitboard)
+                    toBitIndex
             );
 
             move.setMoveFlag(Move.MoveFlag.CAPTURE);
+            move.setCapturedPieceType(capturedPiece.pieceType);
 
             pseudoLegalMoves.add(move);
 

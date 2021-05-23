@@ -352,6 +352,17 @@ public class Bitboard {
     //-------------------------------------------------
 
     /**
+     * Get the square bitboard for a given {@link BitIndex}.
+     *
+     * @param bitIndex A {@link BitIndex}.
+     *
+     * @return The square bitboard for a given {@link BitIndex}.
+     */
+    public static long getSquareBitboardFromBitIndex(BitIndex bitIndex) {
+        return SQUARES[bitIndex.ordinal()];
+    }
+
+    /**
      * Checks whether a bit is set on the given bitboard {@link BitIndex}.
      *
      * @param bitboard The bitboard to be checked.
@@ -360,7 +371,7 @@ public class Bitboard {
      * @return boolean
      */
     public static boolean isBitSet(long bitboard, BitIndex bitIndex) {
-        return (SQUARES[bitIndex.ordinal()] & bitboard) != 0;
+        return (getSquareBitboardFromBitIndex(bitIndex) & bitboard) != 0;
     }
 
     /**

@@ -11,6 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class BoardTest {
 
     @Test
+    void getPieceFrom() {
+        var boardStart = new Board();
+        assertEquals(Piece.WHITE_PAWN, boardStart.getPieceFrom(Bitboard.BitIndex.E4_IDX));
+    }
+
+    @Test
     void isQueenSideCastlingAllowed() {
         var boardStart = new Board();
         assertTrue(boardStart.isQueenSideCastlingAllowed(Board.Color.WHITE));

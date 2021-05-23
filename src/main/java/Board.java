@@ -226,6 +226,61 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // Getter piece
+    //-------------------------------------------------
+
+    /**
+     * Get the {@link Piece} from a given {@link Bitboard.BitIndex}.
+     *
+     * @param bitIndex {@link Bitboard.BitIndex}
+     *
+     * @return {@link Piece}
+     */
+    public Piece getPieceFrom(Bitboard.BitIndex bitIndex) {
+        var toBitboard = Bitboard.getSquareBitboardFromBitIndex(bitIndex);
+
+        if ((toBitboard & getWhitePawns()) != 0) {
+            return Piece.WHITE_PAWN;
+        }
+        if ((toBitboard & getWhiteKnights()) != 0) {
+            return Piece.WHITE_KNIGHT;
+        }
+        if ((toBitboard & getWhiteBishops()) != 0) {
+            return Piece.WHITE_BISHOP;
+        }
+        if ((toBitboard & getWhiteRooks()) != 0) {
+            return Piece.WHITE_ROOK;
+        }
+        if ((toBitboard & getWhiteQueens()) != 0) {
+            return Piece.WHITE_QUEEN;
+        }
+        if ((toBitboard & getWhiteKing()) != 0) {
+            return Piece.WHITE_KING;
+        }
+
+        if ((toBitboard & getBlackPawns()) != 0) {
+            return Piece.BLACK_PAWN;
+        }
+        if ((toBitboard & getBlackKnights()) != 0) {
+            return Piece.BLACK_KNIGHT;
+        }
+        if ((toBitboard & getBlackBishops()) != 0) {
+            return Piece.BLACK_BISHOP;
+        }
+        if ((toBitboard & getBlackRooks()) != 0) {
+            return Piece.BLACK_ROOK;
+        }
+        if ((toBitboard & getBlackQueens()) != 0) {
+            return Piece.BLACK_QUEEN;
+        }
+        if ((toBitboard & getBlackKing()) != 0) {
+            return Piece.BLACK_KING;
+        }
+
+        return Piece.BLACK_KING; // todo return NO_PIECE - must created before
+    }
+
+    //-------------------------------------------------
     // Getter
     //-------------------------------------------------
 
@@ -256,7 +311,7 @@ public class Board {
         return epIndex;
     }
 
-//-------------------------------------------------
+    //-------------------------------------------------
     // Castling
     //-------------------------------------------------
 
@@ -363,7 +418,7 @@ public class Board {
         s.append(" +---+---+---+---+---+---+---+---+\n");
 
         for (var rank = Bitboard.Rank.RANK_8.ordinal(); rank >= Bitboard.Rank.RANK_1.ordinal(); rank--) {
-            s.append(rank).append("|");
+            s.append(rank + 1).append("|");
 
             for (var file : Bitboard.File.values()) {
                 var piece = getPieceString(file, Bitboard.Rank.values()[rank]);
