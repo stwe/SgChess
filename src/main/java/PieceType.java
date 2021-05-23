@@ -1,3 +1,9 @@
+/*
+ * This file is part of the SgChess project.
+ * Copyright (c) 2021 stwe <https://github.com/stwe/SgChess>
+ * License: GNU GPLv2
+ */
+
 /**
  * Represents a PieceType.
  */

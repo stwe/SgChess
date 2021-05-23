@@ -75,6 +75,20 @@ public class MoveGenerator {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Filter the pseudo legal moves list by {@link Move.MoveFlag}.
+     *
+     * @param moveFlag The {@link Move.MoveFlag} to filter by.
+     *
+     * @return The filtered list.
+     */
+    public List<Move> filterPseudoLegalMovesBy(Move.MoveFlag moveFlag) {
+        return pseudoLegalMoves
+                .stream()
+                .filter(e -> e.getMoveFlag() == moveFlag)
+                .collect(Collectors.toList());
+    }
+
     //-------------------------------------------------
     // Nonsliding pieces (knight, king)
     //-------------------------------------------------
