@@ -69,6 +69,7 @@ class MoveGeneratorTest {
         var wpMg = new MoveGenerator(wpBoard);
         assertEquals(26, wpMg.filterPseudoLegalMovesBy(Piece.WHITE_PAWN).size());
         assertEquals(1, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.EN_PASSANT).size());
+        assertEquals(2 * 4, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.PROMOTION_CAPTURE).size());
 
         // 26 black pawn moves
         var bpBoard = new Board(BLACK_PAWNS);

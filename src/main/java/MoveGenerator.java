@@ -401,9 +401,9 @@ public class MoveGenerator {
         // add moves
         addQuietMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_8);
         addPawnStartMoves(Piece.WHITE_PAWN, fromBitIndex, twoStepsBitboard);
-        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_8);
+        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_8, Move.MoveFlag.PROMOTION);
         addCaptureMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_8);
-        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_8);
+        addPromotionMoves(Piece.WHITE_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_8, Move.MoveFlag.PROMOTION_CAPTURE);
     }
 
     /**
@@ -430,9 +430,9 @@ public class MoveGenerator {
         // add moves
         addQuietMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.CLEAR_RANK_1);
         addPawnStartMoves(Piece.BLACK_PAWN, fromBitIndex, twoStepsBitboard);
-        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_1);
+        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, firstStepBitboard & Bitboard.MASK_RANK_1, Move.MoveFlag.PROMOTION);
         addCaptureMoves(Piece.BLACK_PAWN, fromBitIndex, attacksBitboard & Bitboard.CLEAR_RANK_1);
-        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_1);
+        addPromotionMoves(Piece.BLACK_PAWN, fromBitIndex, attacksBitboard & Bitboard.MASK_RANK_1, Move.MoveFlag.PROMOTION_CAPTURE);
     }
 
     /**
@@ -479,7 +479,7 @@ public class MoveGenerator {
      * <p></p>
      * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
      * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
-     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0)</p>
+     * <p><b>captured {@link PieceType}: </b> NO_PIECE(0) or PAWN(1) .. QUEEN(5)</p>
      * <p><b>promoted {@link PieceType}: </b> KNIGHT(2) - QUEEN(5)</p>
      * <p><b>special {@link Move.MoveFlag}: </b> PROMOTION(1)</p>
      * <p><b>piece: </b> the given {@link Piece}</p>
@@ -488,55 +488,71 @@ public class MoveGenerator {
      * @param piece A pawn of any color.
      * @param fromBitIndex The {@link Bitboard.BitIndex} of the given pawn.
      * @param movesBitboard A bitboard with all moves to be added.
+     * @param moveFlag Promotion or promotion capture {@link Move.MoveFlag}.
      */
-    private void addPromotionMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard) {
+    private void addPromotionMoves(Piece piece, Bitboard.BitIndex fromBitIndex, long movesBitboard, Move.MoveFlag moveFlag) {
         if (piece != Piece.WHITE_PAWN && piece != Piece.BLACK_PAWN) {
             return;
         }
 
+        if (moveFlag != Move.MoveFlag.PROMOTION && moveFlag != Move.MoveFlag.PROMOTION_CAPTURE) {
+            return;
+        }
+
         while (movesBitboard != 0) {
+            var toBitIndex = Bitboard.getLsb(movesBitboard);
+            var capturedPiece = Piece.NO_PIECE;
+
+            if (moveFlag == Move.MoveFlag.PROMOTION_CAPTURE) {
+                capturedPiece = board.getPieceFrom(toBitIndex);
+            }
+
             // knight
             var promoteKnight = new Move(
                     piece,
                     fromBitIndex,
-                    Bitboard.getLsb(movesBitboard)
+                    toBitIndex
             );
 
-            promoteKnight.setMoveFlag(Move.MoveFlag.PROMOTION);
+            promoteKnight.setMoveFlag(moveFlag);
             promoteKnight.setPromotedPieceType(PieceType.KNIGHT);
+            promoteKnight.setCapturedPieceType(capturedPiece.pieceType); // default: NO_PIECE
             pseudoLegalMoves.add(promoteKnight);
 
             // bishop
             var promoteBishop = new Move(
                     piece,
                     fromBitIndex,
-                    Bitboard.getLsb(movesBitboard)
+                    toBitIndex
             );
 
-            promoteBishop.setMoveFlag(Move.MoveFlag.PROMOTION);
+            promoteBishop.setMoveFlag(moveFlag);
             promoteBishop.setPromotedPieceType(PieceType.BISHOP);
+            promoteBishop.setCapturedPieceType(capturedPiece.pieceType);
             pseudoLegalMoves.add(promoteBishop);
 
             // rook
             var promoteRook = new Move(
                     piece,
                     fromBitIndex,
-                    Bitboard.getLsb(movesBitboard)
+                    toBitIndex
             );
 
-            promoteRook.setMoveFlag(Move.MoveFlag.PROMOTION);
+            promoteRook.setMoveFlag(moveFlag);
             promoteRook.setPromotedPieceType(PieceType.ROOK);
+            promoteRook.setCapturedPieceType(capturedPiece.pieceType);
             pseudoLegalMoves.add(promoteRook);
 
             // queen
             var promoteQueen = new Move(
                     piece,
                     fromBitIndex,
-                    Bitboard.getLsb(movesBitboard)
+                    toBitIndex
             );
 
-            promoteQueen.setMoveFlag(Move.MoveFlag.PROMOTION);
+            promoteQueen.setMoveFlag(moveFlag);
             promoteQueen.setPromotedPieceType(PieceType.QUEEN);
+            promoteQueen.setCapturedPieceType(capturedPiece.pieceType);
             pseudoLegalMoves.add(promoteQueen);
 
             movesBitboard &= movesBitboard - 1;
@@ -664,7 +680,7 @@ public class MoveGenerator {
      * <p></p>
      * <p><b>from: </b> the given {@link Bitboard.BitIndex}</p>
      * <p><b>to: </b> read {@link Bitboard.BitIndex} from the given movesBitboard</p>
-     * <p><b>captured {@link PieceType}: </b> NO_PIECE(1) PAWN .. NO_PIECE(5/6) QUEEN/KING</p> // todo
+     * <p><b>captured {@link PieceType}: </b> PAWN(1) .. QUEEN(5)/KING(6)</p> // todo
      * <p><b>promoted {@link PieceType}: </b> NO_PIECE(0)</p>
      * <p><b>special {@link Move.MoveFlag}: </b> CAPTURE(5)</p>
      * <p><b>piece: </b> the given {@link Piece}</p>

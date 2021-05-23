@@ -318,11 +318,11 @@ public class Move {
         CASTLING,
         PAWN_START,
         CAPTURE,               => captured piece type
-        PROMOTION_CAPTURE      => captured piece type
+        PROMOTION_CAPTURE      => promoted piece type, captured piece type
         */
 
         String promotedPiece = "";
-        if (getMoveFlag() == MoveFlag.PROMOTION) {
+        if (getMoveFlag() == MoveFlag.PROMOTION || getMoveFlag() == MoveFlag.PROMOTION_CAPTURE) {
             promotedPiece = " promoted piece type: " + getPromotedPieceType();
         }
 
