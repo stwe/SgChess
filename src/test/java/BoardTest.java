@@ -13,8 +13,9 @@ class BoardTest {
     @Test
     void getPieceFrom() {
         var boardStart = new Board();
-        // todo NO_PIECE required
-        //assertEquals(Piece.WHITE_PAWN, boardStart.getPieceFrom(Bitboard.BitIndex.E4_IDX));
+        assertEquals(Piece.NO_PIECE, boardStart.getPieceFrom(Bitboard.BitIndex.E4_IDX));
+        assertEquals(Piece.WHITE_PAWN, boardStart.getPieceFrom(Bitboard.BitIndex.E2_IDX));
+        assertEquals(Piece.BLACK_QUEEN, boardStart.getPieceFrom(Bitboard.BitIndex.D8_IDX));
     }
 
     @Test

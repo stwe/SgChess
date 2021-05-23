@@ -17,32 +17,13 @@ public class Move {
      * Move flags.
      */
     public enum MoveFlag {
-        NORMAL(0),
-        PROMOTION(1), // todo: promotion_capture?
-        ENPASSANT(2),
-        CASTLING(3),
-        PAWN_START(4),
-        CAPTURE(5);
-
-        /**
-         * The ordinal value.
-         */
-        public int value;
-
-        /**
-         * To get the flag by ordinal value.
-         */
-        public final MoveFlag[] values = new MoveFlag[6];
-
-        /**
-         * Constructs a new {@link MoveFlag} enum.
-         *
-         * @param value {@link #value}
-         */
-        MoveFlag(int value) {
-            this.value = value;
-            this.values[value] = this;
-        }
+        NORMAL,
+        PROMOTION,
+        EN_PASSANT,
+        CASTLING,
+        PAWN_START,
+        CAPTURE,
+        PROMOTION_CAPTURE
     }
 
     //-------------------------------------------------
@@ -59,7 +40,7 @@ public class Move {
      * <p>bit  6 - 11: <b>to</b> square (0 - 63)</p>
      * <p>bit 12 - 14: <b>captured piece type</b> (0 - 6)</p>
      * <p>bit 15 - 17: <b>promoted piece type</b> (0 - 6)</p>
-     * <p>bit 18 - 20: <b>special move flag</b> (0 - 5)</p>
+     * <p>bit 18 - 20: <b>special move flag</b> (0 - 6)</p>
      * <p>bit 21 - 24: <b>piece</b>(0 - 11)</p>
      * <p></p>
      * <pre>
@@ -74,6 +55,7 @@ public class Move {
      *                                                castling = 3,
      *                                                pawn start = 4,
      *                                                capture = 5
+     *                                                promotion_capture = 6
      * 0000 0001 1110 0000 0000 0000 0000 0000 -> piece (4 bits)
      * </pre>
      */
@@ -136,7 +118,7 @@ public class Move {
     /**
      * Set the from square {@link Bitboard.BitIndex}.
      *
-     * @param bitIndex A {@link Bitboard.BitIndex} (0 - 63).
+     * @param bitIndex A {@link Bitboard.BitIndex}.
      */
     public void setFrom(Bitboard.BitIndex bitIndex) {
         // clear first 6 bits
@@ -162,7 +144,7 @@ public class Move {
     /**
      * Set the target square {@link Bitboard.BitIndex}.
      *
-     * @param bitIndex A {@link Bitboard.BitIndex} (0 - 63).
+     * @param bitIndex A {@link Bitboard.BitIndex}.
      */
     public void setTo(Bitboard.BitIndex bitIndex) {
         move &= ~4032;
@@ -230,7 +212,7 @@ public class Move {
      */
     public void setPromotedPieceType(PieceType pieceType) {
         if (pieceType == PieceType.KING) {
-            throw new RuntimeException("Invalid piece type given.");
+            return;
         }
 
         move &= ~229376;
@@ -260,33 +242,6 @@ public class Move {
     }
 
     /**
-     * Checks whether the promotion move flag is set.
-     *
-     * @return True is the move a promotion move.
-     */
-    public boolean isPromotionMove() {
-        return getMoveFlag() == MoveFlag.PROMOTION;
-    }
-
-    /**
-     * Checks whether the captured move flag is set.
-     *
-     * @return True is the move a captured move.
-     */
-    public boolean isCapturedMove() {
-        return getMoveFlag() == MoveFlag.CAPTURE;
-    }
-
-    /**
-     * Checks whether the pawn start flag is set.
-     *
-     * @return True is the move a pawn start move.
-     */
-    public boolean isPawnStartMove() {
-        return getMoveFlag() == MoveFlag.PAWN_START;
-    }
-
-    /**
      * Set a {@link MoveFlag}.
      *
      * @param flag {@link MoveFlag}.
@@ -297,7 +252,7 @@ public class Move {
         }
 
         move &= ~1835008;
-        move |= (flag.value & 7) << 18;
+        move |= (flag.ordinal() & 7) << 18;
     }
 
     //-------------------------------------------------
@@ -356,22 +311,32 @@ public class Move {
     @Override
     public String toString() {
 
-        String promotedStr = "";
-        if (isPromotionMove()) {
-            promotedStr = " promoted piece type: " + getPromotedPieceType();
+        /*
+        NORMAL,
+        PROMOTION,             => promoted piece type
+        EN_PASSANT,            => captured piece type pawn
+        CASTLING,
+        PAWN_START,
+        CAPTURE,               => captured piece type
+        PROMOTION_CAPTURE      => captured piece type
+        */
+
+        String promotedPiece = "";
+        if (getMoveFlag() == MoveFlag.PROMOTION) {
+            promotedPiece = " promoted piece type: " + getPromotedPieceType();
         }
 
-        String capturedStr = "";
-        if (isCapturedMove()) {
-            capturedStr = " captured piece type: " + getCapturedPieceType();
+        String capturedPiece = "";
+        if (getMoveFlag() == MoveFlag.EN_PASSANT || getMoveFlag() == MoveFlag.CAPTURE || getMoveFlag() == MoveFlag.PROMOTION_CAPTURE) {
+            capturedPiece = " captured piece type: " + getCapturedPieceType();
         }
 
         return "Piece: " + getPiece().moveLetter +
                 " from: " + Bitboard.SQUARE_STRINGS[getFrom()] +
                 " to: " + Bitboard.SQUARE_STRINGS[getTo()] +
                 " flag: " + getMoveFlag() +
-                promotedStr +
-                capturedStr +
+                promotedPiece +
+                capturedPiece +
                 " (score: " + score + ")";
     }
 }

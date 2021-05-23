@@ -344,7 +344,8 @@ public class MoveGenerator {
 
                 if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
                     var move = new Move(Piece.WHITE_PAWN, fromBitIndex, board.getEpIndex());
-                    move.setMoveFlag(Move.MoveFlag.ENPASSANT);
+                    move.setMoveFlag(Move.MoveFlag.EN_PASSANT);
+                    move.setCapturedPieceType(PieceType.PAWN);
                     pseudoLegalMoves.add(move);
                 }
 
@@ -366,7 +367,8 @@ public class MoveGenerator {
 
                 if (abs(fromBitIndex.ordinal() - enemyDestination) == 1) {
                     var move = new Move(Piece.BLACK_PAWN, fromBitIndex, board.getEpIndex());
-                    move.setMoveFlag(Move.MoveFlag.ENPASSANT);
+                    move.setMoveFlag(Move.MoveFlag.EN_PASSANT);
+                    move.setCapturedPieceType(PieceType.PAWN);
                     pseudoLegalMoves.add(move);
                 }
 

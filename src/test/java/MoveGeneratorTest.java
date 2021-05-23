@@ -68,13 +68,13 @@ class MoveGeneratorTest {
         var wpBoard = new Board(WHITE_PAWNS);
         var wpMg = new MoveGenerator(wpBoard);
         assertEquals(26, wpMg.filterPseudoLegalMovesBy(Piece.WHITE_PAWN).size());
-        assertEquals(1, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.ENPASSANT).size());
+        assertEquals(1, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.EN_PASSANT).size());
 
         // 26 black pawn moves
         var bpBoard = new Board(BLACK_PAWNS);
         var bpMg = new MoveGenerator(bpBoard);
         assertEquals(26, bpMg.filterPseudoLegalMovesBy(Piece.BLACK_PAWN).size());
-        assertEquals(1, bpMg.filterPseudoLegalMovesBy(Move.MoveFlag.ENPASSANT).size());
+        assertEquals(1, bpMg.filterPseudoLegalMovesBy(Move.MoveFlag.EN_PASSANT).size());
 
         // 14 white knight moves + 5 white king moves
         var kkBoard = new Board(KNIGHTS_AND_KINGS);

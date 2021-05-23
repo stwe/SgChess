@@ -285,7 +285,7 @@ public class Board {
             return Piece.BLACK_KING;
         }
 
-        return Piece.BLACK_KING; // todo return NO_PIECE - must created before
+        return Piece.NO_PIECE;
     }
 
     //-------------------------------------------------

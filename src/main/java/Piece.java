@@ -25,7 +25,9 @@ public enum Piece {
     BLACK_BISHOP("♗ ", "b ", 'b', PieceType.BISHOP, Board.Color.BLACK, 8),
     BLACK_ROOK("♖ ", "r ", 'r', PieceType.ROOK, Board.Color.BLACK, 9),
     BLACK_QUEEN("♕ ", "q ", 'q', PieceType.QUEEN, Board.Color.BLACK, 10),
-    BLACK_KING("♔ ", "k ", 'k', PieceType.KING, Board.Color.BLACK, 11);
+    BLACK_KING("♔ ", "k ", 'k', PieceType.KING, Board.Color.BLACK, 11),
+
+    NO_PIECE("x ", "x ", 'x', PieceType.NO_PIECE, Board.Color.NONE, 12);
 
     //-------------------------------------------------
     // Member
@@ -67,7 +69,7 @@ public enum Piece {
     /**
      * To get the {@link Piece} by ordinal value.
      */
-    public final Piece[] values = new Piece[12];
+    public final Piece[] values = new Piece[13];
 
     //-------------------------------------------------
     // Ctors.
