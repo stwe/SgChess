@@ -16,12 +16,20 @@ public class Board {
     //-------------------------------------------------
 
     public enum Color {
-        WHITE(0), BLACK(1);
+        WHITE(0), BLACK(1), NONE(2);
 
         public int value;
 
         public Color getEnemyColor() {
-            return this.value == 0 ? BLACK : WHITE;
+            if (this.value == 0) {
+                return BLACK;
+            }
+
+            if (this.value == 1) {
+                return WHITE;
+            }
+
+            return NONE;
         }
 
         Color(int value) {

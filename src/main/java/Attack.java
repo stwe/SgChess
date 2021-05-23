@@ -260,9 +260,14 @@ public class Attack {
      * @return The bitboard with all attackers.
      */
     public static long getAttackersToSquare(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
+        var attackersBitboard = 0L;
+
+        if (color == Board.Color.NONE) {
+            return attackersBitboard;
+        }
+
         var enemyColor = color.getEnemyColor();
 
-        var attackersBitboard = 0L;
         attackersBitboard |= getKingMoves(bitIndex) & board.getKing(enemyColor);
         attackersBitboard |= getKnightMoves(bitIndex) & board.getKnights(enemyColor);
         attackersBitboard |= getPawnAttacks(color, bitIndex) & board.getPawns(enemyColor);
@@ -283,6 +288,10 @@ public class Attack {
      * @return boolean
      */
     public static boolean isSquareAttacked(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
+        if (color == Board.Color.NONE) {
+            return false;
+        }
+
         var enemyColor = color.getEnemyColor();
 
         if ((getKingMoves(bitIndex) & board.getKing(enemyColor)) != 0) {
@@ -318,6 +327,10 @@ public class Attack {
      * @return boolean
      */
     public static boolean areOneOrMoreSquaresAttacked(Board.Color color, Board board, Bitboard.BitIndex ... bitIndices) {
+        if (color == Board.Color.NONE) {
+            return false;
+        }
+
         for (var index : bitIndices) {
             if (isSquareAttacked(color, index, board)) {
                 return true;
