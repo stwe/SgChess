@@ -71,15 +71,6 @@ public class Move {
     //-------------------------------------------------
 
     /**
-     * Get {@link #move}.
-     *
-     * @return {@link #move}.
-     */
-    public int getMove() {
-        return move;
-    }
-
-    /**
      * Get {@link #score}.
      *
      * @return {@link #score}.

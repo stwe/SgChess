@@ -41,7 +41,7 @@ public class MoveGenerator {
      */
     public MoveGenerator(Board board) {
         this.board = Objects.requireNonNull(board, "board must not be null");
-        generatePseudoLegalMoves();
+        //generatePseudoLegalMoves();
     }
 
     //-------------------------------------------------
@@ -615,27 +615,19 @@ public class MoveGenerator {
     public ArrayList<Move> generateLegalMoves() {
         var moves = new ArrayList<Move>();
 
-        // alle king attackers holen
-        board.updateKingAttackers();
+        //board.updateKingAttackers();
 
-        // is check?
         if (board.kingAttackers != 0) {
-            System.out.println("Is check");
-
-            Bitboard.printBitboard(board.kingAttackers);
-
-            // generateEvasionMoves
-
-            // slider herausarbeiten
-            var sliders = board.kingAttackers & ~board.getBlackPawns() & ~board.getBlackKnights();
-            Bitboard.printBitboard(sliders);
-
-            var t = 0;
+            System.out.println("King is in check.");
+            throw new RuntimeException("error");
+            //Bitboard.printBitboard(board.kingAttackers);
+            //generateEvasionMoves()
+            //var sliders = board.kingAttackers & ~board.getBlackPawns() & ~board.getBlackKnights();
         }
 
-        // generatePseudoLegalMoves
-
-        return moves;
+        // wenn der König nicht im Schach steht, sind alle pseudo legalen Züge gültig/legal
+        //generatePseudoLegalMoves();
+        return pseudoLegalMoves; // evtl. umbenennen in currentMoves
     }
 
     //-------------------------------------------------
@@ -713,7 +705,7 @@ public class MoveGenerator {
     /**
      * Generate and add all pseudo legal moves.
      */
-    private void generatePseudoLegalMoves() {
+    public void generatePseudoLegalMoves() {
         if (board.getColorToMove() == Board.Color.WHITE) {
             // pawns
 
@@ -728,8 +720,6 @@ public class MoveGenerator {
 
             addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.NORMAL, board.getWhiteKing(), ~board.getAllPieces());
             addNonslidingPiecesMoves(Piece.WHITE_KING, Move.MoveFlag.CAPTURE, board.getWhiteKing(), board.getBlackPieces());
-            addKingSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
-            addQueenSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
 
             // rooks
 
@@ -745,6 +735,11 @@ public class MoveGenerator {
 
             addSlidingPiecesMoves(Piece.WHITE_BISHOP, Move.MoveFlag.NORMAL, board.getWhiteBishops(), board.getAllPieces(), ~board.getAllPieces());
             addSlidingPiecesMoves(Piece.WHITE_BISHOP, Move.MoveFlag.CAPTURE, board.getWhiteBishops(), board.getAllPieces(), board.getBlackPieces());
+
+            // castling
+
+            addKingSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
+            addQueenSideCastlingMove(Piece.WHITE_KING, board.getWhiteKing());
         }
 
         if (board.getColorToMove() == Board.Color.BLACK) {
@@ -761,8 +756,6 @@ public class MoveGenerator {
 
             addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.NORMAL, board.getBlackKing(), ~board.getAllPieces());
             addNonslidingPiecesMoves(Piece.BLACK_KING, Move.MoveFlag.CAPTURE, board.getBlackKing(), board.getWhitePieces());
-            addKingSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
-            addQueenSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
 
             // rooks
 
@@ -778,6 +771,11 @@ public class MoveGenerator {
 
             addSlidingPiecesMoves(Piece.BLACK_BISHOP, Move.MoveFlag.NORMAL, board.getBlackBishops(), board.getAllPieces(), ~board.getAllPieces());
             addSlidingPiecesMoves(Piece.BLACK_BISHOP, Move.MoveFlag.CAPTURE, board.getBlackBishops(), board.getAllPieces(), board.getWhitePieces());
+
+            // castling
+
+            addKingSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
+            addQueenSideCastlingMove(Piece.BLACK_KING, board.getBlackKing());
         }
     }
 }

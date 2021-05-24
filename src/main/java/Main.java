@@ -36,16 +36,22 @@ public class Main {
         ConfigLoader.load(Config.class, "/config.properties");
 
         var board = new Board();
-        System.out.println(board);
-
         var mg = new MoveGenerator(board);
+        mg.generatePseudoLegalMoves();
 
-        //mg.generateLegalMoves();
+        var nodes = 0;
+        var allNodes = 0;
+        for (var move : mg.getPseudoLegalMoves()) {
+            board.makeMove(move);
 
-        var mlist = mg.getPseudoLegalMoves();
-        for (var move : mlist) {
-            System.out.println(move);
+            nodes = board.perft(1);
+            allNodes += nodes;
+
+            board.undoMove(move);
+
+            System.out.println(move + " " + nodes);
         }
-        System.out.println("Total moves: " + mlist.size());
+
+        System.out.println("All nodes: " + allNodes);
     }
 }

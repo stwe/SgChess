@@ -49,7 +49,7 @@ public class Board {
     /**
      * The FEN for the starting position.
      */
-    public static final String FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private static final String FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     //-------------------------------------------------
     // Member
@@ -354,21 +354,14 @@ public class Board {
     // todo
 
     public void makeMove(Move move) {
-        // extract from, to etc
-        // schreibe move in die history
-        // handle special moves
-        // hash in/out
-
-        // call movePiece
-
-        // illigeale Züge zurücknehmen
+        movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+        colorToMove = colorToMove.getEnemyColor();
     }
 
-    /*
-    Variante:
-    movePiece from -> to
-    die Funktion findet selbst heraus, welche Figure mit welcher Farbe auf from steht
-    */
+    public void undoMove(Move move) {
+        colorToMove = colorToMove.getEnemyColor();
+        movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+    }
 
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
         movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
@@ -393,6 +386,13 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
+    /**
+     * https://www.chessprogramming.org/Perft_Results
+     *
+     * @param depth
+     *
+     * @return nodes
+     */
     public int perft(int depth) {
         var nodes = 0;
 
@@ -401,15 +401,13 @@ public class Board {
         }
 
         var moveGenerator = new MoveGenerator(this);
+        moveGenerator.generatePseudoLegalMoves();
+        var moves = moveGenerator.getPseudoLegalMoves();
 
-        // todo: legale Züge ermitteln und zurückgeben
-        var moves = moveGenerator.generateLegalMoves();
         for (var move : moves) {
             makeMove(move);
-
             nodes += perft(depth - 1);
-
-            //undoMove(move);
+            undoMove(move);
         }
 
         return nodes;
@@ -696,7 +694,7 @@ public class Board {
     }
 
     public void updateKingAttackers() {
-        //kingAttackers = Attack.getAttackersToSquare(colorToMove, Long.numberOfTrailingZeros(getKingByColor(colorToMove)), this);
+        kingAttackers = Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this);
     }
 
     //-------------------------------------------------
