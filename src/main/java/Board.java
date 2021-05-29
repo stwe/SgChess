@@ -86,7 +86,10 @@ public class Board {
      */
     public long zkey;
 
-    public long kingAttackers = 0L;
+    /**
+     * The current king attackers bitboard.
+     */
+    private long kingAttackersBitboard = 0L;
 
     //-------------------------------------------------
     // Ctors.
@@ -320,6 +323,38 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // King attackers
+    //-------------------------------------------------
+
+    /**
+     * Get current {@link #kingAttackersBitboard}.
+     *
+     * @return {@link #kingAttackersBitboard}.
+     */
+    public long getKingAttackers() {
+        return kingAttackersBitboard;
+    }
+
+    /**
+     * Get the updated {@link #kingAttackersBitboard}.
+     *
+     * @return {@link #kingAttackersBitboard}.
+     */
+    public long updateAndGetKingAttackers() {
+        updateKingAttackers();
+        return kingAttackersBitboard;
+    }
+
+    /**
+     * Checks whether the king is in check.
+     *
+     * @return true if king in check.
+     */
+    public boolean isKingInCheck() {
+        return updateAndGetKingAttackers() != 0;
+    }
+
+    //-------------------------------------------------
     // Castling
     //-------------------------------------------------
 
@@ -351,16 +386,33 @@ public class Board {
     // Move piece
     //-------------------------------------------------
 
-    // todo
-
     public void makeMove(Move move) {
-        movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+        if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+        }
+
+        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+        }
+
         colorToMove = colorToMove.getEnemyColor();
+        updateCommonBitboards();
     }
 
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
-        movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+
+        if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
+            movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+        }
+
+        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+            movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+        }
+
+        updateCommonBitboards();
     }
 
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
@@ -401,14 +453,16 @@ public class Board {
         }
 
         var moveGenerator = new MoveGenerator(this);
-        moveGenerator.generatePseudoLegalMoves();
-        var moves = moveGenerator.getPseudoLegalMoves();
+        moveGenerator.generateLegalMoves();
 
-        for (var move : moves) {
+        for (var move : moveGenerator.getPseudoLegalMoves()) {
             makeMove(move);
             nodes += perft(depth - 1);
             undoMove(move);
+            System.out.println(move);
         }
+
+        System.out.println("All nodes: " + nodes);
 
         return nodes;
     }
@@ -460,15 +514,15 @@ public class Board {
                 s.append("|");
             }
 
-            if (rank == 8) {
+            if (rank == 7) {
                 s.append("    On the move: ").append(colorToMove);
             }
 
-            if (rank == 7) {
+            if (rank == 6) {
                 s.append("    Castling rights: ").append(castlingRightsToString());
             }
 
-            if (rank == 6) {
+            if (rank == 5) {
                 s.append("    Zobrist key: ").append(zkey);
             }
 
@@ -540,7 +594,7 @@ public class Board {
         } else if (fenFields[1].equals("b")) {
             colorToMove = Color.BLACK;
         } else {
-            throw new RuntimeException("Invalid color for to play given.");
+            throw new RuntimeException("Invalid color given.");
         }
 
         // castling rights
@@ -554,7 +608,6 @@ public class Board {
                     Bitboard.File.values()[file],
                     Bitboard.Rank.values()[rank]
             );
-            // todo: add to movelist?
         }
     }
 
@@ -693,8 +746,11 @@ public class Board {
         allPiecesBitboard = bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD] | bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD];
     }
 
-    public void updateKingAttackers() {
-        kingAttackers = Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this);
+    /**
+     * Updates the current king attackers bitboard.
+     */
+    private void updateKingAttackers() {
+        kingAttackersBitboard = Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this);
     }
 
     //-------------------------------------------------

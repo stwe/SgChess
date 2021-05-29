@@ -35,23 +35,15 @@ public class Main {
 
         ConfigLoader.load(Config.class, "/config.properties");
 
-        var board = new Board();
-        var mg = new MoveGenerator(board);
-        mg.generatePseudoLegalMoves();
+        /*
+        stockfish
+        position fen ...
+        go perft x
+        */
 
-        var nodes = 0;
-        var allNodes = 0;
-        for (var move : mg.getPseudoLegalMoves()) {
-            board.makeMove(move);
+        var board = new Board("k7/8/8/8/8/5p2/6p1/7K w - - 0 1");
+        System.out.println(board);
 
-            nodes = board.perft(1);
-            allNodes += nodes;
-
-            board.undoMove(move);
-
-            System.out.println(move + " " + nodes);
-        }
-
-        System.out.println("All nodes: " + allNodes);
+        board.perft(3);
     }
 }
