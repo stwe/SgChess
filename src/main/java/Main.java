@@ -44,7 +44,7 @@ public class Main {
         var board = new Board("k7/8/8/8/7N/5p1B/6p1/7K w - - 0 1");
         System.out.println(board);
 
-        var depth = 2;
+        var depth = 4;
         var nodes = board.perft(depth);
         System.out.println("Depth: " + depth + " all Nodes: " + nodes);
     }

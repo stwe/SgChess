@@ -349,9 +349,14 @@ public class Board {
     // Make / undo
     //-------------------------------------------------
 
+    /**
+     * Executes a given {@link Move}.
+     *
+     * @param move {@link Move}
+     *
+     * @return Returns false if the {@link Move} is illegal; otherwise true.
+     */
     public boolean makeMove(Move move) {
-        var moveColor = colorToMove;
-
         /*
         NORMAL,
         PROMOTION,
@@ -363,23 +368,30 @@ public class Board {
         */
 
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
-            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, moveColor);
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-            removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, moveColor));
-            addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove.getEnemyColor()));
+            removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
+            zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+
+            addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
+            zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, moveColor);
-            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), moveColor.getEnemyColor()));
+            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+            zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
+
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
         }
+
+        var oldColor = colorToMove;
 
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
 
-        if (Attack.getAttackersToSquare(moveColor, Bitboard.getLsb(getKing(moveColor)), this) != 0) {
+        if (Attack.getAttackersToSquare(oldColor, Bitboard.getLsb(getKing(oldColor)), this) != 0) {
             undoMove(move);
             return false; // return illegal move
         }
@@ -387,6 +399,11 @@ public class Board {
         return true; // return legal move
     }
 
+    /**
+     * Restores a {@link Move}.
+     *
+     * @param move {@link Move}
+     */
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
 
@@ -394,9 +411,19 @@ public class Board {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
         }
 
+        if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
+            zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
+
+            addPiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
+            zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+        }
+
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+            zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
         }
 
         updateCommonBitboards();
@@ -406,22 +433,29 @@ public class Board {
     // Move / add / remove
     //-------------------------------------------------
 
+    /**
+     * Convenience method for normal moves.
+     *
+     * @param fromBitIndex The origin {@link Bitboard.BitIndex}.
+     * @param toBitIndex The destination {@link Bitboard.BitIndex}.
+     * @param pieceType {@link PieceType}
+     * @param color {@link Color}
+     */
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
-        movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
+        var pieceBitboard = PieceType.getBitboardNumber(pieceType, color);
+
+        removePiece(fromBitIndex, pieceBitboard);
+        addPiece(toBitIndex, pieceBitboard);
+
         zkey ^= Zkey.piece[color.value][pieceType.value][fromBitIndex];
         zkey ^= Zkey.piece[color.value][pieceType.value][toBitIndex];
-    }
-
-    private void movePiece(int fromBitIndex, int toBitIndex, int bitboardNr) {
-        removePiece(fromBitIndex, bitboardNr);
-        addPiece(toBitIndex, bitboardNr);
     }
 
     /**
      * Add piece to destination.
      *
-     * @param bitIndex
-     * @param bitboardNr
+     * @param bitIndex The destination {@link Bitboard.BitIndex}.
+     * @param bitboardNr The piece's bitboard index.
      */
     private void addPiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] |= Bitboard.SQUARES[bitIndex];
@@ -430,8 +464,8 @@ public class Board {
     /**
      * Remove piece from origin position.
      *
-     * @param bitIndex
-     * @param bitboardNr
+     * @param bitIndex The origin {@link Bitboard.BitIndex}.
+     * @param bitboardNr The piece's bitboard index.
      */
     private void removePiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] &= ~(Bitboard.SQUARES[bitIndex]);
