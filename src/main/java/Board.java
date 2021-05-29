@@ -346,14 +346,29 @@ public class Board {
     }
 
     //-------------------------------------------------
-    // Move piece
+    // Make / undo
     //-------------------------------------------------
 
     public boolean makeMove(Move move) {
         var moveColor = colorToMove;
 
+        /*
+        NORMAL,
+        PROMOTION,
+        EN_PASSANT,
+        CASTLING,
+        PAWN_START,
+        CAPTURE,
+        PROMOTION_CAPTURE
+        */
+
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, moveColor);
+        }
+
+        if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, moveColor));
+            addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove.getEnemyColor()));
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
@@ -387,6 +402,10 @@ public class Board {
         updateCommonBitboards();
     }
 
+    //-------------------------------------------------
+    // Move / add / remove
+    //-------------------------------------------------
+
     public void movePiece(int fromBitIndex, int toBitIndex, PieceType pieceType, Color color) {
         movePiece(fromBitIndex, toBitIndex, PieceType.getBitboardNumber(pieceType, color));
         zkey ^= Zkey.piece[color.value][pieceType.value][fromBitIndex];
@@ -398,10 +417,22 @@ public class Board {
         addPiece(toBitIndex, bitboardNr);
     }
 
+    /**
+     * Add piece to destination.
+     *
+     * @param bitIndex
+     * @param bitboardNr
+     */
     private void addPiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] |= Bitboard.SQUARES[bitIndex];
     }
 
+    /**
+     * Remove piece from origin position.
+     *
+     * @param bitIndex
+     * @param bitboardNr
+     */
     private void removePiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] &= ~(Bitboard.SQUARES[bitIndex]);
     }
