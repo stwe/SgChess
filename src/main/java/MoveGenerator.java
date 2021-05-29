@@ -41,7 +41,6 @@ public class MoveGenerator {
      */
     public MoveGenerator(Board board) {
         this.board = Objects.requireNonNull(board, "board must not be null");
-        //generatePseudoLegalMoves();
     }
 
     //-------------------------------------------------
@@ -615,43 +614,6 @@ public class MoveGenerator {
 
             piecesBitboard &= piecesBitboard - 1;
         }
-    }
-
-    //-------------------------------------------------
-    // Legal moves
-    //-------------------------------------------------
-
-    private boolean isMoveLegal(Move move) {
-        if (move.getPiece().pieceType == PieceType.KING) {
-            return !Attack.isSquareAttacked(board.getColorToMove(), Bitboard.BitIndex.values()[move.getTo()], board);
-        }
-
-        return true;
-    }
-
-    private void generateEvasionMoves() {
-        var kingAttackers = board.getKingAttackers();
-
-        var currentKingBitboard = board.getKing(board.getColorToMove());
-        var kingBitIndex = Bitboard.getLsb(currentKingBitboard);
-        var kingMovesBitboard = Attack.getKingMoves(kingBitIndex);
-
-        var kingCaptureTargets = kingMovesBitboard & kingAttackers;    // captures
-        var kingQuietTargets = kingMovesBitboard ^ kingCaptureTargets; // evasions
-
-        var piece = board.getColorToMove() == Board.Color.WHITE ? Piece.WHITE_KING : Piece.BLACK_KING;
-        addQuietMoves(piece, kingBitIndex, kingQuietTargets);
-        addCaptureMoves(piece, kingBitIndex, kingCaptureTargets);
-    }
-
-    public void generateLegalMoves() {
-        if (board.isKingInCheck()) {
-            generateEvasionMoves();
-            pseudoLegalMoves.removeIf(e -> !isMoveLegal(e));
-            return;
-        }
-
-        generatePseudoLegalMoves();
     }
 
     //-------------------------------------------------

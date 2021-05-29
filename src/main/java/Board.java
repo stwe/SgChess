@@ -86,11 +86,6 @@ public class Board {
      */
     public long zkey;
 
-    /**
-     * The current king attackers bitboard.
-     */
-    private long kingAttackersBitboard = 0L;
-
     //-------------------------------------------------
     // Ctors.
     //-------------------------------------------------
@@ -323,38 +318,6 @@ public class Board {
     }
 
     //-------------------------------------------------
-    // King attackers
-    //-------------------------------------------------
-
-    /**
-     * Get current {@link #kingAttackersBitboard}.
-     *
-     * @return {@link #kingAttackersBitboard}.
-     */
-    public long getKingAttackers() {
-        return kingAttackersBitboard;
-    }
-
-    /**
-     * Get the updated {@link #kingAttackersBitboard}.
-     *
-     * @return {@link #kingAttackersBitboard}.
-     */
-    public long updateAndGetKingAttackers() {
-        updateKingAttackers();
-        return kingAttackersBitboard;
-    }
-
-    /**
-     * Checks whether the king is in check.
-     *
-     * @return true if king in check.
-     */
-    public boolean isKingInCheck() {
-        return updateAndGetKingAttackers() != 0;
-    }
-
-    //-------------------------------------------------
     // Castling
     //-------------------------------------------------
 
@@ -386,18 +349,27 @@ public class Board {
     // Move piece
     //-------------------------------------------------
 
-    public void makeMove(Move move) {
+    public boolean makeMove(Move move) {
+        var moveColor = colorToMove;
+
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
-            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, moveColor);
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
-            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, moveColor);
+            removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), moveColor.getEnemyColor()));
         }
 
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
+
+        if (Attack.getAttackersToSquare(moveColor, Bitboard.getLsb(getKing(moveColor)), this) != 0) {
+            undoMove(move);
+            return false; // return illegal move
+        }
+
+        return true; // return legal move
     }
 
     public void undoMove(Move move) {
@@ -453,16 +425,21 @@ public class Board {
         }
 
         var moveGenerator = new MoveGenerator(this);
-        moveGenerator.generateLegalMoves();
+        moveGenerator.generatePseudoLegalMoves();
 
         for (var move : moveGenerator.getPseudoLegalMoves()) {
-            makeMove(move);
+            if (!makeMove(move)) {
+                continue;
+            }
+
             nodes += perft(depth - 1);
+
             undoMove(move);
-            System.out.println(move);
         }
 
-        System.out.println("All nodes: " + nodes);
+        if (nodes == 0) {
+            System.out.println(colorToMove + " ist Matt");
+        }
 
         return nodes;
     }
@@ -744,13 +721,6 @@ public class Board {
         bitboards[Bitboard.ALL_KINGS_BITBOARD] = bitboards[Bitboard.WHITE_KING_BITBOARD] | bitboards[Bitboard.BLACK_KING_BITBOARD];
 
         allPiecesBitboard = bitboards[Bitboard.ALL_WHITE_PIECES_BITBOARD] | bitboards[Bitboard.ALL_BLACK_PIECES_BITBOARD];
-    }
-
-    /**
-     * Updates the current king attackers bitboard.
-     */
-    private void updateKingAttackers() {
-        kingAttackersBitboard = Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this);
     }
 
     //-------------------------------------------------
