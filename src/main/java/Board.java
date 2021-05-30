@@ -370,13 +370,6 @@ public class Board {
         PROMOTION_CAPTURE
         */
 
-        // todo
-
-        if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-            checks++;
-            System.out.println(move);
-        }
-
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
         }
@@ -511,6 +504,12 @@ public class Board {
 
             if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
                 captures++;
+                //System.out.println("capture:" + move);
+            }
+
+            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                checks++;
+                //System.out.println("check: " + move);
             }
 
             nodes += perft(depth - 1);
