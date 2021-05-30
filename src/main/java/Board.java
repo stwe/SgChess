@@ -485,8 +485,12 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
+    public int captures0 = 0;
+    public int checks0 = 0;
+
     public int captures = 0;
     public int checks = 0;
+
     public long nodes = 0;
 
     /**
@@ -541,6 +545,14 @@ public class Board {
                 continue;
             }
 
+            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                captures0++;
+            }
+
+            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                checks0++;
+            }
+
             var cumNodes = nodes;
 
             perftDriver(depth - 1);
@@ -556,7 +568,9 @@ public class Board {
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
         System.out.println("Captures: " + captures);
+        System.out.println("Captures0: " + captures0);
         System.out.println("Checks: " + checks);
+        System.out.println("Checks0: " + checks0);
         System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("---------------------------------");
     }
