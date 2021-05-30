@@ -510,6 +510,14 @@ public class Board {
                 continue;
             }
 
+            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                captures++;
+            }
+
+            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                checks++;
+            }
+
             perftDriver(depth - 1);
 
             undoMove(move);
@@ -547,6 +555,8 @@ public class Board {
         System.out.println("---------------------------------");
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
+        System.out.println("Captures: " + captures);
+        System.out.println("Checks: " + checks);
         System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("---------------------------------");
     }
