@@ -379,6 +379,11 @@ public class Board {
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
         }
 
+        // todo
+        if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+        }
+
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
             removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
             zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
@@ -417,6 +422,11 @@ public class Board {
 
             addPiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+        }
+
+        // todo
+        if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
+            movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {

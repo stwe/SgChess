@@ -41,26 +41,9 @@ public class Main {
         go perft x
         */
 
-        var board = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
+        //var board = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
+        var board = new Board();
         System.out.println(board);
-        board.perftTest(2);
-
-        /*
-        Piece: P from: e2 to: e3 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: P from: e2 to: e4 flag: PAWN_START (score: 0) nodes:          15   16  -1
-        Piece: P from: g2 to: g3 flag: NORMAL (score: 0) nodes:               4    4
-        Piece: P from: g2 to: g4 flag: PAWN_START (score: 0) nodes:          15   17  -2
-        Piece: K from: a5 to: a4 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: K from: a5 to: a6 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: b1 flag: NORMAL (score: 0) nodes:              16   16
-        Piece: R from: b4 to: b2 flag: NORMAL (score: 0) nodes:              16   16
-        Piece: R from: b4 to: b3 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: a4 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: c4 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: d4 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: e4 flag: NORMAL (score: 0) nodes:              15   15
-        Piece: R from: b4 to: f4 flag: CAPTURE captured piece type: PAWN      2    2
-                                                                                       188 statt 191
-        */
+        board.perftTest(3);
     }
 }
