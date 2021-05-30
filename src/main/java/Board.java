@@ -349,9 +349,6 @@ public class Board {
     // Make / undo
     //-------------------------------------------------
 
-    public int captures = 0;
-    public int checks = 0;
-
     /**
      * Executes a given {@link Move}.
      *
@@ -478,20 +475,21 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
+    public int captures = 0;
+    public int checks = 0;
+    public long nodes = 0;
+
     /**
      * A function to walk the move generation tree of strictly
      * legal moves to count all the leaf nodes of a certain depth.
      * @see <a href="https://www.chessprogramming.org/Perft_Results">Some results</a>
      *
      * @param depth The search depth.
-     *
-     * @return The number of visited nodes.
      */
-    public int perft(int depth) {
-        var nodes = 0;
-
+    private void perftDriver(int depth) {
         if (depth == 0) {
-            return 1;
+            nodes++;
+            return;
         }
 
         var moveGenerator = new MoveGenerator(this);
@@ -502,26 +500,45 @@ public class Board {
                 continue;
             }
 
-            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-                captures++;
-                //System.out.println("capture:" + move);
-            }
-
-            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-                checks++;
-                //System.out.println("check: " + move);
-            }
-
-            nodes += perft(depth - 1);
+            perftDriver(depth - 1);
 
             undoMove(move);
         }
+    }
 
-        if (nodes == 0) {
-            System.out.println(colorToMove + " ist Matt");
+    public void perftTest(int depth) {
+        System.out.println();
+        System.out.println();
+        System.out.println("---------------------------------");
+        System.out.println("Perft test");
+        System.out.println("---------------------------------");
+
+        var moveGenerator = new MoveGenerator(this);
+        moveGenerator.generatePseudoLegalMoves();
+
+        var startTime = System.currentTimeMillis();
+
+        for (var move : moveGenerator.getPseudoLegalMoves()) {
+            if (!makeMove(move)) {
+                continue;
+            }
+
+            var cumNodes = nodes;
+
+            perftDriver(depth - 1);
+
+            var oldNodes = nodes - cumNodes;
+
+            undoMove(move);
+
+            System.out.println(move + " nodes: " + oldNodes);
         }
 
-        return nodes;
+        System.out.println("---------------------------------");
+        System.out.println("Depth: " + depth);
+        System.out.println("Nodes: " + nodes);
+        System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
+        System.out.println("---------------------------------");
     }
 
     //-------------------------------------------------
