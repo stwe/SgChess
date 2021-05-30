@@ -349,6 +349,9 @@ public class Board {
     // Make / undo
     //-------------------------------------------------
 
+    public int captures = 0;
+    public int checks = 0;
+
     /**
      * Executes a given {@link Move}.
      *
@@ -366,6 +369,13 @@ public class Board {
         CAPTURE,
         PROMOTION_CAPTURE
         */
+
+        // todo
+
+        if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+            checks++;
+            System.out.println(move);
+        }
 
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
@@ -476,11 +486,13 @@ public class Board {
     //-------------------------------------------------
 
     /**
-     * https://www.chessprogramming.org/Perft_Results
+     * A function to walk the move generation tree of strictly
+     * legal moves to count all the leaf nodes of a certain depth.
+     * @see <a href="https://www.chessprogramming.org/Perft_Results">Some results</a>
      *
-     * @param depth
+     * @param depth The search depth.
      *
-     * @return nodes
+     * @return The number of visited nodes.
      */
     public int perft(int depth) {
         var nodes = 0;
@@ -495,6 +507,10 @@ public class Board {
         for (var move : moveGenerator.getPseudoLegalMoves()) {
             if (!makeMove(move)) {
                 continue;
+            }
+
+            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                captures++;
             }
 
             nodes += perft(depth - 1);
