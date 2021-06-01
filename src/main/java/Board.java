@@ -372,6 +372,14 @@ public class Board {
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            if (move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+                /*
+                //remove the captured piece
+                unsigned int capturedPieceType = move.getCapturedPieceType();
+                removePiece(destination, capturedPieceType, oppositeColor);
+                 */
+            }
+
             removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
 
@@ -380,6 +388,43 @@ public class Board {
         }
 
         // todo
+        if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+            // king
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+
+            var rookOrigin = Bitboard.BitIndex.NO_SQUARE;
+            var rookDestination = Bitboard.BitIndex.NO_SQUARE;
+
+            if (colorToMove == Color.WHITE) {
+                // short
+                if (move.getTo() == Bitboard.BitIndex.G1_IDX.ordinal()) {
+                    rookOrigin = Bitboard.BitIndex.H1_IDX;
+                    rookDestination = Bitboard.BitIndex.F1_IDX;
+                } else {
+                    // long
+                    rookOrigin = Bitboard.BitIndex.A1_IDX;
+                    rookDestination = Bitboard.BitIndex.D1_IDX;
+                }
+            }
+
+            if (colorToMove == Color.BLACK) {
+                // short
+                if (move.getTo() == Bitboard.BitIndex.G8_IDX.ordinal()) {
+                    rookOrigin = Bitboard.BitIndex.H8_IDX;
+                    rookDestination = Bitboard.BitIndex.F8_IDX;
+                } else {
+                    // long
+                    rookOrigin = Bitboard.BitIndex.A8_IDX;
+                    rookDestination = Bitboard.BitIndex.D8_IDX;
+                }
+            }
+
+            // rook
+            movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
+
+            // todo: update castling rights
+        }
+
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
         }
@@ -425,6 +470,43 @@ public class Board {
         }
 
         // todo
+        if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+            // king
+            movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+
+            var rookOrigin = Bitboard.BitIndex.NO_SQUARE;
+            var rookDestination = Bitboard.BitIndex.NO_SQUARE;
+
+            if (colorToMove == Color.WHITE) {
+                // short
+                if (move.getTo() == Bitboard.BitIndex.G1_IDX.ordinal()) {
+                    rookOrigin = Bitboard.BitIndex.H1_IDX;
+                    rookDestination = Bitboard.BitIndex.F1_IDX;
+                } else {
+                    // long
+                    rookOrigin = Bitboard.BitIndex.A1_IDX;
+                    rookDestination = Bitboard.BitIndex.D1_IDX;
+                }
+            }
+
+            if (colorToMove == Color.BLACK) {
+                // short
+                if (move.getTo() == Bitboard.BitIndex.G8_IDX.ordinal()) {
+                    rookOrigin = Bitboard.BitIndex.H8_IDX;
+                    rookDestination = Bitboard.BitIndex.F8_IDX;
+                } else {
+                    // long
+                    rookOrigin = Bitboard.BitIndex.A8_IDX;
+                    rookDestination = Bitboard.BitIndex.D8_IDX;
+                }
+            }
+
+            // rook
+            movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
+
+            // todo: update castling rights
+        }
+
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
         }
@@ -485,13 +567,15 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
-    public int captures0 = 0;
-    public int checks0 = 0;
+    private int captures0 = 0;
+    private int checks0 = 0;
+    private int castles0 = 0;
 
     public int captures = 0;
     public int checks = 0;
+    public int castles = 0;
 
-    public long nodes = 0;
+    private long nodes = 0;
 
     /**
      * A function to walk the move generation tree of strictly
@@ -520,6 +604,10 @@ public class Board {
 
             if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
                 checks++;
+            }
+
+            if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                castles++;
             }
 
             perftDriver(depth - 1);
@@ -553,6 +641,10 @@ public class Board {
                 checks0++;
             }
 
+            if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                castles0++;
+            }
+
             var cumNodes = nodes;
 
             perftDriver(depth - 1);
@@ -571,6 +663,8 @@ public class Board {
         System.out.println("Captures0: " + captures0);
         System.out.println("Checks: " + checks);
         System.out.println("Checks0: " + checks0);
+        System.out.println("Castles: " + castles);
+        System.out.println("Castles0: " + castles0);
         System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("---------------------------------");
     }
