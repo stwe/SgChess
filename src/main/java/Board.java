@@ -423,6 +423,20 @@ public class Board {
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
 
             // todo: update castling rights
+
+            int castRights[] = new int[]{
+                        7, 15, 15, 15,  3, 15, 15, 11,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        15, 15, 15, 15, 15, 15, 15, 15,
+                        13, 15, 15, 15, 12, 15, 15, 14
+            };
+
+            castlingRights &= castRights[move.getFrom()];
+            castlingRights &= castRights[move.getTo()];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -505,6 +519,19 @@ public class Board {
             movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
 
             // todo: update castling rights
+            int castRights[] = new int[]{
+                    7, 15, 15, 15,  3, 15, 15, 11,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    13, 15, 15, 15, 12, 15, 15, 14
+            };
+
+            castlingRights &= castRights[move.getTo()];
+            castlingRights &= castRights[move.getFrom()];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -575,7 +602,7 @@ public class Board {
     public int checks = 0;
     public int castles = 0;
 
-    private long nodes = 0;
+    public long nodes = 0;
 
     /**
      * A function to walk the move generation tree of strictly

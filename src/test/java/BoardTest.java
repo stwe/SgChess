@@ -41,6 +41,21 @@ class BoardTest {
     }
 
     @Test
+    void makeMove() {
+        var board = new Board("r3k2r/p3p2p/8/8/8/8/P3P2P/R3K2R w KQkq - 0 1");
+
+        var mg = new MoveGenerator(board);
+        mg.generatePseudoLegalMoves();
+        var moves = mg.getPseudoLegalMoves();
+
+        board.makeMove(moves.get(16));
+        System.out.println(board);
+
+        board.undoMove(moves.get(16));
+        System.out.println(board);
+    }
+
+    @Test
     void perftTest() {
         // start position, depth 3
         var boardStart = new Board();
