@@ -423,17 +423,19 @@ public class Board {
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
 
             // todo: update castling rights
-
-            int castRights[] = new int[]{
-                        7, 15, 15, 15,  3, 15, 15, 11,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        15, 15, 15, 15, 15, 15, 15, 15,
-                        13, 15, 15, 15, 12, 15, 15, 14
+            int[] castRights = new int[] {
+                    13, 15, 15, 15, 12, 15, 15, 14,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                    15, 15, 15, 15, 15, 15, 15, 15,
+                     7, 15, 15, 15,  3, 15, 15, 11,
             };
+
+            var f = move.getFrom();
+            var t = move.getTo();
 
             castlingRights &= castRights[move.getFrom()];
             castlingRights &= castRights[move.getTo()];
@@ -519,19 +521,6 @@ public class Board {
             movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
 
             // todo: update castling rights
-            int castRights[] = new int[]{
-                    7, 15, 15, 15,  3, 15, 15, 11,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    13, 15, 15, 15, 12, 15, 15, 14
-            };
-
-            castlingRights &= castRights[move.getTo()];
-            castlingRights &= castRights[move.getFrom()];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
