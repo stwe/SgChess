@@ -206,7 +206,7 @@ public class MoveGenerator {
                 }
 
                 if (Attack.areOneOrMoreSquaresAttacked(
-                        Board.Color.WHITE, board,
+                        Board.Color.BLACK, board,
                         Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.F8_IDX, Bitboard.BitIndex.G8_IDX)
                 ) {
                     return false;
@@ -284,7 +284,7 @@ public class MoveGenerator {
                 }
 
                 if (Attack.areOneOrMoreSquaresAttacked(
-                        Board.Color.WHITE, board,
+                        Board.Color.BLACK, board,
                         Bitboard.BitIndex.E8_IDX, Bitboard.BitIndex.D8_IDX, Bitboard.BitIndex.C8_IDX)
                 ) {
                     return false;

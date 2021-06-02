@@ -348,6 +348,34 @@ public class Bitboard {
     public static final long CLEAR_FILE_GH = CLEAR_FILE_G & CLEAR_FILE_H;
 
     //-------------------------------------------------
+    // Castling
+    //-------------------------------------------------
+
+    // The order is 1111 = qkQK
+
+    public static final int BOTH_CASTLE_BOTH_SIDES = 15;      // 1111
+
+    public static final int WHITE_KING_CASTLE_KING_SIDE = 1;  // 0001
+    public static final int WHITE_KING_CASTLE_QUEEN_SIDE = 2; // 0010
+
+    public static final int BLACK_KING_CASTLE_KING_SIDE = 4;  // 0100
+    public static final int BLACK_KING_CASTLE_QUEEN_SIDE = 8; // 1000
+
+    /**
+     * Castling rights update constants.
+     */
+    public static final int[] CASTLING_RIGHTS = new int[] {
+            13, 15, 15, 15, 12, 15, 15, 14,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+             7, 15, 15, 15,  3, 15, 15, 11,
+    };
+
+    //-------------------------------------------------
     // Utils
     //-------------------------------------------------
 

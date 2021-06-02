@@ -41,18 +41,61 @@ class BoardTest {
     }
 
     @Test
-    void makeMove() {
+    void makeCastlingMove() {
         var board = new Board("r3k2r/p3p2p/8/8/8/8/P3P2P/R3K2R w KQkq - 0 1");
 
-        var mg = new MoveGenerator(board);
-        mg.generatePseudoLegalMoves();
-        var moves = mg.getPseudoLegalMoves();
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var wmoves = mg0.getPseudoLegalMoves();
 
-        board.makeMove(moves.get(16));
-        System.out.println(board);
+        // start
+        assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
 
-        board.undoMove(moves.get(16));
-        System.out.println(board);
+        // white
+
+        // white king castle king side
+        board.makeMove(wmoves.get(15));
+        var rest = Bitboard.BLACK_KING_CASTLE_KING_SIDE | Bitboard.BLACK_KING_CASTLE_QUEEN_SIDE;
+        assertEquals(rest, board.getCastlingRights());
+
+        // undo castling
+        board.undoMove(wmoves.get(15));
+        assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+
+        // white king castle queen side
+        board.makeMove(wmoves.get(16));
+        rest = Bitboard.BLACK_KING_CASTLE_KING_SIDE | Bitboard.BLACK_KING_CASTLE_QUEEN_SIDE;
+        assertEquals(rest, board.getCastlingRights());
+
+        // undo castling
+        board.undoMove(wmoves.get(16));
+        assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+
+        // black
+
+        board.setColorToMove(Board.Color.BLACK);
+
+        var mg1 = new MoveGenerator(board);
+        mg1.generatePseudoLegalMoves();
+        var bmoves = mg1.getPseudoLegalMoves();
+
+        // black king castle king side
+        board.makeMove(bmoves.get(15));
+        rest = Bitboard.WHITE_KING_CASTLE_KING_SIDE | Bitboard.WHITE_KING_CASTLE_QUEEN_SIDE;
+        assertEquals(rest, board.getCastlingRights());
+
+        // undo castling
+        board.undoMove(bmoves.get(15));
+        assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+
+        // black queen castle queen side
+        board.makeMove(bmoves.get(16));
+        rest = Bitboard.WHITE_KING_CASTLE_KING_SIDE | Bitboard.WHITE_KING_CASTLE_QUEEN_SIDE;
+        assertEquals(rest, board.getCastlingRights());
+
+        // undo castling
+        board.undoMove(bmoves.get(16));
+        assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
     }
 
     @Test

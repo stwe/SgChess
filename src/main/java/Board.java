@@ -77,6 +77,11 @@ public class Board {
     private int castlingRights;
 
     /**
+     * A packed integer containing the old castling rights.
+     */
+    private int oldCastlingRights;
+
+    /**
      * The {@link Bitboard.BitIndex} of the En Passant target square.
      */
     private Bitboard.BitIndex epIndex = Bitboard.BitIndex.NO_SQUARE;
@@ -318,6 +323,14 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // Setter
+    //-------------------------------------------------
+
+    public void setColorToMove(Color colorToMove) {
+        this.colorToMove = colorToMove;
+    }
+
+    //-------------------------------------------------
     // Castling
     //-------------------------------------------------
 
@@ -387,7 +400,6 @@ public class Board {
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
         }
 
-        // todo
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
             // king
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
@@ -421,24 +433,6 @@ public class Board {
 
             // rook
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
-
-            // todo: update castling rights
-            int[] castRights = new int[] {
-                    13, 15, 15, 15, 12, 15, 15, 14,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                    15, 15, 15, 15, 15, 15, 15, 15,
-                     7, 15, 15, 15,  3, 15, 15, 11,
-            };
-
-            var f = move.getFrom();
-            var t = move.getTo();
-
-            castlingRights &= castRights[move.getFrom()];
-            castlingRights &= castRights[move.getTo()];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -452,8 +446,15 @@ public class Board {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
         }
 
+        // update castling rights
+        oldCastlingRights = castlingRights;
+        castlingRights &= Bitboard.CASTLING_RIGHTS[move.getFrom()];
+        castlingRights &= Bitboard.CASTLING_RIGHTS[move.getTo()];
+
+        // store current color
         var oldColor = colorToMove;
 
+        // change color && update bitboards
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
 
@@ -485,7 +486,6 @@ public class Board {
             zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
         }
 
-        // todo
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
             // king
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
@@ -519,8 +519,6 @@ public class Board {
 
             // rook
             movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
-
-            // todo: update castling rights
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -533,6 +531,9 @@ public class Board {
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
             zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
         }
+
+        // undo castling rights
+        castlingRights = oldCastlingRights;
 
         updateCommonBitboards();
     }
@@ -913,16 +914,16 @@ public class Board {
         for (var ch : castleString.toCharArray()) {
             switch (ch) {
                 case 'K':
-                    castlingRights |= 1;
+                    castlingRights |= Bitboard.WHITE_KING_CASTLE_KING_SIDE;
                     break;
                 case 'Q':
-                    castlingRights |= 2;
+                    castlingRights |= Bitboard.WHITE_KING_CASTLE_QUEEN_SIDE;
                     break;
                 case 'k':
-                    castlingRights |= 4;
+                    castlingRights |= Bitboard.BLACK_KING_CASTLE_KING_SIDE;
                     break;
                 case 'q':
-                    castlingRights |= 8;
+                    castlingRights |= Bitboard.BLACK_KING_CASTLE_QUEEN_SIDE;
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + ch);
