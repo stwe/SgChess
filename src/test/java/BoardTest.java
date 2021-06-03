@@ -185,8 +185,6 @@ class BoardTest {
         board.makeMove(moves.get(1));
         System.out.println(board);
         */
-
-        var t = 0;
     }
 
     @Test
@@ -195,7 +193,7 @@ class BoardTest {
 
         // start position
         var boardStart = new Board();
-        var depth = 3;
+        var depth = 6;
         boardStart.perftTest(depth);
 
         if (depth == 1) {
@@ -220,6 +218,24 @@ class BoardTest {
             assertEquals(0, boardStart.enPassants[0]);
             assertEquals(0, boardStart.castles[0]);
             assertEquals(12, boardStart.checks[0]);
+        }
+
+        // todo: show checkmates
+
+        if (depth == 4) {
+            assertEquals(197281, boardStart.nodes);
+            assertEquals(1576, boardStart.captures[0]);
+            assertEquals(0, boardStart.enPassants[0]);
+            assertEquals(0, boardStart.castles[0]);
+            assertEquals(469, boardStart.checks[0]);
+        }
+
+        if (depth == 6) {
+            assertEquals(119060324, boardStart.nodes);
+            assertEquals(2812008, boardStart.captures[0]);
+            assertEquals(5248, boardStart.enPassants[0]);
+            assertEquals(0, boardStart.castles[0]);
+            assertEquals(809099, boardStart.checks[0]);
         }
 
         // wiki position 2, also known as Kiwipete
