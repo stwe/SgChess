@@ -99,6 +99,30 @@ class BoardTest {
     }
 
     @Test
+    void makeMove() {
+        // todo
+
+        var board = new Board("k3n3/5P2/8/8/8/8/8/K7 w - - 0 1");
+
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var moves = mg0.getPseudoLegalMoves();
+        System.out.println(board);
+
+        board.makeMove(moves.get(7));
+        System.out.println(board);
+
+        Bitboard.printBitboard(board.getBlackKnights());
+        Bitboard.printBitboard(board.getWhiteQueens());
+
+        board.undoMove(moves.get(7));
+        System.out.println(board);
+
+        Bitboard.printBitboard(board.getBlackKnights());
+        Bitboard.printBitboard(board.getWhiteQueens());
+    }
+
+    @Test
     void perftTest() {
         // start position, depth 3
         var boardStart = new Board();

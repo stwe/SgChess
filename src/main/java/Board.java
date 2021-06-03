@@ -386,11 +386,7 @@ public class Board {
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             if (move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-                /*
-                //remove the captured piece
-                unsigned int capturedPieceType = move.getCapturedPieceType();
-                removePiece(destination, capturedPieceType, oppositeColor);
-                 */
+                removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
             }
 
             removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
@@ -479,6 +475,10 @@ public class Board {
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            if (move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+                addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+            }
+
             removePiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
 
