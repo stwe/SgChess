@@ -396,6 +396,24 @@ public class Board {
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
         }
 
+        if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+            var remove = move.getTo();
+            if (colorToMove == Color.WHITE) {
+                remove -= 8;
+            } else {
+                remove += 8;
+            }
+
+            // remove enemy pawn
+            removePiece(remove, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+
+            // move own pawn to epIndex/move.getTo()
+            movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+
+            // update epIndex to NO_SQUARE
+            epIndex = Bitboard.BitIndex.NO_SQUARE;
+        }
+
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
             // king
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
@@ -433,6 +451,15 @@ public class Board {
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+
+            // todo: check if there is a pawn on the left or on the right
+
+            // update epIndex
+            if (colorToMove == Color.WHITE) {
+                epIndex = Bitboard.BitIndex.values()[move.getTo() - 8];
+            } else {
+                epIndex = Bitboard.BitIndex.values()[move.getTo() + 8];
+            }
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
@@ -453,6 +480,8 @@ public class Board {
         // change color && update bitboards
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
+
+        // todo: ep != no square -> der nächste Zug muss ep sein, sonst no square setzen
 
         if (Attack.getAttackersToSquare(oldColor, Bitboard.getLsb(getKing(oldColor)), this) != 0) {
             undoMove(move);
@@ -484,6 +513,10 @@ public class Board {
 
             addPiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+        }
+
+        if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
@@ -584,13 +617,14 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
-    private int captures0 = 0;
-    private int checks0 = 0;
-    private int castles0 = 0;
+    public int captures0 = 0;
+    public int checks0 = 0;
+    public int castles0 = 0;
 
     public int captures = 0;
     public int checks = 0;
     public int castles = 0;
+    public int enPassants = 0;
 
     public long nodes = 0;
 
@@ -623,6 +657,10 @@ public class Board {
                 checks++;
             }
 
+            if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+                enPassants++;
+            }
+
             if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
                 castles++;
             }
@@ -633,6 +671,11 @@ public class Board {
         }
     }
 
+    /**
+     * Perft test main method.
+     *
+     * @param depth The search depth.
+     */
     public void perftTest(int depth) {
         System.out.println();
         System.out.println();
@@ -677,11 +720,12 @@ public class Board {
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
         System.out.println("Captures: " + captures);
-        System.out.println("Captures0: " + captures0);
-        System.out.println("Checks: " + checks);
-        System.out.println("Checks0: " + checks0);
+        //System.out.println("Captures0: " + captures0);
+        System.out.println("En passants: " + enPassants);
         System.out.println("Castles: " + castles);
-        System.out.println("Castles0: " + castles0);
+        //System.out.println("Castles0: " + castles0);
+        System.out.println("Checks: " + checks);
+        //System.out.println("Checks0: " + checks0);
         System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("---------------------------------");
     }

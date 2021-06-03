@@ -150,26 +150,62 @@ class BoardTest {
     }
 
     @Test
+    void makePawnStartMoveWhite() {
+        // after b2b4 -> "k7/8/8/8/pP6/8/8/7K b - b3 0 1"
+        var board = new Board("k7/8/8/8/p7/8/1P6/7K w - - 0 1");
+
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+
+        // b2b4
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var startMoves = mg0.getPseudoLegalMoves();
+        board.makeMove(startMoves.get(1));
+
+        // epIndex = b3
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
+
+        // a4b3
+        var mg1 = new MoveGenerator(board);
+        mg1.generatePseudoLegalMoves();
+        var moves = mg1.getPseudoLegalMoves();
+        board.makeMove(moves.get(0));
+
+        System.out.println(board);
+
+        var t = 0;
+    }
+
+    @Test
     void perftTest() {
+        // https://www.chessprogramming.org/Perft_Results
+
         // start position, depth 3
+        /*
         var boardStart = new Board();
-        boardStart.perftTest(3);
+        boardStart.perftTest(3); // 0.07
         assertEquals(8902, boardStart.nodes);
         assertEquals(34, boardStart.captures);
         assertEquals(12, boardStart.checks);
+        assertEquals(0, boardStart.castles);
+        */
 
         // wiki position 2, also known as Kiwipete, depth 1
         var board2 = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
-        board2.perftTest(1);
-        assertEquals(48, board2.nodes);
-        assertEquals(8, board2.captures);
-        //assertEquals(0, board2.checks);
+        board2.perftTest(2);
+        assertEquals(2039, board2.nodes);
+        assertEquals(351, board2.captures);
+        assertEquals(1, board2.enPassants);
+        assertEquals(91, board2.castles);
+        assertEquals(3, board2.checks);
 
         // wiki position 3, depth 2
+        /*
         var board3 = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
         board3.perftTest(2);
         assertEquals(191, board3.nodes);
         assertEquals(14, board3.captures);
         assertEquals(10, board3.checks);
+        */
     }
 }
