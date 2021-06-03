@@ -657,8 +657,9 @@ public class Board {
      * @see <a href="https://www.chessprogramming.org/Perft_Results">Some results</a>
      *
      * @param depth The search depth.
+     * @param quiet True for no text outputs
      */
-    private void perftDriver(int depth) {
+    private void perftDriver(int depth, boolean quiet) {
         if (depth == 0) {
             nodes++;
             return;
@@ -672,24 +673,26 @@ public class Board {
                 continue;
             }
 
-            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-                captures[depth - 1]++;
+            if (!quiet) {
+                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                    captures[depth - 1]++;
+                }
+
+                if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                    checks[depth - 1]++;
+                }
+
+                if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+                    enPassants[depth - 1]++;
+                    captures[depth - 1]++; // todo
+                }
+
+                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                    castles[depth - 1]++;
+                }
             }
 
-            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-                checks[depth - 1]++;
-            }
-
-            if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-                enPassants[depth - 1]++;
-                captures[depth - 1]++; // todo
-            }
-
-            if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                castles[depth - 1]++;
-            }
-
-            perftDriver(depth - 1);
+            perftDriver(depth - 1, quiet);
 
             undoMove(move);
         }
@@ -699,8 +702,9 @@ public class Board {
      * Perft test main method.
      *
      * @param depth The search depth.
+     * @param quiet True for no text outputs.
      */
-    public void perftTest(int depth) {
+    public void perftTest(int depth, boolean quiet) {
         System.out.println();
         System.out.println();
         System.out.println("---------------------------------");
@@ -722,43 +726,60 @@ public class Board {
                 continue;
             }
 
-            if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-                captures[depth - 1]++;
-            }
+            if (!quiet) {
+                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                    captures[depth - 1]++;
+                }
 
-            if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-                checks[depth - 1]++;
-            }
+                if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                    checks[depth - 1]++;
+                }
 
-            if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-                enPassants[depth - 1]++;
-                captures[depth - 1]++; // todo
-            }
+                if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+                    enPassants[depth - 1]++;
+                    captures[depth - 1]++; // todo
+                }
 
-            if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                castles[depth - 1]++;
+                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                    castles[depth - 1]++;
+                }
             }
 
             var cumNodes = nodes;
 
-            perftDriver(depth - 1);
+            perftDriver(depth - 1, quiet);
 
             var oldNodes = nodes - cumNodes;
 
             undoMove(move);
 
-            System.out.println(move + " nodes: " + oldNodes);
+            if (!quiet) {
+                System.out.println(move + " nodes: " + oldNodes);
+            }
         }
+
+        var endTime = System.currentTimeMillis() - startTime;
 
         System.out.println("---------------------------------");
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
-        System.out.println("Captures: " + captures[0]);
-        System.out.println("En passants: " + enPassants[0]);
-        System.out.println("Castles: " + castles[0]);
-        System.out.println("Checks: " + checks[0]);
-        System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
+        if (!quiet) {
+            System.out.println("Captures: " + captures[0]);
+            System.out.println("En passants: " + enPassants[0]);
+            System.out.println("Castles: " + castles[0]);
+            System.out.println("Checks: " + checks[0]);
+        }
+        System.out.println("Total execution time: " + endTime + "ms");
         System.out.println("---------------------------------");
+    }
+
+    /**
+     * Perft test main method.
+     *
+     * @param depth The search depth.
+     */
+    public void perftTest(int depth) {
+        perftTest(depth, true);
     }
 
     //-------------------------------------------------
