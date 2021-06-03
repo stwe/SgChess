@@ -87,6 +87,11 @@ public class Board {
     private Bitboard.BitIndex epIndex = Bitboard.BitIndex.NO_SQUARE;
 
     /**
+     * The {@link Bitboard.BitIndex} of the old En Passant target square.
+     */
+    private Bitboard.BitIndex oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
+
+    /**
      * The current Zobrist key.
      */
     public long zkey;
@@ -382,6 +387,8 @@ public class Board {
 
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+
+            epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -394,6 +401,8 @@ public class Board {
 
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
+
+            epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
@@ -410,7 +419,7 @@ public class Board {
             // move own pawn to epIndex/move.getTo()
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
-            // update epIndex to NO_SQUARE
+            oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
@@ -447,6 +456,8 @@ public class Board {
 
             // rook
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
+
+            epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -454,7 +465,8 @@ public class Board {
 
             // todo: check if there is a pawn on the left or on the right
 
-            // update epIndex
+            // epIndex must be updated
+            oldEpIndex = epIndex;
             if (colorToMove == Color.WHITE) {
                 epIndex = Bitboard.BitIndex.values()[move.getTo() - 8];
             } else {
@@ -467,6 +479,8 @@ public class Board {
             zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
 
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+
+            epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         // update castling rights
@@ -480,8 +494,6 @@ public class Board {
         // change color && update bitboards
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
-
-        // todo: ep != no square -> der nächste Zug muss ep sein, sonst no square setzen
 
         if (Attack.getAttackersToSquare(oldColor, Bitboard.getLsb(getKing(oldColor)), this) != 0) {
             undoMove(move);
@@ -498,6 +510,8 @@ public class Board {
      */
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
+
+        // todo: restore epIndex?
 
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
@@ -516,7 +530,20 @@ public class Board {
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+            var add = move.getTo();
+            if (colorToMove == Color.WHITE) {
+                add -= 8;
+            } else {
+                add += 8;
+            }
 
+            // add enemy pawn
+            addPiece(add, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+
+            // move own pawn back
+            movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+
+            epIndex = oldEpIndex;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
@@ -556,6 +583,7 @@ public class Board {
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            epIndex = oldEpIndex;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
@@ -617,15 +645,10 @@ public class Board {
     // Perft
     //-------------------------------------------------
 
-    public int captures0 = 0;
-    public int checks0 = 0;
-    public int castles0 = 0;
-
-    public int captures = 0;
-    public int checks = 0;
-    public int castles = 0;
-    public int enPassants = 0;
-
+    public int[] captures;
+    public int[] checks;
+    public int[] castles;
+    public int[] enPassants;
     public long nodes = 0;
 
     /**
@@ -650,19 +673,20 @@ public class Board {
             }
 
             if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-                captures++;
+                captures[depth - 1]++;
             }
 
             if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-                checks++;
+                checks[depth - 1]++;
             }
 
             if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-                enPassants++;
+                enPassants[depth - 1]++;
+                captures[depth - 1]++; // todo
             }
 
             if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                castles++;
+                castles[depth - 1]++;
             }
 
             perftDriver(depth - 1);
@@ -686,6 +710,11 @@ public class Board {
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
 
+        captures = new int[depth];
+        checks = new int[depth];
+        castles = new int[depth];
+        enPassants = new int[depth];
+
         var startTime = System.currentTimeMillis();
 
         for (var move : moveGenerator.getPseudoLegalMoves()) {
@@ -694,15 +723,20 @@ public class Board {
             }
 
             if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-                captures0++;
+                captures[depth - 1]++;
             }
 
             if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
-                checks0++;
+                checks[depth - 1]++;
+            }
+
+            if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
+                enPassants[depth - 1]++;
+                captures[depth - 1]++; // todo
             }
 
             if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                castles0++;
+                castles[depth - 1]++;
             }
 
             var cumNodes = nodes;
@@ -719,13 +753,10 @@ public class Board {
         System.out.println("---------------------------------");
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
-        System.out.println("Captures: " + captures);
-        //System.out.println("Captures0: " + captures0);
-        System.out.println("En passants: " + enPassants);
-        System.out.println("Castles: " + castles);
-        //System.out.println("Castles0: " + castles0);
-        System.out.println("Checks: " + checks);
-        //System.out.println("Checks0: " + checks0);
+        System.out.println("Captures: " + captures[0]);
+        System.out.println("En passants: " + enPassants[0]);
+        System.out.println("Castles: " + castles[0]);
+        System.out.println("Checks: " + checks[0]);
         System.out.println("Total execution time: " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("---------------------------------");
     }
@@ -778,7 +809,7 @@ public class Board {
             }
 
             if (rank == 7) {
-                s.append("    On the move: ").append(colorToMove);
+                s.append("    Next move: ").append(colorToMove);
             }
 
             if (rank == 6) {
@@ -786,6 +817,10 @@ public class Board {
             }
 
             if (rank == 5) {
+                s.append("    En passant: ").append(epIndex);
+            }
+
+            if (rank == 4) {
                 s.append("    Zobrist key: ").append(zkey);
             }
 
