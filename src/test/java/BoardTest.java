@@ -151,31 +151,95 @@ class BoardTest {
 
     @Test
     void makePawnStartMoveWhite() {
-        // after b2b4 -> "k7/8/8/8/pP6/8/8/7K b - b3 0 1"
         var board = new Board("k7/8/8/8/p7/8/1P6/7K w - - 0 1");
 
+        // before pawn start move
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
 
-        // b2b4
+        // b2b4 make white pawn start move
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
         var mg0 = new MoveGenerator(board);
         mg0.generatePseudoLegalMoves();
         var startMoves = mg0.getPseudoLegalMoves();
         board.makeMove(startMoves.get(1));
-        System.out.println(board);
 
-        // epIndex = b3
+        // after pawn start move
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
 
-        // a4b3
+        // undo pawn start move
+        board.undoMove(startMoves.get(1));
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+    }
+
+    @Test
+    void makePawnStartMoveBlack() {
+        var board = new Board("k7/6p1/8/7P/8/8/8/7K b - - 0 1");
+
+        // before pawn start move
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+
+        // g7g5 make black pawn start move
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var startMoves = mg0.getPseudoLegalMoves();
+        board.makeMove(startMoves.get(1));
+
+        // after pawn start move
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+
+        // undo pawn start move
+        board.undoMove(startMoves.get(1));
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+    }
+
+    @Test
+    void makeEpMoveWhite() {
+        var board = new Board("k7/8/8/8/p7/8/1P6/7K w - - 0 1");
+
+        // before pawn start move
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+
+        // b2b4 make white pawn start move
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var startMoves = mg0.getPseudoLegalMoves();
+        board.makeMove(startMoves.get(1));
+
+        // after pawn start move
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+
+        // make a4b3 - capture the white pawn
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
         var mg1 = new MoveGenerator(board);
         mg1.generatePseudoLegalMoves();
         var moves = mg1.getPseudoLegalMoves();
-        board.makeMove(moves.get(0));
-        System.out.println(board);
+        var epMove = moves.get(0);
+        assertEquals(Move.MoveFlag.EN_PASSANT, epMove.getMoveFlag());
+        board.makeMove(epMove);
 
-        // undo
-        board.undoMove(moves.get(0));
-        System.out.println(board);
+        // after capture white pawn
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getOldEpIndex());
+
+        // undo capture
+        board.undoMove(epMove);
+
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // todo
+
+        var t = 0;
 
         // alternative a4a3
         /*
@@ -188,10 +252,21 @@ class BoardTest {
     }
 
     @Test
+    void makeEpMoveBlack() {
+
+    }
+
+    @Test
     void perftTest() {
         // https://www.chessprogramming.org/Perft_Results
 
+        var board = new Board("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1");
+        var depth = 6;
+        board.perftTest(depth, false);
+        assertEquals(1134888, board.nodes);
+
         // start position
+        /*
         var boardStart = new Board();
         var depth = 6;
         boardStart.perftTest(depth);
@@ -237,6 +312,7 @@ class BoardTest {
             //assertEquals(0, boardStart.castles[0]);
             //assertEquals(809099, boardStart.checks[0]);
         }
+        */
 
         // wiki position 2, also known as Kiwipete
         /*

@@ -319,12 +319,21 @@ public class Board {
     }
 
     /**
-     * Get {@link Bitboard.BitIndex}.
+     * Get {@link #epIndex}.
      *
-     * @return {@link Bitboard.BitIndex}
+     * @return {@link #epIndex}
      */
     public Bitboard.BitIndex getEpIndex() {
         return epIndex;
+    }
+
+    /**
+     * Get {@link #oldEpIndex}.
+     *
+     * @return {@link #oldEpIndex}
+     */
+    public Bitboard.BitIndex getOldEpIndex() {
+        return oldEpIndex;
     }
 
     //-------------------------------------------------
