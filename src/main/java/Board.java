@@ -356,7 +356,7 @@ public class Board {
     /**
      * Check if queen side castling is allowed.
      *
-     * @param color The color for which to check.
+     * @param color The {@link Color} for which to check.
      *
      * @return boolean
      */
@@ -368,7 +368,7 @@ public class Board {
     /**
      * Check if king side castling is allowed.
      *
-     * @param color The color for which to check.
+     * @param color The {@link Color} for which to check.
      *
      * @return boolean
      */
@@ -470,7 +470,7 @@ public class Board {
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
-            // todo: check if there is a pawn on the left or on the right?
+            // todo: check if there is a pawn on the left or on the right: YES
 
             // epIndex must be updated
             oldEpIndex = epIndex;
@@ -658,6 +658,78 @@ public class Board {
      */
     private void removePiece(int bitIndex, int bitboardNr) {
         bitboards[bitboardNr] &= ~(Bitboard.SQUARES[bitIndex]);
+    }
+
+    //-------------------------------------------------
+    // Parse move
+    //-------------------------------------------------
+
+    // todo
+
+    public Move parseMove(String userInput) {
+        /*
+        [0] get vertical file (a-h)
+        [1] get horizontal rank (1-8)
+
+        [2] get vertical file (a-h)
+        [3] get horizontal rank (1-8)
+
+        [4] get promoted piece
+        */
+
+        // ASCI a = 97, h = 104
+        // ASCI 1 = 49, 8 = 56
+
+        // file from
+        if (userInput.charAt(0) > 'h' || userInput.charAt(0) < 'a') {
+            return null;
+        }
+
+        // rank from
+        if (userInput.charAt(1) > '8' || userInput.charAt(1) < '1') {
+            return null;
+        }
+
+        // to from
+        if (userInput.charAt(2) > 'h' || userInput.charAt(2) < 'a') {
+            return null;
+        }
+
+        // rank to
+        if (userInput.charAt(3) > '8' || userInput.charAt(3) < '1') {
+            return null;
+        }
+
+        // todo: make convert method
+        var fromFile = userInput.charAt(0) - 'a';
+        var fromRank = userInput.charAt(1) - '1';
+        var toFile = userInput.charAt(2) - 'a';
+        var toRank = userInput.charAt(3) - '1';
+
+        var fromValue = Bitboard.getBitIndexByFileAndRank(
+                Bitboard.File.values()[fromFile],
+                Bitboard.Rank.values()[fromRank]
+        ).ordinal();
+
+        var toValue = Bitboard.getBitIndexByFileAndRank(
+                Bitboard.File.values()[toFile],
+                Bitboard.Rank.values()[toRank]
+        ).ordinal();
+
+        // generate moves list
+        var moveGenerator = new MoveGenerator(this);
+        moveGenerator.generatePseudoLegalMoves();
+
+        // search move
+        var moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue);
+
+        // todo: mehr als ein Zug -> promotion (5 Zeichen input)
+
+        if (moves.size() != 1) {
+            return null;
+        }
+
+        return moves.get(0);
     }
 
     //-------------------------------------------------
