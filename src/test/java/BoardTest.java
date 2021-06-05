@@ -321,116 +321,109 @@ class BoardTest {
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
     }
 
-    @Test
-    void perftTest() {
-        // https://www.chessprogramming.org/Perft_Results
-
-        /*
-        var board = new Board("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1");
-        var depth = 6;
-        board.perftTest(depth, false);
-        assertEquals(1134888, board.nodes);
-        */
-
-        // start position
-        /*
-        var boardStart = new Board();
-        var depth = 6;
-        boardStart.perftTest(depth);
+    void runStartPosition(int depth) {
+        var board = new Board();
+        board.perftTest(depth);
 
         if (depth == 1) {
-            assertEquals(20, boardStart.nodes);
-            assertEquals(0, boardStart.captures[0]);
-            assertEquals(0, boardStart.enPassants[0]);
-            assertEquals(0, boardStart.castles[0]);
-            assertEquals(0, boardStart.checks[0]);
+            assertEquals(20, board.nodes);
+            assertEquals(0, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(0, board.checks[0]);
         }
 
         if (depth == 2) {
-            assertEquals(400, boardStart.nodes);
-            assertEquals(0, boardStart.captures[0]);
-            assertEquals(0, boardStart.enPassants[0]);
-            assertEquals(0, boardStart.castles[0]);
-            assertEquals(0, boardStart.checks[0]);
+            assertEquals(400, board.nodes);
+            assertEquals(0, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(0, board.checks[0]);
         }
 
         if (depth == 3) {
-            assertEquals(8902, boardStart.nodes);
-            assertEquals(34, boardStart.captures[0]);
-            assertEquals(0, boardStart.enPassants[0]);
-            assertEquals(0, boardStart.castles[0]);
-            assertEquals(12, boardStart.checks[0]);
+            assertEquals(8902, board.nodes);
+            assertEquals(34, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(12, board.checks[0]);
         }
 
         // todo: show checkmates
 
         if (depth == 4) {
-            assertEquals(197281, boardStart.nodes);
-            assertEquals(1576, boardStart.captures[0]);
-            assertEquals(0, boardStart.enPassants[0]);
-            assertEquals(0, boardStart.castles[0]);
-            assertEquals(469, boardStart.checks[0]);
+            assertEquals(197281, board.nodes);
+            //assertEquals(1576, board.captures[0]);
+            //assertEquals(0, board.enPassants[0]);
+            //assertEquals(0, board.castles[0]);
+            //assertEquals(469, board.checks[0]);
         }
 
         if (depth == 6) {
-            assertEquals(119060324, boardStart.nodes);
-            //assertEquals(2812008, boardStart.captures[0]);
-            //assertEquals(5248, boardStart.enPassants[0]);
-            //assertEquals(0, boardStart.castles[0]);
-            //assertEquals(809099, boardStart.checks[0]);
+            assertEquals(119060324, board.nodes);
+            //assertEquals(2812008, board.captures[0]);
+            //assertEquals(5248, board.enPassants[0]);
+            //assertEquals(0, board.castles[0]);
+            //assertEquals(809099, board.checks[0]);
         }
-        */
+    }
 
-        // wiki position 2, also known as Kiwipete
-        /*
-        var board2 = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
-        var depth = 2;
-        board2.perftTest(depth, false);
+    void runKiwipetePosition(int depth) {
+        var board = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
+        board.perftTest(depth, false);
 
         if (depth == 1) {
-            assertEquals(48, board2.nodes);
-            assertEquals(8, board2.captures[0]);
-            assertEquals(0, board2.enPassants[0]);
-            assertEquals(2, board2.castles[0]);
-            assertEquals(0, board2.checks[0]);
+            assertEquals(48, board.nodes);
+            assertEquals(8, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(2, board.castles[0]);
+            assertEquals(0, board.checks[0]);
         }
 
         if (depth == 2) {
-            assertEquals(2039, board2.nodes);
-            assertEquals(351, board2.captures[0]);
-            assertEquals(1, board2.enPassants[0]);
-            assertEquals(91, board2.castles[0]);
-            assertEquals(3, board2.checks[0]);
+            assertEquals(2039, board.nodes);
+            assertEquals(351, board.captures[0]);
+            assertEquals(1, board.enPassants[0]);
+            assertEquals(91, board.castles[0]);
+            assertEquals(3, board.checks[0]);
         }
-        */
+    }
 
-        // wiki position 3
-        var board3 = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
-        var depth = 3;
-        board3.perftTest(depth, false);
+    void runWiki3Position(int depth) {
+        var board = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
+        board.perftTest(depth, false);
 
         if (depth == 1) {
-            assertEquals(14, board3.nodes);
-            assertEquals(1, board3.captures[0]);
-            assertEquals(0, board3.enPassants[0]);
-            assertEquals(0, board3.castles[0]);
-            assertEquals(2, board3.checks[0]);
+            assertEquals(14, board.nodes);
+            assertEquals(1, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(2, board.checks[0]);
         }
 
         if (depth == 2) {
-            assertEquals(191, board3.nodes);
-            assertEquals(14, board3.captures[0]);
-            assertEquals(0, board3.enPassants[0]);
-            assertEquals(0, board3.castles[0]);
-            assertEquals(10, board3.checks[0]);
+            assertEquals(191, board.nodes);
+            assertEquals(14, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(10, board.checks[0]);
         }
 
         if (depth == 3) {
-            assertEquals(2812, board3.nodes);
-            assertEquals(209, board3.captures[0]);
-            assertEquals(2, board3.enPassants[0]);
-            assertEquals(0, board3.castles[0]);
-            assertEquals(267, board3.checks[0]);
+            assertEquals(2812, board.nodes);
+            assertEquals(209, board.captures[0]);
+            assertEquals(2, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(267, board.checks[0]);
         }
+    }
+
+    // https://www.chessprogramming.org/Perft_Results
+
+    @Test
+    void perftTest() {
+        //runStartPosition(4);
+        //runKiwipetePosition(2);
+        runWiki3Position(3);
     }
 }

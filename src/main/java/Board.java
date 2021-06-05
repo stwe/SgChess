@@ -389,16 +389,6 @@ public class Board {
      * @return Returns false if the {@link Move} is illegal; otherwise true.
      */
     public boolean makeMove(Move move) {
-        /*
-        NORMAL,
-        PROMOTION,
-        EN_PASSANT,
-        CASTLING,
-        PAWN_START,
-        CAPTURE,
-        PROMOTION_CAPTURE
-        */
-
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
