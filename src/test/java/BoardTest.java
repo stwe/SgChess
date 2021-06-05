@@ -202,8 +202,6 @@ class BoardTest {
     @Test
     void makeEpMoveWhite() {
         var board = new Board("k7/8/8/8/p7/8/1P6/7K w - - 0 1");
-
-        // before pawn start move
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
 
@@ -218,7 +216,9 @@ class BoardTest {
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
 
-        // make a4b3 - capture the white pawn
+        // ---------------------------------------------------------------
+
+        // make a4b3 - black can now make an En Passant capture
         assertEquals(Board.Color.BLACK, board.getColorToMove());
         var mg1 = new MoveGenerator(board);
         mg1.generatePseudoLegalMoves();
@@ -232,23 +232,32 @@ class BoardTest {
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getOldEpIndex());
 
-        // undo capture
+        // undo capture (a4b3)
         board.undoMove(epMove);
-
         assertEquals(Board.Color.BLACK, board.getColorToMove());
-        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
-        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // todo
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());       // same situation after pawn start
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
 
-        var t = 0;
+        // ---------------------------------------------------------------
 
-        // alternative a4a3
-        /*
-        var mg1 = new MoveGenerator(board);
-        mg1.generatePseudoLegalMoves();
-        var moves = mg1.getPseudoLegalMoves();
-        board.makeMove(moves.get(1));
-        System.out.println(board);
-        */
+        // make a4a3 instead En Passant capture
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        var mg2 = new MoveGenerator(board);
+        mg2.generatePseudoLegalMoves();
+        var otherMoves = mg2.getPseudoLegalMoves();
+        assertEquals(Move.MoveFlag.NORMAL, otherMoves.get(1).getMoveFlag());
+        board.makeMove(otherMoves.get(1));
+
+        // after a4a3
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getOldEpIndex());
+
+        // undo a4a3
+        board.undoMove(otherMoves.get(1));
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());       // same situation after pawn start
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
     }
 
     @Test
@@ -260,10 +269,12 @@ class BoardTest {
     void perftTest() {
         // https://www.chessprogramming.org/Perft_Results
 
+        /*
         var board = new Board("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1");
         var depth = 6;
         board.perftTest(depth, false);
         assertEquals(1134888, board.nodes);
+        */
 
         // start position
         /*
@@ -318,7 +329,7 @@ class BoardTest {
         /*
         var board2 = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
         var depth = 2;
-        board2.perftTest(depth);
+        board2.perftTest(depth, false);
 
         if (depth == 1) {
             assertEquals(48, board2.nodes);
@@ -338,10 +349,9 @@ class BoardTest {
         */
 
         // wiki position 3
-        /*
         var board3 = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
         var depth = 3;
-        board3.perftTest(depth);
+        board3.perftTest(depth, false);
 
         if (depth == 1) {
             assertEquals(14, board3.nodes);
@@ -366,6 +376,5 @@ class BoardTest {
             assertEquals(0, board3.castles[0]);
             assertEquals(267, board3.checks[0]);
         }
-        */
     }
 }

@@ -340,6 +340,11 @@ public class Board {
     // Setter
     //-------------------------------------------------
 
+    /**
+     * Set {@link #colorToMove}
+     *
+     * @param colorToMove {@link Color}
+     */
     public void setColorToMove(Color colorToMove) {
         this.colorToMove = colorToMove;
     }
@@ -397,6 +402,7 @@ public class Board {
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
+            oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
@@ -411,6 +417,7 @@ public class Board {
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
 
+            oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
@@ -466,13 +473,14 @@ public class Board {
             // rook
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
 
+            oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
-            // todo: check if there is a pawn on the left or on the right
+            // todo: check if there is a pawn on the left or on the right?
 
             // epIndex must be updated
             oldEpIndex = epIndex;
@@ -489,6 +497,7 @@ public class Board {
 
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
+            oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
@@ -520,10 +529,11 @@ public class Board {
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
 
-        // todo: restore epIndex?
-
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+
+            epIndex = oldEpIndex;
+            oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -536,6 +546,9 @@ public class Board {
 
             addPiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
             zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+
+            epIndex = oldEpIndex;
+            oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
@@ -553,6 +566,7 @@ public class Board {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
 
             epIndex = oldEpIndex;
+            oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
@@ -588,6 +602,9 @@ public class Board {
 
             // rook
             movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
+
+            epIndex = oldEpIndex;
+            oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
@@ -600,6 +617,9 @@ public class Board {
 
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
             zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
+
+            epIndex = oldEpIndex;
+            oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         // undo castling rights
@@ -693,7 +713,7 @@ public class Board {
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
                     enPassants[depth - 1]++;
-                    captures[depth - 1]++; // todo
+                    captures[depth - 1]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
@@ -746,7 +766,7 @@ public class Board {
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
                     enPassants[depth - 1]++;
-                    captures[depth - 1]++; // todo
+                    captures[depth - 1]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
