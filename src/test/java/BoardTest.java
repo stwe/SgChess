@@ -262,7 +262,63 @@ class BoardTest {
 
     @Test
     void makeEpMoveBlack() {
+        var board = new Board("k7/2P3p1/8/7P/8/8/8/7K b - - 0 1");
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
 
+        // g7g5 make black pawn start move
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        var mg0 = new MoveGenerator(board);
+        mg0.generatePseudoLegalMoves();
+        var startMoves = mg0.getPseudoLegalMoves();
+        board.makeMove(startMoves.get(1));
+
+        // after pawn start move
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+
+        // ---------------------------------------------------------------
+
+        // make h5g6 - white can now make an En Passant capture
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        var mg1 = new MoveGenerator(board);
+        mg1.generatePseudoLegalMoves();
+        var moves = mg1.getPseudoLegalMoves();
+        var epMove = moves.get(0);
+        assertEquals(Move.MoveFlag.EN_PASSANT, epMove.getMoveFlag());
+        board.makeMove(epMove);
+
+        // after capture black pawn
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getOldEpIndex());
+
+        // undo capture (h5g6)
+        board.undoMove(epMove);
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());       // same situation after pawn start
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
+
+        // ---------------------------------------------------------------
+
+        // make c7c8 (promotion move) instead En Passant capture
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        var mg2 = new MoveGenerator(board);
+        mg2.generatePseudoLegalMoves();
+        var otherMoves = mg2.getPseudoLegalMoves();
+        assertEquals(Move.MoveFlag.PROMOTION, otherMoves.get(5).getMoveFlag());
+        board.makeMove(otherMoves.get(5));
+
+        // after c7c8
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getOldEpIndex());
+
+        // undo c7c8 promotion move
+        board.undoMove(otherMoves.get(5));
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());       // same situation after pawn start
+        assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
     }
 
     @Test
