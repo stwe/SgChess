@@ -51,7 +51,7 @@ public class Main {
                             helpMenu();
                             break;
                         case "q" :
-                            System.out.println("Exit SgChess");
+                            System.out.println("Good bye.");
                             exit = true;
                             break;
                         case "l" :
@@ -101,6 +101,7 @@ public class Main {
         System.out.println("l list pseudo legal moves");
         System.out.println("b show board");
         System.out.println("c clear screen");
+        System.out.println("u undo last move");
     }
 
     private static void listPseudoLegalMoves(Board board) {

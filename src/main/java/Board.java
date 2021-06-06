@@ -246,6 +246,23 @@ public class Board {
     //-------------------------------------------------
 
     /**
+     * Checks whether there is an opponent's pawn on the left or right.
+     *
+     * @param bitIndexValue The position bit index value of the own pawn.
+     * @param color {@link Color} of te own pawn.
+     *
+     * @return boolean
+     */
+    public boolean isNeighborAnEnemyPawn(int bitIndexValue, Color color) {
+        var pawnsBitboard = color == Color.WHITE ? getBlackPawns() : getWhitePawns();
+
+        var leftBitboard = Bitboard.SQUARES[bitIndexValue - 1];
+        var rightBitboard = Bitboard.SQUARES[bitIndexValue + 1];
+
+        return (leftBitboard & pawnsBitboard) != 0 || (rightBitboard & pawnsBitboard) != 0;
+    }
+
+    /**
      * Get the {@link Piece} from a given {@link Bitboard.BitIndex}.
      *
      * @param bitIndex {@link Bitboard.BitIndex}
@@ -470,14 +487,15 @@ public class Board {
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
-            // todo: check if there is a pawn on the left or on the right: YES
-
-            // epIndex must be updated
-            oldEpIndex = epIndex;
-            if (colorToMove == Color.WHITE) {
-                epIndex = Bitboard.BitIndex.values()[move.getTo() - 8];
-            } else {
-                epIndex = Bitboard.BitIndex.values()[move.getTo() + 8];
+            // check if there is a pawn on the left or on the right
+            if (isNeighborAnEnemyPawn(move.getTo(), colorToMove)) {
+                // epIndex must be updated
+                oldEpIndex = epIndex;
+                if (colorToMove == Color.WHITE) {
+                    epIndex = Bitboard.BitIndex.values()[move.getTo() - 8];
+                } else {
+                    epIndex = Bitboard.BitIndex.values()[move.getTo() + 8];
+                }
             }
         }
 

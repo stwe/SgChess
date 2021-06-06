@@ -11,6 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class BoardTest {
 
     @Test
+    void isNeighborAnEnemyPawn() {
+        var board = new Board("k7/8/8/8/1P1pPp2/p1P5/8/7K w - - 0 1");
+
+        // check white pawns
+        assertTrue(board.isNeighborAnEnemyPawn(Bitboard.BitIndex.E4_IDX.ordinal(), Board.Color.WHITE));
+        assertFalse(board.isNeighborAnEnemyPawn(Bitboard.BitIndex.B4_IDX.ordinal(), Board.Color.WHITE));
+
+        // check black pawns
+        assertFalse(board.isNeighborAnEnemyPawn(Bitboard.BitIndex.A3_IDX.ordinal(), Board.Color.BLACK));
+        assertTrue(board.isNeighborAnEnemyPawn(Bitboard.BitIndex.D4_IDX.ordinal(), Board.Color.BLACK));
+        assertTrue(board.isNeighborAnEnemyPawn(Bitboard.BitIndex.F4_IDX.ordinal(), Board.Color.BLACK));
+    }
+
+    @Test
     void getPieceFrom() {
         var boardStart = new Board();
         assertEquals(Piece.NO_PIECE, boardStart.getPieceFrom(Bitboard.BitIndex.E4_IDX));
@@ -422,8 +436,8 @@ class BoardTest {
 
     @Test
     void perftTest() {
-        //runStartPosition(4);
-        //runKiwipetePosition(2);
+        runStartPosition(4);
+        runKiwipetePosition(2);
         runWiki3Position(3);
     }
 }

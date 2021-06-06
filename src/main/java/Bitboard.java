@@ -347,6 +347,17 @@ public class Bitboard {
     public static final long CLEAR_FILE_AB = CLEAR_FILE_A & CLEAR_FILE_B;
     public static final long CLEAR_FILE_GH = CLEAR_FILE_G & CLEAR_FILE_H;
 
+    public static long[] NEIGHBOR_FILES = {
+            MASK_FILE_B,
+            MASK_FILE_A | MASK_FILE_C,
+            MASK_FILE_B | MASK_FILE_D,
+            MASK_FILE_C | MASK_FILE_E,
+            MASK_FILE_D | MASK_FILE_F,
+            MASK_FILE_E | MASK_FILE_G,
+            MASK_FILE_F | MASK_FILE_H,
+            MASK_FILE_G
+    };
+
     //-------------------------------------------------
     // Castling
     //-------------------------------------------------
