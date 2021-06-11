@@ -5,6 +5,8 @@
  */
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class UCIClient {
@@ -31,12 +33,9 @@ public class UCIClient {
         var exit = false;
         while (!exit) {
             var input = keyboard.nextLine();
+            var command = input.split(" ")[0];
 
-            if (input.startsWith("position")) {
-                parsePosition(input);
-            }
-
-            switch (input) {
+            switch (command) {
                 case "uci":
                     System.out.println("id name " + Config.TITLE);
                     System.out.println("id author " + AUTHOR);
@@ -45,11 +44,12 @@ public class UCIClient {
                 case "isready":
                     System.out.println("readyok");
                     break;
-                    /*
-                case "ucinewgame":
-                    parsePosition("todo");
+                case "position":
+                    parsePosition(input);
                     break;
-                    */
+                case "ucinewgame":
+                    parsePosition("position startpos");
+                    break;
                 case "go":
                     parseGo(input);
                     break;
@@ -57,42 +57,89 @@ public class UCIClient {
                     System.out.println("Good bye.");
                     exit = true;
                     break;
+                default:
+                    System.out.println("Invalid command given.");
             }
         }
     }
 
     /**
-     * Parse UCI "position" command.
+     * Parse an UCI "position" command.
      *
      * position fen
      * position startpos
      * ... moves e2e4 b7b8q
      *
-     * @param command
+     * @param command An UCI "position" command string.
      */
     private static void parsePosition(String command) {
         var commands = command.split(" ");
 
-        if (commands[1].equals("startpos")) {
-            board = new Board();
+        if (commands.length == 1) {
+            System.out.println("Invalid position command given.");
+            return;
         }
 
-        /*
-2021-06-09 20:44:08,062-->1:position fen k7/8/3P4/8/3p4/8/8/K7 w - - 0 1 moves d6d7 d4d3
-2021-06-09 20:44:08,063<--1:Custom Fen k7/8/3P4/8/3p4/8/8/K7
-         */
+        if (commands[1].equals("startpos")) {
+            // default Fen (startpos), no moves
+            board = new Board();
 
-        if (commands[1].equals("fen")) {
-            if (commands[2] != null) {
-                System.out.println("Custom Fen " + commands[2]);
-                board = new Board(commands[2]);
-            } else {
-                System.out.println("Default Fen");
-                board = new Board();
+            // default Fen (startpos) with moves to execute
+            if (commands.length > 2) {
+                doMoves(Arrays.copyOfRange(commands, 3, commands.length));
             }
         }
 
-        // todo foreach moves -> execute move
+        if (commands[1].equals("fen")) {
+            // default Fen, no moves
+            if (commands.length == 2) {
+                board = new Board();
+            }
+
+            // custom full Fen, no moves
+            if (commands.length == 8) {
+                var sb = new StringBuilder();
+                for(int i = 2; i < commands.length; i++) {
+                    if (i != 2) {
+                        sb.append(" ");
+                    }
+
+                    sb.append(commands[i]);
+                }
+
+                board = new Board(sb.toString());
+            }
+
+            // custom full Fen with moves to execute
+            if (commands.length > 8) {
+                var sb = new StringBuilder();
+                for(int i = 2; i < 8; i++) {
+                    if (i != 2) {
+                        sb.append(" ");
+                    }
+
+                    sb.append(commands[i]);
+                }
+
+                board = new Board(sb.toString());
+
+                doMoves(Arrays.copyOfRange(commands, 9, commands.length));
+            }
+        }
+
+        System.out.println(board);
+    }
+
+    private static void doMoves(String[] moves) {
+        Objects.requireNonNull(board, "board must not be null");
+        for (String input : moves) {
+            var move = board.parseMove(input);
+            if (move != null) {
+                board.makeMove(move);
+            } else {
+                System.out.println("Error while parsing move.");
+            }
+        }
     }
 
     private static void parseGo(String go) {
