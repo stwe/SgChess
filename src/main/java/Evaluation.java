@@ -84,15 +84,18 @@ public class Evaluation {
                 piece.pieceType.evaluationTables[nextColor][to] -
                 piece.pieceType.evaluationTables[nextColor][from];
 
-        /*
-        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-
+        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            var capturedPieceType = move.getCapturedPieceType();
+            gameStage -= capturedPieceType.materialScore;
+            materialScore += (-2 * nextColor + 1) * capturedPieceType.materialScore;
+            positionScore += (-2 * nextColor + 1) * capturedPieceType.evaluationTables[nextColor][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-
+            var promotedPieceType = move.getPromotedPieceType();
+            gameStage += (-2 * nextColor + 1) * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
+            positionScore += (-2 * nextColor + 1) * promotedPieceType.evaluationTables[nextColor][to];
         }
-        */
     }
 
     public void undo(Move move) {
@@ -105,15 +108,18 @@ public class Evaluation {
                 piece.pieceType.evaluationTables[nextColor][to] -
                 piece.pieceType.evaluationTables[nextColor][from];
 
-        /*
-        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
-
+        if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            var capturedPieceType = move.getCapturedPieceType();
+            gameStage += capturedPieceType.materialScore;
+            materialScore -= (-2 * nextColor + 1) * capturedPieceType.materialScore;
+            positionScore -= (-2 * nextColor + 1) * capturedPieceType.evaluationTables[nextColor][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-
+            var promotedPieceType = move.getPromotedPieceType();
+            gameStage -= (-2 * nextColor + 1) * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
+            positionScore -= (-2 * nextColor + 1) * promotedPieceType.evaluationTables[nextColor][to];
         }
-        */
     }
 
     //-------------------------------------------------
