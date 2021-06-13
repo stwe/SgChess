@@ -693,8 +693,6 @@ public class Board {
     // Parse move
     //-------------------------------------------------
 
-    // todo
-
     public Move parseMove(String userInput) {
         /*
         [0] get vertical file (a-h)
@@ -729,7 +727,6 @@ public class Board {
             return null;
         }
 
-        // todo: make convert method
         var fromFile = userInput.charAt(0) - 'a';
         var fromRank = userInput.charAt(1) - '1';
         var toFile = userInput.charAt(2) - 'a';
@@ -752,9 +749,15 @@ public class Board {
         // search move
         var moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue);
 
-        // todo: mehr als ein Zug -> promotion (5 Zeichen input)
-
+        // promotion
         if (moves.size() != 1) {
+            if (userInput.length() == 5) {
+                var promotedPiece = userInput.charAt(4);
+                if (promotedPiece == 'q') {
+
+                }
+            }
+
             return null;
         }
 

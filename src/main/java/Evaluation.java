@@ -133,15 +133,13 @@ public class Evaluation {
         var from = move.getFrom();
         var to = move.getTo();
 
-        // the undo() method is called after undoMove(), which has already changed the color
-        // so we need to restore the previous color as the right color
-        // todo: test
-        var previousColor = board.getColorToMove().getEnemyColor();
-        var previousColorValue = previousColor.value;
+        // the undo() method is called after undoMove(), which has already restored the color
+        var color = board.getColorToMove();
+        var colorValue = color.value;
 
-        var tableFrom = piece.pieceType.evaluationTables[previousColorValue][from];
-        var tableTo = piece.pieceType.evaluationTables[previousColorValue][to];
-        pieceSquareTableScore -= previousColor.sign * tableTo - tableFrom;
+        var tableFrom = piece.pieceType.evaluationTables[colorValue][from];
+        var tableTo = piece.pieceType.evaluationTables[colorValue][to];
+        pieceSquareTableScore -= color.sign * tableTo - tableFrom;
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var capturedPieceType = move.getCapturedPieceType();
@@ -152,8 +150,8 @@ public class Evaluation {
             }
 
             currentTotalMaterialScore += capturedPieceType.materialScore;
-            materialScore -= previousColor.sign * capturedPieceType.materialScore;
-            pieceSquareTableScore -= previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
+            materialScore -= color.sign * capturedPieceType.materialScore;
+            pieceSquareTableScore -= color.sign * capturedPieceType.evaluationTables[colorValue][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -164,8 +162,8 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            currentTotalMaterialScore -= previousColor.sign * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
-            pieceSquareTableScore -= previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
+            currentTotalMaterialScore -= color.sign * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
+            pieceSquareTableScore -= color.sign * promotedPieceType.evaluationTables[colorValue][to];
         }
     }
 

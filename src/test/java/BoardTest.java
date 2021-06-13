@@ -11,6 +11,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class BoardTest {
 
     @Test
+    void parseMove() {
+        var b0 = new Board();
+        var m0 = b0.parseMove("e2e4");
+        assertTrue(b0.makeMove(m0));
+
+        var b1 = new Board("k7/4P3/1p6/8/8/8/8/K7 w - - 0 1");
+        var m1 = b1.parseMove("e7e8q");
+
+        var t = 0;
+    }
+
+    @Test
     void isNeighborAnEnemyPawn() {
         var board = new Board("k7/8/8/8/1P1pPp2/p1P5/8/7K w - - 0 1");
 

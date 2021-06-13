@@ -11,17 +11,34 @@ import static org.junit.jupiter.api.Assertions.*;
 class EvaluationTest {
 
     @Test
-    void evaluate() {
+    void whiteOpeningMove() {
         var board = new Board();
         var eval = new Evaluation(board);
-        System.out.println(eval.evaluate());
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
 
         var m = board.parseMove("e2e4");
-        board.makeMove(m);
+        assertTrue(board.makeMove(m));
         eval.update(m);
-        System.out.println(eval.evaluate());
+        assertEquals(60, eval.getPieceSquareTableScore());
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
 
+        board.undoMove(m);
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
         eval.undo(m);
-        System.out.println(eval.evaluate());
+        assertEquals(0, eval.getPieceSquareTableScore());
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+    }
+
+    @Test
+    void whitePromotionMove() {
+        var board = new Board("k7/4P3/1p6/8/8/8/8/K7 w - - 0 1");
+        var eval = new Evaluation(board);
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+
+        /*
+        var m = board.parseMove("e2e4");
+        assertTrue(board.makeMove(m));
+        eval.update(m);
+        */
     }
 }
