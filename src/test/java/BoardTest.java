@@ -14,12 +14,23 @@ class BoardTest {
     void parseMove() {
         var b0 = new Board();
         var m0 = b0.parseMove("e2e4");
+        assertEquals(Move.MoveFlag.PAWN_START, m0.getMoveFlag());
         assertTrue(b0.makeMove(m0));
 
         var b1 = new Board("k7/4P3/1p6/8/8/8/8/K7 w - - 0 1");
         var m1 = b1.parseMove("e7e8q");
+        assertEquals(Move.MoveFlag.PROMOTION, m1.getMoveFlag());
+        assertEquals(PieceType.QUEEN, m1.getPromotedPieceType());
+        assertTrue(b1.makeMove(m1));
 
-        var t = 0;
+        var b2 = new Board("7k/8/8/1P6/8/8/5p2/K3N1R1 b - - 0 1");
+        var m2 = b2.parseMove("f2e1b");
+        assertEquals(Move.MoveFlag.PROMOTION_CAPTURE, m2.getMoveFlag());
+        assertEquals(PieceType.BISHOP, m2.getPromotedPieceType());
+        assertTrue(b2.makeMove(m2));
+
+        var m3 = b2.parseMove("f2e1B");
+        assertNull(m3);
     }
 
     @Test

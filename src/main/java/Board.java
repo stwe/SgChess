@@ -4,6 +4,7 @@
  * License: GNU GPLv2
  */
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -693,6 +694,13 @@ public class Board {
     // Parse move
     //-------------------------------------------------
 
+    /**
+     * Takes a string and returns the corresponding {@link Move} object or null.
+     *
+     * @param userInput The move as a string (e2e4 or e7e8q).
+     *
+     * @return A {@link Move} or null.
+     */
     public Move parseMove(String userInput) {
         /*
         [0] get vertical file (a-h)
@@ -746,22 +754,36 @@ public class Board {
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
 
-        // search move
-        var moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue);
-
-        // promotion
-        if (moves.size() != 1) {
-            if (userInput.length() == 5) {
-                var promotedPiece = userInput.charAt(4);
-                if (promotedPiece == 'q') {
-
-                }
+        // filter moves list
+        List<Move> moves = null;
+        if (userInput.length() == 4) {
+            moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue);
+        } else if (userInput.length() == 5) {
+            var promotedPiece = userInput.charAt(4);
+            switch (promotedPiece) {
+                case 'q':
+                    moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue, PieceType.QUEEN);
+                    break;
+                case 'n':
+                    moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue, PieceType.KNIGHT);
+                    break;
+                case 'b':
+                    moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue, PieceType.BISHOP);
+                    break;
+                case 'r':
+                    moves = moveGenerator.filterPseudoLegalMovesBy(fromValue, toValue, PieceType.ROOK);
+                    break;
+                default:
+                    System.out.println("Invalid char for promoted piece given.");
+                    return null;
             }
-
-            return null;
         }
 
-        return moves.get(0);
+        if (moves != null && !moves.isEmpty()) {
+            return moves.get(0);
+        }
+
+        return null;
     }
 
     //-------------------------------------------------

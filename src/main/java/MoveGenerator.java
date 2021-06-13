@@ -112,6 +112,26 @@ public class MoveGenerator {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Filter the pseudo legal moves list by from, to and promoted piece type.
+     *
+     * @param fromValue The BitIndex ordinal value of the from square.
+     * @param toValue The BitIndex ordinal value of the to square.
+     * @param promotedPieceType The promoted {@link PieceType}.
+     *
+     * @return The filtered list, which should contain only one move.
+     */
+    public List<Move> filterPseudoLegalMovesBy(int fromValue, int toValue, PieceType promotedPieceType) {
+        return pseudoLegalMoves
+                .stream()
+                .filter(
+                        e -> e.getFrom() == fromValue &&
+                             e.getTo() == toValue &&
+                             e.getPromotedPieceType() == promotedPieceType
+                )
+                .collect(Collectors.toList());
+    }
+
     //-------------------------------------------------
     // Nonsliding pieces (knight, king)
     //-------------------------------------------------
