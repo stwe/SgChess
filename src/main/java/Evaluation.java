@@ -10,17 +10,17 @@ public class Evaluation {
     // Constants
     //-------------------------------------------------
 
-    public static final int TOTAL_MATERIAL =
+    /**
+     * The material value of all the white and black pieces on the board.
+     */
+    public static final int START_POSITION_TOTAL_MATERIAL_SCORE =
             2 * PieceType.QUEEN.materialScore +
             4 * PieceType.ROOK.materialScore +
             4 * PieceType.BISHOP.materialScore +
             4 * PieceType.KNIGHT.materialScore +
             16 * PieceType.PAWN.materialScore;
 
-    private final int[] BISHOP_PAIR = {
-        40, 60
-    };
-
+    private static final int BISHOP_PAIR = 40;
     private static final int KNIGHT_VALUE = 32;
     private static final int BISHOP_VALUE = 16;
 
@@ -33,11 +33,24 @@ public class Evaluation {
      */
     private final Board board;
 
+    /**
+     * The material value of all white pieces minus the material value of all black pieces.
+     * The higher the score the better it is for White. The lower the score the better it is for black.
+     */
     private int materialScore;
 
-    private int positionScore;
+    /**
+     * The summed material value of all the current white and black pieces on the board.
+     */
+    private int currentTotalMaterialScore;
 
-    private int gameStage;
+    /**
+     * The piece-square table score of white minus the piece-square table score of black.
+     * @see <a href="https://www.chessprogramming.org/Simplified_Evaluation_Function">Piece-square tables</a>
+     * For each sort of pieces, different values are calculated depending on the squares the pieces are located.
+     * The higher the score the better it is for White. The lower the score the better it is for black.
+     */
+    private int pieceSquareTableScore;
 
     //-------------------------------------------------
     // Ctors.
@@ -62,12 +75,12 @@ public class Evaluation {
         return materialScore;
     }
 
-    public int getPositionScore() {
-        return positionScore;
+    public int getPieceSquareTableScore() {
+        return pieceSquareTableScore;
     }
 
-    public int getGameStage() {
-        return gameStage;
+    public int getCurrentTotalMaterialScore() {
+        return currentTotalMaterialScore;
     }
 
     //-------------------------------------------------
@@ -78,23 +91,40 @@ public class Evaluation {
         var piece = move.getPiece();
         var from = move.getFrom();
         var to = move.getTo();
-        var nextColor = board.getColorToMove().getEnemyColor().value;
 
-        positionScore += (-2 * nextColor + 1) *
-                piece.pieceType.evaluationTables[nextColor][to] -
-                piece.pieceType.evaluationTables[nextColor][from];
+        // the update() method is called after makeMove(), which has already changed the color
+        // so we need to restore the previous color as the right color
+        var previousColor = board.getColorToMove().getEnemyColor();
+        var previousColorValue = previousColor.value;
+
+        // example: white pawn e2e4
+        var tableFrom = piece.pieceType.evaluationTables[previousColorValue][from]; //  -40
+        var tableTo = piece.pieceType.evaluationTables[previousColorValue][to];     //   20
+        pieceSquareTableScore += previousColor.sign * tableTo - tableFrom;               // = 60
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var capturedPieceType = move.getCapturedPieceType();
-            gameStage -= capturedPieceType.materialScore;
-            materialScore += (-2 * nextColor + 1) * capturedPieceType.materialScore;
-            positionScore += (-2 * nextColor + 1) * capturedPieceType.evaluationTables[nextColor][to];
+
+            // todo: temp code
+            if (capturedPieceType == PieceType.NO_PIECE) {
+                throw new RuntimeException("unexpected error.");
+            }
+
+            currentTotalMaterialScore -= capturedPieceType.materialScore;
+            materialScore += previousColor.sign * capturedPieceType.materialScore;
+            pieceSquareTableScore += previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var promotedPieceType = move.getPromotedPieceType();
-            gameStage += (-2 * nextColor + 1) * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
-            positionScore += (-2 * nextColor + 1) * promotedPieceType.evaluationTables[nextColor][to];
+
+            // todo: temp code
+            if (promotedPieceType == PieceType.NO_PIECE) {
+                throw new RuntimeException("unexpected error.");
+            }
+
+            currentTotalMaterialScore += previousColor.sign * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
+            pieceSquareTableScore += previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
         }
     }
 
@@ -102,23 +132,40 @@ public class Evaluation {
         var piece = move.getPiece();
         var from = move.getFrom();
         var to = move.getTo();
-        var nextColor = board.getColorToMove().getEnemyColor().value;
 
-        positionScore -= (-2 * nextColor + 1) *
-                piece.pieceType.evaluationTables[nextColor][to] -
-                piece.pieceType.evaluationTables[nextColor][from];
+        // the undo() method is called after undoMove(), which has already changed the color
+        // so we need to restore the previous color as the right color
+        // todo: test
+        var previousColor = board.getColorToMove().getEnemyColor();
+        var previousColorValue = previousColor.value;
+
+        var tableFrom = piece.pieceType.evaluationTables[previousColorValue][from];
+        var tableTo = piece.pieceType.evaluationTables[previousColorValue][to];
+        pieceSquareTableScore -= previousColor.sign * tableTo - tableFrom;
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var capturedPieceType = move.getCapturedPieceType();
-            gameStage += capturedPieceType.materialScore;
-            materialScore -= (-2 * nextColor + 1) * capturedPieceType.materialScore;
-            positionScore -= (-2 * nextColor + 1) * capturedPieceType.evaluationTables[nextColor][to];
+
+            // todo: temp code
+            if (capturedPieceType == PieceType.NO_PIECE) {
+                throw new RuntimeException("unexpected error.");
+            }
+
+            currentTotalMaterialScore += capturedPieceType.materialScore;
+            materialScore -= previousColor.sign * capturedPieceType.materialScore;
+            pieceSquareTableScore -= previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var promotedPieceType = move.getPromotedPieceType();
-            gameStage -= (-2 * nextColor + 1) * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
-            positionScore -= (-2 * nextColor + 1) * promotedPieceType.evaluationTables[nextColor][to];
+
+            // todo: temp code
+            if (promotedPieceType == PieceType.NO_PIECE) {
+                throw new RuntimeException("unexpected error.");
+            }
+
+            currentTotalMaterialScore -= previousColor.sign * promotedPieceType.materialScore - PieceType.PAWN.materialScore;
+            pieceSquareTableScore -= previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
         }
     }
 
@@ -127,12 +174,11 @@ public class Evaluation {
     //-------------------------------------------------
 
     public int evaluate() {
-        // position
-        //var alpha = TOTAL_MATERIAL - gameStage;
-        var openingValue = positionScore * gameStage;
-        var positionResult = openingValue / TOTAL_MATERIAL;
+        // position score
+        var openingValue = pieceSquareTableScore * currentTotalMaterialScore;
+        var positionScore = openingValue / START_POSITION_TOTAL_MATERIAL_SCORE;
 
-        // material adjustments
+        // material adjustment score
         var whitePawns = Long.bitCount(board.getWhitePawns());
         var blackPawns = Long.bitCount(board.getBlackPawns());
 
@@ -146,13 +192,12 @@ public class Evaluation {
         int bishopBonus = BISHOP_VALUE * (whiteBishops * whitePawns - blackBishops * blackPawns) / 8;
 
         int pairCount = ((whiteBishops > 1) ? 1 : 0) - ((blackBishops > 1) ? 1 : 0);
+        int pairBonus = pairCount * (BISHOP_PAIR * currentTotalMaterialScore) / START_POSITION_TOTAL_MATERIAL_SCORE;
 
-        int pairBonus = pairCount * (BISHOP_PAIR[0] * gameStage) / TOTAL_MATERIAL;
-
-        var materialAdjustmentsResult = knightBonus + bishopBonus + pairBonus;
+        var materialAdjustmentsScore = knightBonus + bishopBonus + pairBonus;
 
         // result
-        return materialAdjustmentsResult + materialScore + (int)(1.16 * positionResult);
+        return materialAdjustmentsScore + materialScore + (int)(1.16 * positionScore);
     }
 
     //-------------------------------------------------
@@ -160,32 +205,32 @@ public class Evaluation {
     //-------------------------------------------------
 
     private void init() {
-        materialScore = getWhitePiecesMaterialScore() - getBlackPiecesMaterialScore();
-        gameStage = getWhitePiecesMaterialScore() + getBlackPiecesMaterialScore();
+        materialScore = calcWhitePiecesMaterialScore() - calcBlackPiecesMaterialScore();
+        currentTotalMaterialScore = calcWhitePiecesMaterialScore() + calcBlackPiecesMaterialScore();
 
-        int whitePositionScore = 0;
-        whitePositionScore += calcPositionScore(board.getWhitePawns(), Piece.WHITE_PAWN);
-        whitePositionScore += calcPositionScore(board.getWhiteKnights(), Piece.WHITE_KNIGHT);
-        whitePositionScore += calcPositionScore(board.getWhiteBishops(), Piece.WHITE_BISHOP);
-        whitePositionScore += calcPositionScore(board.getWhiteRooks(), Piece.WHITE_ROOK);
-        whitePositionScore += calcPositionScore(board.getWhiteQueens(), Piece.WHITE_QUEEN);
+        int whitePiecesSquareTableScore = 0;
+        whitePiecesSquareTableScore += calcPieceSquareTableScore(board.getWhitePawns(), Piece.WHITE_PAWN);
+        whitePiecesSquareTableScore += calcPieceSquareTableScore(board.getWhiteKnights(), Piece.WHITE_KNIGHT);
+        whitePiecesSquareTableScore += calcPieceSquareTableScore(board.getWhiteBishops(), Piece.WHITE_BISHOP);
+        whitePiecesSquareTableScore += calcPieceSquareTableScore(board.getWhiteRooks(), Piece.WHITE_ROOK);
+        whitePiecesSquareTableScore += calcPieceSquareTableScore(board.getWhiteQueens(), Piece.WHITE_QUEEN);
 
-        int blackPositionScore = 0;
-        blackPositionScore += calcPositionScore(board.getBlackPawns(), Piece.BLACK_PAWN);
-        blackPositionScore += calcPositionScore(board.getBlackKnights(), Piece.BLACK_KNIGHT);
-        blackPositionScore += calcPositionScore(board.getBlackBishops(), Piece.BLACK_BISHOP);
-        blackPositionScore += calcPositionScore(board.getBlackRooks(), Piece.BLACK_ROOK);
-        blackPositionScore += calcPositionScore(board.getBlackQueens(), Piece.BLACK_QUEEN);
+        int blackPiecesSquareTableScore = 0;
+        blackPiecesSquareTableScore += calcPieceSquareTableScore(board.getBlackPawns(), Piece.BLACK_PAWN);
+        blackPiecesSquareTableScore += calcPieceSquareTableScore(board.getBlackKnights(), Piece.BLACK_KNIGHT);
+        blackPiecesSquareTableScore += calcPieceSquareTableScore(board.getBlackBishops(), Piece.BLACK_BISHOP);
+        blackPiecesSquareTableScore += calcPieceSquareTableScore(board.getBlackRooks(), Piece.BLACK_ROOK);
+        blackPiecesSquareTableScore += calcPieceSquareTableScore(board.getBlackQueens(), Piece.BLACK_QUEEN);
 
-        positionScore = whitePositionScore - blackPositionScore;
+        pieceSquareTableScore = whitePiecesSquareTableScore - blackPiecesSquareTableScore;
     }
 
     //-------------------------------------------------
-    // Material score
+    // Calc score
     //-------------------------------------------------
 
-    private int getWhitePiecesMaterialScore() {
-        int result = 0;
+    private int calcWhitePiecesMaterialScore() {
+        var result = 0;
 
         result += Long.bitCount(board.getWhitePawns()) * PieceType.PAWN.materialScore;
         result += Long.bitCount(board.getWhiteKnights()) * PieceType.KNIGHT.materialScore;
@@ -196,8 +241,8 @@ public class Evaluation {
         return result;
     }
 
-    private int getBlackPiecesMaterialScore() {
-        int result = 0;
+    private int calcBlackPiecesMaterialScore() {
+        var result = 0;
 
         result += Long.bitCount(board.getBlackPawns()) * PieceType.PAWN.materialScore;
         result += Long.bitCount(board.getBlackKnights()) * PieceType.KNIGHT.materialScore;
@@ -208,12 +253,8 @@ public class Evaluation {
         return result;
     }
 
-    //-------------------------------------------------
-    // Position score
-    //-------------------------------------------------
-
-    private int calcPositionScore(long bitboard, Piece piece) {
-        int result = 0;
+    private int calcPieceSquareTableScore(long bitboard, Piece piece) {
+        var result = 0;
         while (bitboard != 0) {
             result += piece.evaluationTable[Bitboard.getLsb(bitboard).ordinal()];
             bitboard &= bitboard - 1;

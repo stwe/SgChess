@@ -5,7 +5,7 @@
  */
 
 /**
- * Represents the evaluation tables.
+ * Represents Piece-Square Tables.
  */
 public class EvaluationTables {
 

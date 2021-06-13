@@ -16,9 +16,19 @@ public class Board {
     //-------------------------------------------------
 
     public enum Color {
-        WHITE(0), BLACK(1), NONE(2);
+        WHITE(0, 1), BLACK(1, -1), NONE(2, 0);
 
+        /**
+         * The ordinal value.
+         */
         public int value;
+
+        /**
+         * Used for evaluation calculations.
+         * A positive number means that white's position is better.
+         * A negative number means things look better for black.
+         */
+        public int sign;
 
         public Color getEnemyColor() {
             if (this.value == 0) {
@@ -32,8 +42,9 @@ public class Board {
             return NONE;
         }
 
-        Color(int value) {
+        Color(int value, int sign) {
             this.value = value;
+            this.sign = sign;
         }
     }
 
