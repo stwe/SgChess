@@ -33,12 +33,19 @@ class EvaluationTest {
     void whitePromotionMove() {
         var board = new Board("k7/4P3/1p6/8/8/8/8/K7 w - - 0 1");
         var eval = new Evaluation(board);
+        assertEquals(25, eval.getPieceSquareTableScore());
         assertEquals(Board.Color.WHITE, board.getColorToMove());
 
-        /*
-        var m = board.parseMove("e2e4");
+        var m = board.parseMove("e7e8q");
         assertTrue(board.makeMove(m));
         eval.update(m);
-        */
+        assertEquals(Board.Color.BLACK, board.getColorToMove());
+
+        board.undoMove(m);
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
+        eval.undo(m);
+
+        assertEquals(25, eval.getPieceSquareTableScore());
+        assertEquals(Board.Color.WHITE, board.getColorToMove());
     }
 }
