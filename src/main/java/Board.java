@@ -89,7 +89,7 @@ public class Board {
     private int castlingRights;
 
     /**
-     * A packed integer containing the old castling rights.
+     * A packed integer containing the old {@link #castlingRights}.
      */
     private int oldCastlingRights;
 
@@ -99,7 +99,7 @@ public class Board {
     private Bitboard.BitIndex epIndex = Bitboard.BitIndex.NO_SQUARE;
 
     /**
-     * The {@link Bitboard.BitIndex} of the old En Passant target square.
+     * The {@link Bitboard.BitIndex} of the old {@link #epIndex}.
      */
     private Bitboard.BitIndex oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
 
@@ -107,6 +107,21 @@ public class Board {
      * The current Zobrist key.
      */
     private long zkey;
+
+    /**
+     * The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
+     */
+    private int halfMovesCounter;
+
+    /**
+     * The old {@link #halfMovesCounter} value.
+     */
+    private int oldHalfMovesCounter;
+
+    /**
+     * The number of the full move. It starts at 1, and is incremented after Black's move.
+     */
+    private int movesCounter;
 
     //-------------------------------------------------
     // Ctors.
@@ -560,6 +575,21 @@ public class Board {
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
 
+        // update move counter
+        movesCounter += oldColor.value; // inc only it was a black move
+
+        if (move.getPiece().pieceType == PieceType.PAWN ||
+                move.getMoveFlag() == Move.MoveFlag.CAPTURE ||
+                move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE
+        ) {
+            oldHalfMovesCounter = halfMovesCounter;
+            halfMovesCounter = 0;
+        } else {
+            oldHalfMovesCounter = halfMovesCounter;
+            halfMovesCounter++;
+        }
+
+        // check if it was legal
         if (Attack.getAttackersToSquare(oldColor, Bitboard.getLsb(getKing(oldColor)), this) != 0) {
             undoMove(move);
             return false; // return illegal move
@@ -575,6 +605,12 @@ public class Board {
      */
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
+
+        if (colorToMove == Color.BLACK) {
+            movesCounter--;
+        }
+
+        halfMovesCounter = oldHalfMovesCounter;
 
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
@@ -1017,6 +1053,10 @@ public class Board {
                 s.append("    Zobrist key: ").append(zkey);
             }
 
+            if (rank == 3) {
+                s.append("    half moves: ").append(halfMovesCounter).append(", moves: ").append(movesCounter);
+            }
+
             s.append("\n");
             s.append(" +---+---+---+---+---+---+---+---+\n");
         }
@@ -1063,7 +1103,9 @@ public class Board {
         Objects.requireNonNull(fen, "fen must not be null");
 
         var fenFields = fen.split(" ");
-        if (fenFields.length != 6) {
+
+        // a FEN without movecounters can be passed
+        if (fenFields.length < 4) {
             throw new RuntimeException("Invalid FEN record given.");
         }
 
@@ -1099,6 +1141,19 @@ public class Board {
                     Bitboard.File.values()[file],
                     Bitboard.Rank.values()[rank]
             );
+        }
+
+        // move counter
+        halfMovesCounter = 0;
+        oldHalfMovesCounter = 0;
+
+        movesCounter = 1;
+
+        if (fenFields.length == 6) {
+            halfMovesCounter = Integer.parseInt(fenFields[4]);
+            oldHalfMovesCounter = halfMovesCounter;
+
+            movesCounter = Integer.parseInt(fenFields[5]);
         }
 
         // create Zobrist key
