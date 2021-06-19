@@ -15,12 +15,10 @@ public class Main {
     //-------------------------------------------------
 
     public static void main(String[] args) throws IOException, IllegalAccessException {
-        /*
         if (USE_UCI) {
             UCIClient.run();
         } else {
             Client.run();
         }
-        */
     }
 }

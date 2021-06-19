@@ -29,6 +29,9 @@ public class Client {
         // show board
         System.out.println(board);
 
+        // print hint
+        System.out.println("press h for help");
+
         // read commands
         var keyboard = new Scanner(System.in);
 

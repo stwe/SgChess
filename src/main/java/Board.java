@@ -106,7 +106,7 @@ public class Board {
     /**
      * The current Zobrist key.
      */
-    public long zkey;
+    private long zkey;
 
     //-------------------------------------------------
     // Ctors.
@@ -330,9 +330,18 @@ public class Board {
     //-------------------------------------------------
 
     /**
+     * Get {@link #bitboards}.
+     *
+     * @return {@link #bitboards}
+     */
+    public long[] getBitboards() {
+        return bitboards;
+    }
+
+    /**
      * Get {@link #colorToMove}.
      *
-     * @return {@link #colorToMove}.
+     * @return {@link #colorToMove}
      */
     public Color getColorToMove() {
         return colorToMove;
@@ -341,7 +350,7 @@ public class Board {
     /**
      * Get {@link #castlingRights}.
      *
-     * @return {@link #castlingRights}.
+     * @return {@link #castlingRights}
      */
     public int getCastlingRights() {
         return castlingRights;
@@ -365,6 +374,15 @@ public class Board {
         return oldEpIndex;
     }
 
+    /**
+     * Get {@link #zkey}.
+     *
+     * @return {@link #zkey}
+     */
+    public long getZkey() {
+        return zkey;
+    }
+
     //-------------------------------------------------
     // Setter
     //-------------------------------------------------
@@ -376,6 +394,15 @@ public class Board {
      */
     public void setColorToMove(Color colorToMove) {
         this.colorToMove = colorToMove;
+    }
+
+    /**
+     * Set {@link #zkey}.
+     *
+     * @param zkey The new Zobrist key.
+     */
+    public void setZkey(long zkey) {
+        this.zkey = zkey;
     }
 
     //-------------------------------------------------
@@ -1073,6 +1100,9 @@ public class Board {
                     Bitboard.Rank.values()[rank]
             );
         }
+
+        // create Zobrist key
+        Zkey.createKey(this);
     }
 
     /**

@@ -51,19 +51,32 @@ public enum PieceType {
 
     /**
      * Returns the bitboard index of a white or black {@link PieceType}.
-     * If an invalid color is passed, -1 is returned.
+     * If an invalid piece type or color is passed, -1 is returned.
      *
      * @param pieceType The {@link PieceType}.
-     * @param color {@link Board.Color}.
+     * @param color The {@link Board.Color}.
      *
-     * @return An index or -1 if an invalid color was passed.
+     * @return An index or -1 if an invalid type was passed.
      */
     public static int getBitboardNumber(PieceType pieceType, Board.Color color) {
-        if (color == Board.Color.NONE) {
+        return getBitboardNumber(pieceType.value, color.value);
+    }
+
+    /**
+     * Returns the bitboard index of a white or black {@link PieceType} value.
+     * If an invalid piece type or color value is passed, -1 is returned.
+     *
+     * @param pieceType The {@link PieceType} value.
+     * @param color The {@link Board.Color} value.
+     *
+     * @return An index or -1 if an invalid value was passed.
+     */
+    public static int getBitboardNumber(int pieceType, int color) {
+        if (pieceType == PieceType.NO_PIECE.value || color == Board.Color.NONE.value) {
             return -1;
         }
 
-        return (pieceType.value + color.value * 6) - 1;
+        return (pieceType + color * 6) - 1;
     }
 
     //-------------------------------------------------
