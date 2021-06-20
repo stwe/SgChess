@@ -449,6 +449,26 @@ public class Board {
     }
 
     //-------------------------------------------------
+    // Zobrist
+    //-------------------------------------------------
+
+    private void xorWhiteColorToMove() {
+        zkey ^= Zkey.whiteColorToMove;
+    }
+
+    private void xorCastlingRights(int castlingRights) {
+        zkey ^= Zkey.castlingRights[castlingRights];
+    }
+
+    private void xorEpIndex(Bitboard.BitIndex epIndex) {
+        zkey ^= Zkey.epIndex[epIndex.ordinal()];
+    }
+
+    private void xorPiece(int color, int pieceType, int square) {
+        zkey ^= Zkey.piece[color][pieceType][square];
+    }
+
+    //-------------------------------------------------
     // Make / undo
     //-------------------------------------------------
 
@@ -463,47 +483,71 @@ public class Board {
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
 
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+
             oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            var colorToMoveValue = colorToMove.value;
+
+            // remove captured piece
             if (move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
                 removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+                xorPiece(colorToMove.getEnemyColor().value, move.getCapturedPieceType().value, move.getTo());
             }
 
+            // remove own pawn
             removePiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
-            zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+            xorPiece(colorToMoveValue, PieceType.PAWN.value, move.getFrom());
 
+            // add own promoted piece
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
-            zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
+            xorPiece(colorToMoveValue, move.getPromotedPieceType().value, move.getTo());
 
             oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-            var remove = move.getTo();
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
+            var removeFrom = move.getTo();
             if (colorToMove == Color.WHITE) {
-                remove -= 8;
+                removeFrom -= 8;
             } else {
-                remove += 8;
+                removeFrom += 8;
             }
 
-            // remove enemy pawn
-            removePiece(remove, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+            // remove captured pawn
+            removePiece(removeFrom, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+            xorPiece(colorToMove.getEnemyColor().value, PieceType.PAWN.value, removeFrom);
 
             // move own pawn to epIndex/move.getTo()
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
 
             oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             // king
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
 
+            // determine rook from and to squares
             var rookOrigin = Bitboard.BitIndex.NO_SQUARE;
             var rookDestination = Bitboard.BitIndex.NO_SQUARE;
 
@@ -533,13 +577,20 @@ public class Board {
 
             // rook
             movePiece(rookOrigin.ordinal(), rookDestination.ordinal(), PieceType.ROOK, colorToMove);
+            xorPiece(colorToMoveValue, PieceType.ROOK.value, rookOrigin.ordinal());
+            xorPiece(colorToMoveValue, PieceType.ROOK.value, rookDestination.ordinal());
 
             oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
 
             // check if there is a pawn on the left or on the right
             if (isNeighborAnEnemyPawn(move.getTo(), colorToMove)) {
@@ -554,10 +605,15 @@ public class Board {
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             removePiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
-            zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
+            xorPiece(colorToMove.getEnemyColor().value, move.getCapturedPieceType().value, move.getTo());
 
             movePiece(move.getFrom(), move.getTo(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
 
             oldEpIndex = epIndex;
             epIndex = Bitboard.BitIndex.NO_SQUARE;
@@ -571,9 +627,38 @@ public class Board {
         // store current color
         var oldColor = colorToMove;
 
-        // change color && update bitboards
+        // change color to move && update bitboards
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
+
+
+        ////////////////////////////////////////////////////////////////////////////////
+
+        // todo
+
+        // nimmt weiss aus dem key, falls gerade aktuell und umgedreht
+        xorWhiteColorToMove();
+
+        // Did the castling rights change? If yes, update the zkey.
+        if (oldCastlingRights != castlingRights) {
+            xorCastlingRights(castlingRights);
+        }
+
+        // Did the ep index change? If yes, update the zkey.
+        if (oldEpIndex != epIndex) {
+            if (oldEpIndex != Bitboard.BitIndex.NO_SQUARE) {
+                xorEpIndex(oldEpIndex);
+            }
+
+            if (epIndex != Bitboard.BitIndex.NO_SQUARE) {
+                xorEpIndex(epIndex);
+            }
+        }
+
+        // todo add the zkey to a map
+
+        ////////////////////////////////////////////////////////////////////////////////
+
 
         // update move counter
         movesCounter += oldColor.value; // inc only it was a black move
@@ -600,6 +685,7 @@ public class Board {
 
     /**
      * Restores a {@link Move}.
+     * todo: undo Zobrist key
      *
      * @param move {@link Move}
      */
@@ -728,9 +814,6 @@ public class Board {
 
         removePiece(fromBitIndex, pieceBitboard);
         addPiece(toBitIndex, pieceBitboard);
-
-        zkey ^= Zkey.piece[color.value][pieceType.value][fromBitIndex];
-        zkey ^= Zkey.piece[color.value][pieceType.value][toBitIndex];
     }
 
     /**

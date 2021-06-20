@@ -13,14 +13,14 @@ public class Zkey {
     //-------------------------------------------------
 
     /**
-     * The two sides to move possibilities.
+     * White is the color on move.
      */
-    public static final long colorToMove;
+    public static final long whiteColorToMove;
 
     /**
      * 16 castling possibilities.
      */
-    public static final long[] castling = new long[16];
+    public static final long[] castlingRights = new long[16];
 
     /**
      * 48 ep possibilities, the last two ranks are never needed.
@@ -41,12 +41,12 @@ public class Zkey {
         var rndg = new SecureRandom();
         rndg.setSeed(System.currentTimeMillis());
 
-        // color to move
-        colorToMove = rndg.nextLong();
+        // white color to move
+        whiteColorToMove = rndg.nextLong();
 
-        // castling
-        for (int i = 0; i < castling.length; i++) {
-            castling[i] = rndg.nextLong();
+        // castling rights
+        for (int i = 0; i < castlingRights.length; i++) {
+            castlingRights[i] = rndg.nextLong();
         }
 
         // ep index
@@ -65,7 +65,7 @@ public class Zkey {
     }
 
     //-------------------------------------------------
-    // Helper
+    // Create key
     //-------------------------------------------------
 
     /**
@@ -76,13 +76,13 @@ public class Zkey {
     public static void createKey(Board board) {
         var key = 0L;
 
-        // color to move
+        // xor only if white color to move
         if (board.getColorToMove() == Board.Color.WHITE) {
-            key ^= colorToMove;
+            key ^= whiteColorToMove;
         }
 
-        // castling
-        key ^= castling[board.getCastlingRights()];
+        // castling rights
+        key ^= castlingRights[board.getCastlingRights()];
 
         // ep index
         if (board.getEpIndex() != Bitboard.BitIndex.NO_SQUARE) {

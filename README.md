@@ -7,7 +7,6 @@ A chess engine written in Java.
 ### Board representation
 
 - Bitboards
-- Magic bitboards
 
 ### Search
 
