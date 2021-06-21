@@ -93,6 +93,7 @@ class BoardTest {
     @Test
     void makeCastlingMoveWhite() {
         var board = new Board("r3k2r/p3p2p/8/8/8/8/P3P2P/R3K2R w KQkq - 0 1");
+        var startKey = board.getZkey();
 
         var mg = new MoveGenerator(board);
         mg.generatePseudoLegalMoves();
@@ -109,6 +110,7 @@ class BoardTest {
         // undo castling
         board.undoMove(moves.get(15));
         assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+        assertEquals(startKey, board.getZkey());
 
         // white king castle queen side
         board.makeMove(moves.get(16));
@@ -118,11 +120,13 @@ class BoardTest {
         // undo castling
         board.undoMove(moves.get(16));
         assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test
     void makeCastlingMoveBlack() {
         var board = new Board("r3k2r/p3p2p/8/8/8/8/P3P2P/R3K2R b KQkq - 0 1");
+        var startKey = board.getZkey();
 
         var mg = new MoveGenerator(board);
         mg.generatePseudoLegalMoves();
@@ -139,6 +143,7 @@ class BoardTest {
         // undo castling
         board.undoMove(moves.get(15));
         assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+        assertEquals(startKey, board.getZkey());
 
         // black queen castle queen side
         board.makeMove(moves.get(16));
@@ -148,6 +153,7 @@ class BoardTest {
         // undo castling
         board.undoMove(moves.get(16));
         assertEquals(Bitboard.BOTH_CASTLE_BOTH_SIDES, board.getCastlingRights());
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test

@@ -631,20 +631,14 @@ public class Board {
         colorToMove = colorToMove.getEnemyColor();
         updateCommonBitboards();
 
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        // todo
-
-        // nimmt weiss aus dem key, falls gerade aktuell und umgedreht
+        // update zkey (color, castling, epIndex)
         xorWhiteColorToMove();
 
-        // Did the castling rights change? If yes, update the zkey.
         if (oldCastlingRights != castlingRights) {
+            xorCastlingRights(oldCastlingRights);
             xorCastlingRights(castlingRights);
         }
 
-        // Did the ep index change? If yes, update the zkey.
         if (oldEpIndex != epIndex) {
             if (oldEpIndex != Bitboard.BitIndex.NO_SQUARE) {
                 xorEpIndex(oldEpIndex);
@@ -656,9 +650,6 @@ public class Board {
         }
 
         // todo add the zkey to a map
-
-        ////////////////////////////////////////////////////////////////////////////////
-
 
         // update move counter
         movesCounter += oldColor.value; // inc only it was a black move
@@ -685,12 +676,12 @@ public class Board {
 
     /**
      * Restores a {@link Move}.
-     * todo: undo Zobrist key
      *
      * @param move {@link Move}
      */
     public void undoMove(Move move) {
         colorToMove = colorToMove.getEnemyColor();
+        xorWhiteColorToMove();
 
         if (colorToMove == Color.BLACK) {
             movesCounter--;
@@ -701,46 +692,66 @@ public class Board {
         if (move.getMoveFlag() == Move.MoveFlag.NORMAL) {
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
 
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+
             epIndex = oldEpIndex;
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+            var colorToMoveValue = colorToMove.value;
+
             if (move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
                 addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
+                xorPiece(colorToMove.getEnemyColor().value, move.getCapturedPieceType().value, move.getTo());
             }
 
             removePiece(move.getTo(), PieceType.getBitboardNumber(move.getPromotedPieceType(), colorToMove));
-            zkey ^= Zkey.piece[colorToMove.value][move.getPromotedPieceType().value][move.getTo()];
+            xorPiece(colorToMoveValue, move.getPromotedPieceType().value, move.getTo());
 
             addPiece(move.getFrom(), PieceType.getBitboardNumber(PieceType.PAWN, colorToMove));
-            zkey ^= Zkey.piece[colorToMove.value][PieceType.PAWN.value][move.getFrom()];
+            xorPiece(colorToMoveValue, PieceType.PAWN.value, move.getFrom());
 
             epIndex = oldEpIndex;
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-            var add = move.getTo();
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
+            var addTo = move.getTo();
             if (colorToMove == Color.WHITE) {
-                add -= 8;
+                addTo -= 8;
             } else {
-                add += 8;
+                addTo += 8;
             }
 
-            // add enemy pawn
-            addPiece(add, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+            // add captured pawn
+            addPiece(addTo, PieceType.getBitboardNumber(PieceType.PAWN, colorToMove.getEnemyColor()));
+            xorPiece(colorToMove.getEnemyColor().value, PieceType.PAWN.value, addTo);
 
             // move own pawn back
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
 
             epIndex = oldEpIndex;
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             // king
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
 
             var rookOrigin = Bitboard.BitIndex.NO_SQUARE;
             var rookDestination = Bitboard.BitIndex.NO_SQUARE;
@@ -771,30 +782,60 @@ public class Board {
 
             // rook
             movePiece(rookDestination.ordinal(), rookOrigin.ordinal(), PieceType.ROOK, colorToMove);
+            xorPiece(colorToMoveValue, PieceType.ROOK.value, rookDestination.ordinal());
+            xorPiece(colorToMoveValue, PieceType.ROOK.value, rookOrigin.ordinal());
 
             epIndex = oldEpIndex;
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PAWN_START) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
+
             epIndex = oldEpIndex;
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+            var colorToMoveValue = colorToMove.value;
+            var pieceTypeValue = move.getPiece().pieceType.value;
+
             movePiece(move.getTo(), move.getFrom(), move.getPiece().pieceType, colorToMove);
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getTo());
+            xorPiece(colorToMoveValue, pieceTypeValue, move.getFrom());
 
             addPiece(move.getTo(), PieceType.getBitboardNumber(move.getCapturedPieceType(), colorToMove.getEnemyColor()));
-            zkey ^= Zkey.piece[colorToMove.getEnemyColor().value][move.getCapturedPieceType().value][move.getTo()];
+            xorPiece(colorToMove.getEnemyColor().value, move.getCapturedPieceType().value, move.getTo());
 
             epIndex = oldEpIndex;
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
         // undo castling rights
+        if (oldCastlingRights != castlingRights) {
+            xorCastlingRights(castlingRights);
+            xorCastlingRights(oldCastlingRights);
+        }
+
         castlingRights = oldCastlingRights;
 
+        // update bitboards
         updateCommonBitboards();
+
+        // todo
+        if (oldEpIndex != epIndex) {
+            if (epIndex != Bitboard.BitIndex.NO_SQUARE) {
+                xorEpIndex(epIndex);
+            }
+
+            if (oldEpIndex != Bitboard.BitIndex.NO_SQUARE) {
+                xorEpIndex(oldEpIndex);
+            }
+        }
     }
 
     //-------------------------------------------------
