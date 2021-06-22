@@ -160,6 +160,7 @@ class BoardTest {
     void makePromotionCaptureMoveWhite() {
         // f7e8=queen
         var board = new Board("k3n3/5P2/8/8/8/8/8/K7 w - - 0 1");
+        var startKey = board.getZkey();
 
         var mg = new MoveGenerator(board);
         mg.generatePseudoLegalMoves();
@@ -172,12 +173,14 @@ class BoardTest {
         board.undoMove(moves.get(7));
         assertEquals(0, board.getWhiteQueens());
         assertEquals(Piece.BLACK_KNIGHT, board.getPieceFrom(Bitboard.BitIndex.E8_IDX));
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test
     void makePromotionCaptureMoveBlack() {
         // d2c1=queen
         var board = new Board("k7/8/8/8/8/8/3p4/2N4K b - - 0 1");
+        var startKey = board.getZkey();
 
         var mg = new MoveGenerator(board);
         mg.generatePseudoLegalMoves();
@@ -190,11 +193,13 @@ class BoardTest {
         board.undoMove(moves.get(7));
         assertEquals(0, board.getBlackQueens());
         assertEquals(Piece.WHITE_KNIGHT, board.getPieceFrom(Bitboard.BitIndex.C1_IDX));
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test
     void makePawnStartMoveWhite() {
         var board = new Board("k7/8/8/8/p7/8/1P6/7K w - - 0 1");
+        var startKey = board.getZkey();
 
         // before pawn start move
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
@@ -215,11 +220,13 @@ class BoardTest {
         board.undoMove(startMoves.get(1));
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test
     void makePawnStartMoveBlack() {
         var board = new Board("k7/6p1/8/7P/8/8/8/7K b - - 0 1");
+        var startKey = board.getZkey();
 
         // before pawn start move
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
@@ -240,6 +247,7 @@ class BoardTest {
         board.undoMove(startMoves.get(1));
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getEpIndex());
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex());
+        assertEquals(startKey, board.getZkey());
     }
 
     @Test
@@ -254,6 +262,7 @@ class BoardTest {
         mg0.generatePseudoLegalMoves();
         var startMoves = mg0.getPseudoLegalMoves();
         board.makeMove(startMoves.get(1));
+        var pawnStartKey = board.getZkey();
 
         // after pawn start move
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());
@@ -280,6 +289,7 @@ class BoardTest {
         assertEquals(Board.Color.BLACK, board.getColorToMove());
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());       // same situation after pawn start
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
+        assertEquals(pawnStartKey, board.getZkey());
 
         // ---------------------------------------------------------------
 
@@ -301,6 +311,7 @@ class BoardTest {
         assertEquals(Board.Color.BLACK, board.getColorToMove());
         assertEquals(Bitboard.BitIndex.B3_IDX, board.getEpIndex());       // same situation after pawn start
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
+        assertEquals(pawnStartKey, board.getZkey());
     }
 
     @Test
@@ -315,6 +326,7 @@ class BoardTest {
         mg0.generatePseudoLegalMoves();
         var startMoves = mg0.getPseudoLegalMoves();
         board.makeMove(startMoves.get(1));
+        var pawnStartKey = board.getZkey();
 
         // after pawn start move
         assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());
@@ -341,6 +353,7 @@ class BoardTest {
         assertEquals(Board.Color.WHITE, board.getColorToMove());
         assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());       // same situation after pawn start
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
+        assertEquals(pawnStartKey, board.getZkey());
 
         // ---------------------------------------------------------------
 
@@ -362,6 +375,7 @@ class BoardTest {
         assertEquals(Board.Color.WHITE, board.getColorToMove());
         assertEquals(Bitboard.BitIndex.G6_IDX, board.getEpIndex());       // same situation after pawn start
         assertEquals(Bitboard.BitIndex.NO_SQUARE, board.getOldEpIndex()); // same situation after pawn start
+        assertEquals(pawnStartKey, board.getZkey());
     }
 
     void runStartPosition(int depth) {
