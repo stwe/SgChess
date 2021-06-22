@@ -54,6 +54,7 @@ class MoveGeneratorTest {
         // start position with 20 moves
         var boardStart = new Board();
         var mgStart = new MoveGenerator(boardStart);
+        mgStart.generatePseudoLegalMoves();
         assertEquals(20, mgStart.getPseudoLegalMoves().size());
         assertEquals(0, mgStart.filterPseudoLegalMovesBy(Move.MoveFlag.CAPTURE).size());
         assertEquals(0, mgStart.filterPseudoLegalMovesBy(Move.MoveFlag.CASTLING).size());
@@ -61,12 +62,14 @@ class MoveGeneratorTest {
         // tricky position with 48 moves
         var board48 = new Board(TEST48);
         var mg48 = new MoveGenerator(board48);
+        mg48.generatePseudoLegalMoves();
         assertEquals(48, mg48.getPseudoLegalMoves().size());
         assertEquals(2, mg48.filterPseudoLegalMovesBy(Move.MoveFlag.CASTLING).size());
 
         // 26 white pawn moves
         var wpBoard = new Board(WHITE_PAWNS);
         var wpMg = new MoveGenerator(wpBoard);
+        wpMg.generatePseudoLegalMoves();
         assertEquals(26, wpMg.filterPseudoLegalMovesBy(Piece.WHITE_PAWN).size());
         assertEquals(1, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.EN_PASSANT).size());
         assertEquals(2 * 4, wpMg.filterPseudoLegalMovesBy(Move.MoveFlag.PROMOTION_CAPTURE).size());
@@ -74,12 +77,14 @@ class MoveGeneratorTest {
         // 26 black pawn moves
         var bpBoard = new Board(BLACK_PAWNS);
         var bpMg = new MoveGenerator(bpBoard);
+        bpMg.generatePseudoLegalMoves();
         assertEquals(26, bpMg.filterPseudoLegalMovesBy(Piece.BLACK_PAWN).size());
         assertEquals(1, bpMg.filterPseudoLegalMovesBy(Move.MoveFlag.EN_PASSANT).size());
 
         // 14 white knight moves + 5 white king moves
         var kkBoard = new Board(KNIGHTS_AND_KINGS);
         var kkMg = new MoveGenerator(kkBoard);
+        kkMg.generatePseudoLegalMoves();
         assertEquals(14, kkMg.filterPseudoLegalMovesBy(Piece.WHITE_KNIGHT).size());
         assertEquals(5, kkMg.filterPseudoLegalMovesBy(Piece.WHITE_KING).size());
         assertEquals(0, kkMg.filterPseudoLegalMovesBy(Move.MoveFlag.CASTLING).size());
@@ -87,21 +92,25 @@ class MoveGeneratorTest {
         // 13 white rooks moves
         var wrBoard = new Board(ROOKS);
         var wrMg = new MoveGenerator(wrBoard);
+        wrMg.generatePseudoLegalMoves();
         assertEquals(13, wrMg.filterPseudoLegalMovesBy(Piece.WHITE_ROOK).size());
 
         // 22 white queen moves
         var wqBoard = new Board(QUEENS);
         var wqMg = new MoveGenerator(wqBoard);
+        wqMg.generatePseudoLegalMoves();
         assertEquals(22, wqMg.filterPseudoLegalMovesBy(Piece.WHITE_QUEEN).size());
 
         // 22 white queen moves
         var wbBoard = new Board(BISHOPS);
         var wbMg = new MoveGenerator(wbBoard);
+        wbMg.generatePseudoLegalMoves();
         assertEquals(11, wbMg.filterPseudoLegalMovesBy(Piece.WHITE_BISHOP).size());
 
         // 6 capture moves
         var boardCap = new Board("rnbqkbnr/1p2pppp/p1p5/3p3Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1");
         var capMg = new MoveGenerator(boardCap);
+        capMg.generatePseudoLegalMoves();
         assertEquals(6, capMg.filterPseudoLegalMovesBy(Move.MoveFlag.CAPTURE).size());
     }
 }
