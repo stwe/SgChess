@@ -279,47 +279,93 @@ public class Attack {
     }
 
     /**
-     * Checks whether a square is under attack.
+     * Checks whether a white square is under attack.
      *
-     * @param color Which {@link Board.Color} is under attack.
      * @param bitIndex The {@link Bitboard.BitIndex} of the square which is under attack.
      * @param board A {@link Board} object.
      *
      * @return boolean
      */
-    public static boolean isSquareAttacked(Board.Color color, Bitboard.BitIndex bitIndex, Board board) {
-        if (color == Board.Color.NONE) {
-            return false;
-        }
-
-        var enemyColor = color.getEnemyColor();
-
-        if ((getKingMoves(bitIndex) & board.getKing(enemyColor)) != 0) {
+    public static boolean isWhiteSquareAttacked(Bitboard.BitIndex bitIndex, Board board) {
+        if ((getPawnAttacks(Board.Color.WHITE, bitIndex) & board.getBlackPawns()) != 0) {
             return true;
         }
 
-        if ((getKnightMoves(bitIndex) & board.getKnights(enemyColor)) != 0) {
+        if ((getKnightMoves(bitIndex) & board.getBlackKnights()) != 0) {
             return true;
         }
 
-        if ((getPawnAttacks(color, bitIndex) & board.getPawns(enemyColor)) != 0) {
+        if ((getKingMoves(bitIndex) & board.getBlackKing()) != 0) {
             return true;
         }
 
-        return false;
-
-        // todo: color beachten!
-        /*
-        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooks(enemyColor)) != 0) {
+        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getBlackRooks()) != 0) {
             return true;
         }
 
-        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBishops(enemyColor)) != 0) {
+        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getBlackBishops()) != 0) {
             return true;
         }
 
-        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueens(enemyColor)) != 0;
-        */
+        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getBlackQueens()) != 0;
+    }
+
+    /**
+     * Checks whether a white square is under attack.
+     *
+     * @param file A {@link Bitboard.File}.
+     * @param rank A {@link Bitboard.Rank}.
+     * @param board A {@link Board} object.
+     *
+     * @return boolean
+     */
+    public static boolean isWhiteSquareAttacked(Bitboard.File file, Bitboard.Rank rank, Board board) {
+        return isWhiteSquareAttacked(Bitboard.getBitIndexByFileAndRank(file, rank), board);
+    }
+
+    /**
+     * Checks whether a black square is under attack.
+     *
+     * @param bitIndex The {@link Bitboard.BitIndex} of the square which is under attack.
+     * @param board A {@link Board} object.
+     *
+     * @return boolean
+     */
+    public static boolean isBlackSquareAttacked(Bitboard.BitIndex bitIndex, Board board) {
+        if ((getPawnAttacks(Board.Color.BLACK, bitIndex) & board.getWhitePawns()) != 0) {
+            return true;
+        }
+
+        if ((getKnightMoves(bitIndex) & board.getWhiteKnights()) != 0) {
+            return true;
+        }
+
+        if ((getKingMoves(bitIndex) & board.getWhiteKing()) != 0) {
+            return true;
+        }
+
+        if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getWhiteRooks()) != 0) {
+            return true;
+        }
+
+        if ((getBishopMoves(bitIndex, board.getAllPieces()) & board.getWhiteBishops()) != 0) {
+            return true;
+        }
+
+        return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getWhiteQueens()) != 0;
+    }
+
+    /**
+     * Checks whether a black square is under attack.
+     *
+     * @param file A {@link Bitboard.File}.
+     * @param rank A {@link Bitboard.Rank}.
+     * @param board A {@link Board} object.
+     *
+     * @return boolean
+     */
+    public static boolean isBlackSquareAttacked(Bitboard.File file, Bitboard.Rank rank, Board board) {
+        return isBlackSquareAttacked(Bitboard.getBitIndexByFileAndRank(file, rank), board);
     }
 
     /**
@@ -336,9 +382,15 @@ public class Attack {
             return false;
         }
 
-        for (var index : bitIndices) {
-            if (isSquareAttacked(color, index, board)) {
-                return true;
+        for (var bitIndex : bitIndices) {
+            if (color == Board.Color.WHITE) {
+                if (isWhiteSquareAttacked(bitIndex, board)) {
+                    return true;
+                }
+            } else {
+                if (isBlackSquareAttacked(bitIndex, board)) {
+                    return true;
+                }
             }
         }
 

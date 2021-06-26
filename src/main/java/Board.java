@@ -1405,66 +1405,65 @@ public class Board {
      * @return The String for the square.
      */
     private String getPieceString(Bitboard.File file, Bitboard.Rank rank) {
-        var bitIndex = Bitboard.getBitIndexByFileAndRank(file, rank);
         var attacked = false;
 
         if (Bitboard.isBitSet(getWhitePawns(), file, rank)) {
-            attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_PAWN, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteKnights(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_KNIGHT, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteBishops(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_BISHOP, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteRooks(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_ROOK, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteQueens(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_QUEEN, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteKing(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isWhiteSquareAttacked(file, rank, this);
             return createPieceString(Piece.WHITE_KING, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackPawns(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_PAWN, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackKnights(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_KNIGHT, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackBishops(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_BISHOP, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackRooks(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_ROOK, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackQueens(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_QUEEN, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackKing(), file, rank)) {
-            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            attacked = Attack.isBlackSquareAttacked(file, rank, this);
             return createPieceString(Piece.BLACK_KING, attacked);
         }
 

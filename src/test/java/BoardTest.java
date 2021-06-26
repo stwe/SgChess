@@ -479,7 +479,7 @@ class BoardTest {
 
     @Test
     void perftTest() {
-        runStartPosition(4);
+        runStartPosition(6);
         runKiwipetePosition(2);
         runWiki3Position(3);
     }

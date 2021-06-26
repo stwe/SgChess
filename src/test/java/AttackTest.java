@@ -125,18 +125,19 @@ class AttackTest {
     void isSquareAttacked() {
         var board = new Board("rn2kb1r/ppp1pppp/5n2/3p4/1q1PP1b1/6PP/PPP2P2/RNBQKBNR w KQkq - 1 2");
 
-        /*
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.E1_IDX, board));
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.D1_IDX, board));
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.E4_IDX, board));
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.D4_IDX, board));
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.B2_IDX, board));
-        assertTrue(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.H3_IDX, board));
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.E1_IDX, board)); // white king
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.D1_IDX, board)); // white queen
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.E4_IDX, board)); // white pawn
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.D4_IDX, board)); // white pawn
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.B2_IDX, board)); // white pawn
+        assertTrue(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.H3_IDX, board)); // white pawn
 
-        assertFalse(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.A1_IDX, board));
-        assertFalse(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.G1_IDX, board));
-        assertFalse(Attack.isSquareAttacked(Board.Color.WHITE, Bitboard.BitIndex.F2_IDX, board));
-        */
+        assertFalse(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.A1_IDX, board)); // white rook
+        assertFalse(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.G1_IDX, board)); // white knight
+        assertFalse(Attack.isWhiteSquareAttacked(Bitboard.BitIndex.F2_IDX, board)); // white pawn
+
+        assertTrue(Attack.isBlackSquareAttacked(Bitboard.BitIndex.D5_IDX, board)); // black pawn
+        assertTrue(Attack.isBlackSquareAttacked(Bitboard.BitIndex.G4_IDX, board)); // black bishop
     }
 
     @Test
@@ -154,6 +155,13 @@ class AttackTest {
                 Board.Color.WHITE,
                 board,
                 Bitboard.BitIndex.A1_IDX, Bitboard.BitIndex.B1_IDX, Bitboard.BitIndex.C1_IDX
+                )
+        );
+
+        assertTrue(Attack.areOneOrMoreSquaresAttacked(
+                Board.Color.BLACK,
+                board,
+                Bitboard.BitIndex.D5_IDX, Bitboard.BitIndex.H3_IDX
                 )
         );
     }

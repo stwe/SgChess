@@ -27,6 +27,7 @@ public class Client {
         System.out.println(Config.TITLE);
 
         // setup board to start position
+        // todo: var board = new Board("8/8/8/3k4/8/4P3/8/K7 w - - 0 1"); <-- d5d4 prints out success message
         var board = new Board();
 
         // show board
