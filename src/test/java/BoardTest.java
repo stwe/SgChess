@@ -491,7 +491,11 @@ class BoardTest {
 
     @Test
     void perftTest() {
-        runStartPosition(6);
+        //var board = new Board("2k5/4R3/8/8/8/8/8/R6K w - - 0 1");
+        //board.perftTest(2, false); // 1: 30
+
+
+        runStartPosition(4);
         //runKiwipetePosition(2);
         //runWiki3Position(3);
     }

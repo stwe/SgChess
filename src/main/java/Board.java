@@ -1046,6 +1046,10 @@ public class Board {
             undoMove(move);
 
             if (!quiet) {
+                if (oldNodes == 0) {
+                    System.out.println("Mate found: " + move);
+                }
+
                 System.out.println(move + " nodes: " + oldNodes);
             }
         }
