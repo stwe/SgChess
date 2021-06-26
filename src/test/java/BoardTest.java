@@ -378,6 +378,10 @@ class BoardTest {
         assertEquals(pawnStartKey, board.getZkey());
     }
 
+    //-------------------------------------------------
+    // Perft test
+    //-------------------------------------------------
+
     void runStartPosition(int depth) {
         var board = new Board();
         board.perftTest(depth);

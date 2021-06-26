@@ -279,6 +279,30 @@ public class Attack {
     }
 
     /**
+     * Convenience method to determine if a king in check.
+     *
+     * @param color The {@link Board.Color} of the kink.
+     * @param board The {@link Board}.
+     *
+     * @return boolean
+     */
+    public static boolean isCheck(Board.Color color, Board board) {
+        if (color == Board.Color.NONE) {
+            return false;
+        }
+
+        // get the position of the king (white or black)
+        var kingBitIndex = Bitboard.getLsb(board.getKing(color));
+
+        // determine if the position is under attack
+        if (color == Board.Color.WHITE) {
+            return isWhiteSquareAttacked(kingBitIndex, board);
+        }
+
+        return isBlackSquareAttacked(kingBitIndex, board);
+    }
+
+    /**
      * Checks whether a white square is under attack.
      *
      * @param bitIndex The {@link Bitboard.BitIndex} of the square which is under attack.

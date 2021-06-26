@@ -674,7 +674,7 @@ public class Board {
         }
 
         // check if it was legal
-        if (Attack.getAttackersToSquare(oldColor, Bitboard.getLsb(getKing(oldColor)), this) != 0) {
+        if (Attack.isCheck(oldColor, this)) {
             undoMove(move);
             return false; // return illegal move
         }
