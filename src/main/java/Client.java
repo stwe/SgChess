@@ -7,6 +7,9 @@
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Run the game on the command line.
+ */
 public class Client {
 
     //-------------------------------------------------
@@ -62,6 +65,9 @@ public class Client {
                         case "c" :
                             clearConsole();
                             break;
+                        case "s" :
+                            System.out.println("best move found: " + search(board));
+                            break;
                         case "u" :
                             if (move != null) {
                                 board.undoMove(move);
@@ -114,6 +120,11 @@ public class Client {
 
     private static void clearConsole() {
         System.out.print("\033[H\033[2J");
-        System.out.flush();;
+        System.out.flush();
+    }
+
+    private static Move search(Board board) {
+        var bestMoveSearch = new Search(board);
+        return bestMoveSearch.minimaxRoot(3);
     }
 }

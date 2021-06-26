@@ -306,6 +306,10 @@ public class Attack {
             return true;
         }
 
+        return false;
+
+        // todo: color beachten!
+        /*
         if ((getRookMoves(bitIndex, board.getAllPieces()) & board.getRooks(enemyColor)) != 0) {
             return true;
         }
@@ -315,6 +319,7 @@ public class Attack {
         }
 
         return (getQueenMoves(bitIndex, board.getAllPieces()) & board.getQueens(enemyColor)) != 0;
+        */
     }
 
     /**

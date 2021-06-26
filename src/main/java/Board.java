@@ -1089,30 +1089,8 @@ public class Board {
 
             for (var file : Bitboard.File.values()) {
                 var piece = getPieceString(file, Bitboard.Rank.values()[rank]);
-
-                // set square background
-                if (Config.COLORED) {
-                    if (file.ordinal() % 2 == 1 && rank % 2 == 0) {
-                        s.append(Config.BOARD_WHITE);
-                    }
-                    if (file.ordinal() % 2 == 0 && rank % 2 == 0) {
-                        s.append(Config.BOARD_BLACK);
-                    }
-
-                    if (file.ordinal() % 2 == 1 && rank % 2 == 1) {
-                        s.append(Config.BOARD_BLACK);
-                    }
-                    if (file.ordinal() % 2 == 0 && rank % 2 == 1) {
-                        s.append(Config.BOARD_WHITE);
-                    }
-                }
-
-                // append piece
                 if (piece.equals("")) {
                     s.append("   ");
-                    if (Config.COLORED) {
-                        s.append(ANSI_RESET);
-                    }
                 } else {
                     s.append(" ");
                     s.append(piece);
@@ -1385,6 +1363,40 @@ public class Board {
     //-------------------------------------------------
 
     /**
+     * Returns a String for the specified {@link Piece}.
+     *
+     * @param piece A {@link Piece}.
+     * @param attacked True, if the {@link Piece} is attacked.
+     *
+     * @return The String for the {@link Piece}.
+     */
+    private String createPieceString(Piece piece, boolean attacked) {
+        var pieceColor = piece.color == Color.WHITE ? Config.WHITE_PIECE_COLOR : Config.BLACK_PIECE_COLOR;
+
+        if (Config.UNICODE_SYMBOLS) {
+            if (Config.COLORED) {
+                if (attacked) {
+                    return Config.SQUARE_ATTACKED_BG_COLOR + pieceColor + piece.symbol + ANSI_RESET;
+                } else {
+                    return pieceColor + piece.symbol + ANSI_RESET;
+                }
+            } else {
+                return piece.symbol;
+            }
+        } else {
+            if (Config.COLORED) {
+                if (attacked) {
+                    return Config.SQUARE_ATTACKED_BG_COLOR + pieceColor + piece.letter + ANSI_RESET;
+                } else {
+                    return pieceColor + piece.letter + ANSI_RESET;
+                }
+            } else {
+                return piece.letter;
+            }
+        }
+    }
+
+    /**
      * Returns a String for the specified file/rank.
      *
      * @param file A vertical line on the chessboard.
@@ -1393,76 +1405,67 @@ public class Board {
      * @return The String for the square.
      */
     private String getPieceString(Bitboard.File file, Bitboard.Rank rank) {
+        var bitIndex = Bitboard.getBitIndexByFileAndRank(file, rank);
+        var attacked = false;
+
         if (Bitboard.isBitSet(getWhitePawns(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_PAWN.symbol + ANSI_RESET : Piece.WHITE_PAWN.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_PAWN.letter + ANSI_RESET : Piece.WHITE_PAWN.letter;
+            attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_PAWN, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteKnights(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KNIGHT.symbol + ANSI_RESET : Piece.WHITE_KNIGHT.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KNIGHT.letter + ANSI_RESET : Piece.WHITE_KNIGHT.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_KNIGHT, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteBishops(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_BISHOP.symbol + ANSI_RESET : Piece.WHITE_BISHOP.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_BISHOP.letter + ANSI_RESET : Piece.WHITE_BISHOP.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_BISHOP, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteRooks(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_ROOK.symbol + ANSI_RESET : Piece.WHITE_ROOK.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_ROOK.letter + ANSI_RESET : Piece.WHITE_ROOK.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_ROOK, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteQueens(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_QUEEN.symbol + ANSI_RESET : Piece.WHITE_QUEEN.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_QUEEN.letter + ANSI_RESET : Piece.WHITE_QUEEN.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_QUEEN, attacked);
         }
 
         if (Bitboard.isBitSet(getWhiteKing(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KING.symbol + ANSI_RESET : Piece.WHITE_KING.symbol
-                    : Config.COLORED ? Config.PIECE_WHITE + Piece.WHITE_KING.letter + ANSI_RESET : Piece.WHITE_KING.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.WHITE_KING, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackPawns(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_PAWN.symbol + ANSI_RESET : Piece.BLACK_PAWN.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_PAWN.letter + ANSI_RESET : Piece.BLACK_PAWN.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_PAWN, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackKnights(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KNIGHT.symbol + ANSI_RESET : Piece.BLACK_KNIGHT.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KNIGHT.letter + ANSI_RESET : Piece.BLACK_KNIGHT.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_KNIGHT, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackBishops(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_BISHOP.symbol + ANSI_RESET : Piece.BLACK_BISHOP.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_BISHOP.letter + ANSI_RESET : Piece.BLACK_BISHOP.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_BISHOP, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackRooks(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_ROOK.symbol + ANSI_RESET : Piece.BLACK_ROOK.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_ROOK.letter + ANSI_RESET : Piece.BLACK_ROOK.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_ROOK, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackQueens(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_QUEEN.symbol + ANSI_RESET : Piece.BLACK_QUEEN.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_QUEEN.letter + ANSI_RESET : Piece.BLACK_QUEEN.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_QUEEN, attacked);
         }
 
         if (Bitboard.isBitSet(getBlackKing(), file, rank)) {
-            return Config.UNICODE_SYMBOLS ?
-                      Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KING.symbol  + ANSI_RESET : Piece.BLACK_KING.symbol
-                    : Config.COLORED ? Config.PIECE_BLACK + Piece.BLACK_KING.letter + ANSI_RESET : Piece.BLACK_KING.letter;
+            //attacked = Attack.isSquareAttacked(colorToMove, bitIndex, this);
+            return createPieceString(Piece.BLACK_KING, attacked);
         }
 
         return "";
