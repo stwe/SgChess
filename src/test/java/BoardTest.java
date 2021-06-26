@@ -384,7 +384,7 @@ class BoardTest {
 
     void runStartPosition(int depth) {
         var board = new Board();
-        board.perftTest(depth);
+        board.perftTest(depth, false);
 
         if (depth == 1) {
             assertEquals(20, board.nodes);
@@ -414,18 +414,26 @@ class BoardTest {
 
         if (depth == 4) {
             assertEquals(197281, board.nodes);
-            //assertEquals(1576, board.captures[0]);
-            //assertEquals(0, board.enPassants[0]);
-            //assertEquals(0, board.castles[0]);
-            //assertEquals(469, board.checks[0]);
+            assertEquals(1576, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(469, board.checks[0]);
+        }
+
+        if (depth == 5) {
+            assertEquals(4865609, board.nodes);
+            assertEquals(82719, board.captures[0]);
+            assertEquals(258, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(27351, board.checks[0]);
         }
 
         if (depth == 6) {
             assertEquals(119060324, board.nodes);
-            //assertEquals(2812008, board.captures[0]);
-            //assertEquals(5248, board.enPassants[0]);
-            //assertEquals(0, board.castles[0]);
-            //assertEquals(809099, board.checks[0]);
+            assertEquals(2812008, board.captures[0]);
+            assertEquals(5248, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(809099, board.checks[0]);
         }
     }
 
@@ -484,7 +492,7 @@ class BoardTest {
     @Test
     void perftTest() {
         runStartPosition(6);
-        runKiwipetePosition(2);
-        runWiki3Position(3);
+        //runKiwipetePosition(2);
+        //runWiki3Position(3);
     }
 }

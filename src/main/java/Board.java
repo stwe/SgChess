@@ -999,9 +999,9 @@ public class Board {
     public void perftTest(int depth, boolean quiet) {
         System.out.println();
         System.out.println();
-        System.out.println("---------------------------------");
-        System.out.println("Perft test");
-        System.out.println("---------------------------------");
+        System.out.println("--------------------------------");
+        System.out.println("           Perft test           ");
+        System.out.println("--------------------------------");
 
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
