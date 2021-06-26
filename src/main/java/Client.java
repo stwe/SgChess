@@ -27,7 +27,6 @@ public class Client {
         System.out.println(Config.TITLE);
 
         // setup board to start position
-        // todo: var board = new Board("8/8/8/3k4/8/4P3/8/K7 w - - 0 1"); <-- d5d4 prints out success message
         var board = new Board();
 
         // show board
@@ -83,8 +82,12 @@ public class Client {
                 } else if (input.length() == 4 || input.length() == 5) {
                     move = board.parseMove(input);
                     if (move != null) {
-                        board.makeMove(move);
-                        System.out.println("Success: press b to show the new board.");
+                        var wasLegal = board.makeMove(move);
+                        if (wasLegal) {
+                            System.out.println("Success: press b to show the new board.");
+                        } else {
+                            System.out.println("The move is illegal and has been undo.");
+                        }
                     } else {
                         System.out.println("Error: there was no move found.");
                     }
