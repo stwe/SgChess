@@ -941,6 +941,7 @@ public class Board {
     public int[] checks;
     public int[] castles;
     public int[] enPassants;
+    public int[] promotions;
     public int[] checkmates;
     public long nodes = 0;
 
@@ -971,12 +972,16 @@ public class Board {
             legalMovesMaked++;
 
             if (!quiet) {
-                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
                     captures[depth - 1]++;
                 }
 
-                if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                if (Attack.isCheck(colorToMove, this)) {
                     checks[depth - 1]++;
+                }
+
+                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                    castles[depth - 1]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
@@ -984,8 +989,8 @@ public class Board {
                     captures[depth - 1]++;
                 }
 
-                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                    castles[depth - 1]++;
+                if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+                    promotions[depth - 1]++;
                 }
             }
 
@@ -1019,6 +1024,7 @@ public class Board {
         checks = new int[depth];
         castles = new int[depth];
         enPassants = new int[depth];
+        promotions = new int[depth];
         checkmates = new int[depth];
 
         var startTime = System.currentTimeMillis();
@@ -1033,12 +1039,16 @@ public class Board {
             legalMovesMaked++;
 
             if (!quiet) {
-                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
+                if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
                     captures[depth - 1]++;
                 }
 
-                if (Attack.getAttackersToSquare(colorToMove, Bitboard.getLsb(getKing(colorToMove)), this) != 0) {
+                if (Attack.isCheck(colorToMove, this)) {
                     checks[depth - 1]++;
+                }
+
+                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
+                    castles[depth - 1]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
@@ -1046,8 +1056,8 @@ public class Board {
                     captures[depth - 1]++;
                 }
 
-                if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                    castles[depth - 1]++;
+                if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
+                    promotions[depth - 1]++;
                 }
             }
 
@@ -1077,6 +1087,7 @@ public class Board {
             System.out.println("Captures: " + captures[0]);
             System.out.println("En passants: " + enPassants[0]);
             System.out.println("Castles: " + castles[0]);
+            System.out.println("Promotions: " + promotions[0]);
             System.out.println("Checks: " + checks[0]);
             // todo: ob die Tiefe Matt ist, kann momentan nur mit Tiefe + 1 festgestellt werden
             for (var i = 0; i < depth; i++) {
