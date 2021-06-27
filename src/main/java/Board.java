@@ -1230,7 +1230,8 @@ public class Board {
 
         // en passant
         if (!fenFields[3].equals("-")) {
-            var file = (104 - fenFields[3].charAt(0)) + 1;
+            var ascii = fenFields[3].charAt(0);
+            var file = Math.abs((104 - ascii) - 7);
             var rank = Integer.parseInt(fenFields[3].substring(1)) - 1;
             epIndex = Bitboard.getBitIndexByFileAndRank(
                     Bitboard.File.values()[file],

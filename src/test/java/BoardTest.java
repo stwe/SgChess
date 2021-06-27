@@ -598,10 +598,9 @@ class BoardTest {
         assertEquals(1015133, b1.nodes);
 
         //--EP Capture Checks Opponent
-        // todo fail
         var b2 = new Board("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1");
         b2.perftTest(6);
-        //assertEquals(1440467, b2.nodes);
+        assertEquals(1440467, b2.nodes);
 
         //--Short Castling Gives Check
         var b3 = new Board("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
