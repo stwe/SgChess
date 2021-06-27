@@ -476,9 +476,9 @@ class BoardTest {
         }
     }
 
-    void runWiki3Position(int depth) {
+    void runWiki3Position(int depth, boolean quiet) {
         var board = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
-        board.perftTest(depth, false);
+        board.perftTest(depth, quiet);
 
         if (depth == 1) {
             assertEquals(14, board.nodes);
@@ -503,6 +503,52 @@ class BoardTest {
             assertEquals(0, board.castles[0]);
             assertEquals(267, board.checks[0]);
         }
+
+        if (depth == 4) {
+            assertEquals(43238, board.nodes);
+            assertEquals(3348, board.captures[0]);
+            assertEquals(123, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(1680, board.checks[0]);
+        }
+
+        if (depth == 5) {
+            assertEquals(674624, board.nodes);
+            assertEquals(52051, board.captures[0]);
+            assertEquals(1165, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(52950, board.checks[0]);
+            assertEquals(17, board.checkmates[0]);
+        }
+
+        if (depth == 6) {
+            assertEquals(11030083, board.nodes);      // ok
+            //assertEquals(940350, board.captures[0]);  // todo fails with 939910
+            assertEquals(33325, board.enPassants[0]); // ok
+            assertEquals(0, board.castles[0]);        // ok
+            assertEquals(452473, board.checks[0]);    // ok
+        }
+    }
+
+    void runWiki4Position(int depth, boolean quiet) {
+        var board = new Board("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+        board.perftTest(depth, quiet);
+
+        if (depth == 1) {
+            assertEquals(6, board.nodes);
+            assertEquals(0, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(0, board.checks[0]);
+        }
+
+        if (depth == 2) {
+            assertEquals(264, board.nodes);
+            assertEquals(87, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(6, board.castles[0]);
+            assertEquals(10, board.checks[0]);
+        }
     }
 
     // https://www.chessprogramming.org/Perft_Results
@@ -510,7 +556,8 @@ class BoardTest {
     @Test
     void perftTest() {
         //runStartPosition(6, false);
-        runKiwipetePosition(3, false);
-        //runWiki3Position(3);
+        //runKiwipetePosition(3, false);
+        //runWiki3Position(6, false);
+        runWiki4Position(2, false);
     }
 }
