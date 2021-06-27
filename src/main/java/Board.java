@@ -941,6 +941,7 @@ public class Board {
     public int[] checks;
     public int[] castles;
     public int[] enPassants;
+    public int[] checkmates;
     public long nodes = 0;
 
     /**
@@ -960,10 +961,14 @@ public class Board {
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
 
+        var legalMovesMaked = 0;
+
         for (var move : moveGenerator.getPseudoLegalMoves()) {
             if (!makeMove(move)) {
                 continue;
             }
+
+            legalMovesMaked++;
 
             if (!quiet) {
                 if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
@@ -988,6 +993,10 @@ public class Board {
 
             undoMove(move);
         }
+
+        if (legalMovesMaked == 0) {
+            checkmates[depth - 1]++;
+        }
     }
 
     /**
@@ -1010,13 +1019,18 @@ public class Board {
         checks = new int[depth];
         castles = new int[depth];
         enPassants = new int[depth];
+        checkmates = new int[depth];
 
         var startTime = System.currentTimeMillis();
+
+        var legalMovesMaked = 0;
 
         for (var move : moveGenerator.getPseudoLegalMoves()) {
             if (!makeMove(move)) {
                 continue;
             }
+
+            legalMovesMaked++;
 
             if (!quiet) {
                 if (move.getMoveFlag() == Move.MoveFlag.CAPTURE) {
@@ -1046,15 +1060,15 @@ public class Board {
             undoMove(move);
 
             if (!quiet) {
-                if (oldNodes == 0) {
-                    System.out.println("Mate found: " + move);
-                }
-
                 System.out.println(move + " nodes: " + oldNodes);
             }
         }
 
         var endTime = System.currentTimeMillis() - startTime;
+
+        if (legalMovesMaked == 0) {
+            checkmates[depth - 1]++;
+        }
 
         System.out.println("---------------------------------");
         System.out.println("Depth: " + depth);
@@ -1064,6 +1078,10 @@ public class Board {
             System.out.println("En passants: " + enPassants[0]);
             System.out.println("Castles: " + castles[0]);
             System.out.println("Checks: " + checks[0]);
+            // todo: ob die Tiefe Matt ist, kann momentan nur mit Tiefe + 1 festgestellt werden
+            for (var i = 0; i < depth; i++) {
+                System.out.println("Checkmates depth " + (depth - i) + ": "  + checkmates[i]);
+            }
         }
         System.out.println("Total execution time: " + endTime + "ms");
         System.out.println("---------------------------------");

@@ -382,9 +382,9 @@ class BoardTest {
     // Perft test
     //-------------------------------------------------
 
-    void runStartPosition(int depth) {
+    void runStartPosition(int depth, boolean quiet) {
         var board = new Board();
-        board.perftTest(depth, false);
+        board.perftTest(depth, quiet);
 
         if (depth == 1) {
             assertEquals(20, board.nodes);
@@ -410,8 +410,6 @@ class BoardTest {
             assertEquals(12, board.checks[0]);
         }
 
-        // todo: show checkmates
-
         if (depth == 4) {
             assertEquals(197281, board.nodes);
             assertEquals(1576, board.captures[0]);
@@ -426,6 +424,7 @@ class BoardTest {
             assertEquals(258, board.enPassants[0]);
             assertEquals(0, board.castles[0]);
             assertEquals(27351, board.checks[0]);
+            assertEquals(8, board.checkmates[0]); // todo: 8 Positionen bei Tiefe 4 Matt
         }
 
         if (depth == 6) {
@@ -434,12 +433,13 @@ class BoardTest {
             assertEquals(5248, board.enPassants[0]);
             assertEquals(0, board.castles[0]);
             assertEquals(809099, board.checks[0]);
+            assertEquals(347, board.checkmates[0]); // todo: 347 Positionen bei Tiefe 5 Matt
         }
     }
 
-    void runKiwipetePosition(int depth) {
-        var board = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
-        board.perftTest(depth, false);
+    void runKiwipetePosition(int depth, boolean quiet) {
+        var board = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+        board.perftTest(depth, quiet);
 
         if (depth == 1) {
             assertEquals(48, board.nodes);
@@ -455,6 +455,24 @@ class BoardTest {
             assertEquals(1, board.enPassants[0]);
             assertEquals(91, board.castles[0]);
             assertEquals(3, board.checks[0]);
+        }
+
+        // todo fails
+        if (depth == 3) {
+            assertEquals(97862, board.nodes);        // 91965
+            assertEquals(17102, board.captures[0]);  // 16396
+            assertEquals(45, board.enPassants[0]);   // 45      (ok)
+            assertEquals(3162, board.castles[0]);    // 1430
+            assertEquals(993, board.checks[0]);      // 933
+        }
+
+        if (depth == 4) {
+            assertEquals(4085603, board.nodes);
+            assertEquals(757163, board.captures[0]);
+            assertEquals(1929, board.enPassants[0]);
+            assertEquals(128013, board.castles[0]);
+            assertEquals(25523, board.checks[0]);
+            assertEquals(1, board.checkmates[0]); // todo: 1 Position bei Tiefe 3 Matt
         }
     }
 
@@ -491,12 +509,8 @@ class BoardTest {
 
     @Test
     void perftTest() {
-        //var board = new Board("2k5/4R3/8/8/8/8/8/R6K w - - 0 1");
-        //board.perftTest(2, false); // 1: 30
-
-
-        runStartPosition(4);
-        //runKiwipetePosition(2);
+        //runStartPosition(6, false);
+        runKiwipetePosition(3, false);
         //runWiki3Position(3);
     }
 }
