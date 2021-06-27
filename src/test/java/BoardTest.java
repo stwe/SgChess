@@ -584,6 +584,82 @@ class BoardTest {
     }
 
     // https://www.chessprogramming.org/Perft_Results
+    // https://www.chessprogramming.net/perfect-perft/
+
+    void talkChessPositions() {
+        //--Illegal ep move #1
+        var b0 = new Board("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1");
+        b0.perftTest(6);
+        assertEquals(1134888, b0.nodes);
+
+        //--Illegal ep move #2
+        var b1 = new Board("8/8/4k3/8/2p5/8/B2P2K1/8 w - - 0 1");
+        b1.perftTest(6);
+        assertEquals(1015133, b1.nodes);
+
+        //--EP Capture Checks Opponent
+        // todo fail
+        var b2 = new Board("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1");
+        b2.perftTest(6);
+        //assertEquals(1440467, b2.nodes);
+
+        //--Short Castling Gives Check
+        var b3 = new Board("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
+        b3.perftTest(6);
+        assertEquals(661072, b3.nodes);
+
+        //--Long Castling Gives Check
+        var b4 = new Board("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1");
+        b4.perftTest(6);
+        assertEquals(803711, b4.nodes);
+
+        //--Castle Rights
+        // todo fail
+        var b5 = new Board("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
+        b5.perftTest(4);
+        //assertEquals(1274206, b5.nodes);
+
+        //--Castling Prevented
+        // todo fail
+        var b6 = new Board("r3k2r/8/3Q4/8/8/5q2/8/R3K2R b KQkq - 0 1");
+        b6.perftTest(4);
+        //assertEquals(1720476, b6.nodes);
+
+        //--Promote out of Check
+        var b7 = new Board("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1");
+        b7.perftTest(6);
+        assertEquals(3821001, b7.nodes);
+
+        //--Discovered Check
+        var b8 = new Board("8/8/1P2K3/8/2n5/1q6/8/5k2 b - - 0 1");
+        b8.perftTest(5);
+        assertEquals(1004658, b8.nodes);
+
+        //--Promote to give check
+        var b9 = new Board("4k3/1P6/8/8/8/8/K7/8 w - - 0 1");
+        b9.perftTest(6);
+        assertEquals(217342, b9.nodes);
+
+        //--Under Promote to give check
+        var b10 = new Board("8/P1k5/K7/8/8/8/8/8 w - - 0 1");
+        b10.perftTest(6);
+        assertEquals(92683, b10.nodes);
+
+        //--Self Stalemate
+        var b11 = new Board("K1k5/8/P7/8/8/8/8/8 w - - 0 1");
+        b11.perftTest(6);
+        assertEquals(2217, b11.nodes);
+
+        //--Stalemate & Checkmate
+        var b12 = new Board("8/k1P5/8/1K6/8/8/8/8 w - - 0 1");
+        b12.perftTest(7);
+        assertEquals(567584, b12.nodes);
+
+        //--Stalemate & Checkmate
+        var b13 = new Board("8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1");
+        b13.perftTest(4);
+        assertEquals(23527, b13.nodes);
+    }
 
     @Test
     void perftTest() {
@@ -596,5 +672,7 @@ class BoardTest {
 
         //runWiki3Position(7, false); // alle ok
         //runWiki4Position(4, false); // 3 fails
+
+        talkChessPositions();
     }
 }
