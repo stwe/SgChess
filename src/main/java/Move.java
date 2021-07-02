@@ -33,7 +33,7 @@ public class Move {
     /**
      * A packed integer containing all of the move data.
      *
-     * Currently 25 bits are used in total to store move information.
+     * Currently 29 bits are used in total to store move information.
      * The format is as follows:
      *
      * <p>bit  0 -  5: <b>from</b> square (0 - 63)</p>
@@ -42,6 +42,7 @@ public class Move {
      * <p>bit 15 - 17: <b>promoted piece type</b> (0 - 6)</p>
      * <p>bit 18 - 20: <b>special move flag</b> (0 - 6)</p>
      * <p>bit 21 - 24: <b>piece</b>(0 - 11)</p>
+     * <p>bit 25 - 29: <b>previousCastlingRights</b> 4 bits</p>
      * <p></p>
      * <pre>
      * 0000 0000 0000 0000 0000 0000 0011 1111 -> from (6 bits)
@@ -57,6 +58,7 @@ public class Move {
      *                                                capture = 5
      *                                                promotion_capture = 6
      * 0000 0001 1110 0000 0000 0000 0000 0000 -> piece (4 bits)
+     * 0001 1110 0000 0000 0000 0000 0000 0000 -> previous castling rights (4 bits)
      * </pre>
      */
     private int move;
@@ -276,6 +278,29 @@ public class Move {
     public void setPiece(Piece piece) {
         move &= ~31457280;
         move |= (piece.value & 15) << 21;
+    }
+
+    //-------------------------------------------------
+    // Previous castling rights
+    //-------------------------------------------------
+
+    /**
+     * Get the previous castling rights of this move.
+     *
+     * @return The previous castling rights.
+     */
+    public int getPreviousCastlingRights() {
+        return (move & 503316480) >>> 25;
+    }
+
+    /**
+     * Set the previous castling rights of this move.
+     *
+     * @param castlingRights A packed integer containing the previous castling rights. The order is 1111 = qkQK
+     */
+    public void setPreviousCastlingRights(int castlingRights) {
+        move &= ~503316480;
+        move |= (castlingRights & 15) << 25;
     }
 
     //-------------------------------------------------

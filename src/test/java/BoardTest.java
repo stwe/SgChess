@@ -670,8 +670,11 @@ class BoardTest {
         //runKiwipetePosition(3, false); // 3 fails
 
         //runWiki3Position(7, false); // alle ok
-        //runWiki4Position(4, false); // 3 fails
+        //runWiki4Position(3, false); // 3 fails
 
-        talkChessPositions();
+        //talkChessPositions();
+
+        var b5 = new Board("1k6/8/8/8/8/8/8/R3K2R w KQ - 0 1"); // 2182
+        b5.perftTest(3, false);
     }
 }
