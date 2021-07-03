@@ -382,9 +382,15 @@ class BoardTest {
     // Perft test
     //-------------------------------------------------
 
+    /**
+     * @see <a href="https://www.chessprogramming.org/Perft_Results">Start position</a>
+     *
+     * @param depth Perft test depth.
+     * @param quiet Shows a summary.
+     */
     void runStartPosition(int depth, boolean quiet) {
         var board = new Board();
-        board.perftTest(depth, quiet);
+        board.perftTest(depth, quiet, "Start position depth: " + depth);
 
         if (depth == 1) {
             assertEquals(20, board.nodes);
@@ -444,9 +450,15 @@ class BoardTest {
         }
     }
 
+    /**
+     * @see <a href="https://www.chessprogramming.org/Perft_Results">Kiwipete</a>
+     *
+     * @param depth Perft test depth.
+     * @param quiet Shows a summary.
+     */
     void runKiwipetePosition(int depth, boolean quiet) {
         var board = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
-        board.perftTest(depth, quiet);
+        board.perftTest(depth, quiet, "Kiwipete depth: " + depth);
 
         if (depth == 1) {
             assertEquals(48, board.nodes);
@@ -466,7 +478,6 @@ class BoardTest {
             assertEquals(3, board.checks[0]);
         }
 
-        // todo fails
         if (depth == 3) {
             assertEquals(97862, board.nodes);
             assertEquals(17102, board.captures[0]);
@@ -476,11 +487,37 @@ class BoardTest {
             assertEquals(993, board.checks[0]);
             // 1 checkmate
         }
+
+        if (depth == 4) {
+            assertEquals(4085603, board.nodes);
+            assertEquals(757163, board.captures[0]);
+            assertEquals(1929, board.enPassants[0]);
+            assertEquals(128013, board.castles[0]);
+            assertEquals(15172, board.promotions[0]);
+            assertEquals(25523, board.checks[0]);
+            // 43 checkmate
+        }
+
+        if (depth == 5) {
+            assertEquals(193690690, board.nodes);
+            assertEquals(35043416, board.captures[0]);
+            assertEquals(73365, board.enPassants[0]);
+            assertEquals(4993637, board.castles[0]);
+            assertEquals(8392, board.promotions[0]);
+            assertEquals(3309887, board.checks[0]);
+            // 30171 checkmate
+        }
     }
 
+    /**
+     * @see <a href="https://www.chessprogramming.org/Perft_Results">Wiki Position 3</a>
+     *
+     * @param depth Perft test depth.
+     * @param quiet Shows a summary.
+     */
     void runWiki3Position(int depth, boolean quiet) {
         var board = new Board("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0");
-        board.perftTest(depth, quiet);
+        board.perftTest(depth, quiet, "Wiki position 3 depth: " + depth);
 
         if (depth == 1) {
             assertEquals(14, board.nodes);
@@ -549,9 +586,15 @@ class BoardTest {
         }
     }
 
+    /**
+     * @see <a href="https://www.chessprogramming.org/Perft_Results">Wiki Position 4</a>
+     *
+     * @param depth Perft test depth.
+     * @param quiet Shows a summary.
+     */
     void runWiki4Position(int depth, boolean quiet) {
         var board = new Board("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
-        board.perftTest(depth, quiet);
+        board.perftTest(depth, quiet, "Wiki position 4 depth: " + depth);
 
         if (depth == 1) {
             assertEquals(6, board.nodes);
@@ -571,7 +614,6 @@ class BoardTest {
             assertEquals(10, board.checks[0]);
         }
 
-        // todo fails
         if (depth == 3) {
             assertEquals(9467, board.nodes);
             assertEquals(1021, board.captures[0]);
@@ -581,100 +623,134 @@ class BoardTest {
             assertEquals(38, board.checks[0]);
             // 22 checkmates
         }
+
+        if (depth == 4) {
+            assertEquals(422333, board.nodes);
+            assertEquals(131393, board.captures[0]);
+            assertEquals(0, board.enPassants[0]);
+            assertEquals(7795, board.castles[0]);
+            assertEquals(60032, board.promotions[0]);
+            assertEquals(15492, board.checks[0]);
+            // 5 checkmates
+        }
+
+        if (depth == 5) {
+            assertEquals(15833292, board.nodes);
+            assertEquals(2046173, board.captures[0]);
+            assertEquals(6512, board.enPassants[0]);
+            assertEquals(0, board.castles[0]);
+            assertEquals(329464, board.promotions[0]);
+            assertEquals(200568, board.checks[0]);
+            // 50562 checkmates
+        }
+
+        if (depth == 6) {
+            assertEquals(706045033, board.nodes);
+            assertEquals(210369132, board.captures[0]);
+            assertEquals(212, board.enPassants[0]);
+            assertEquals(10882006, board.castles[0]);
+            assertEquals(81102984, board.promotions[0]);
+            assertEquals(26973664, board.checks[0]);
+            // 81076 checkmates
+        }
     }
 
-    // https://www.chessprogramming.org/Perft_Results
-    // https://www.chessprogramming.net/perfect-perft/
-
+    /**
+     * TalkChess PERFT Tests.
+     * Positions which contain the special chess moves.
+     *
+     * @see <a href="https://www.chessprogramming.net/perfect-perft/">TalkChess PERFT Tests</a>
+     */
     void talkChessPositions() {
         //--Illegal ep move #1
         var b0 = new Board("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1");
-        b0.perftTest(6);
+        b0.perftTest(6, "Illegal ep move #1");
         assertEquals(1134888, b0.nodes);
 
         //--Illegal ep move #2
         var b1 = new Board("8/8/4k3/8/2p5/8/B2P2K1/8 w - - 0 1");
-        b1.perftTest(6);
+        b1.perftTest(6, "Illegal ep move #2");
         assertEquals(1015133, b1.nodes);
 
         //--EP Capture Checks Opponent
         var b2 = new Board("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1");
-        b2.perftTest(6);
+        b2.perftTest(6, "EP Capture Checks Opponent");
         assertEquals(1440467, b2.nodes);
 
         //--Short Castling Gives Check
         var b3 = new Board("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
-        b3.perftTest(6);
+        b3.perftTest(6, "Short Castling Gives Check");
         assertEquals(661072, b3.nodes);
 
         //--Long Castling Gives Check
         var b4 = new Board("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1");
-        b4.perftTest(6);
+        b4.perftTest(6, "Long Castling Gives Check");
         assertEquals(803711, b4.nodes);
 
         //--Castle Rights
-        // todo fail
         var b5 = new Board("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1");
-        b5.perftTest(4);
-        //assertEquals(1274206, b5.nodes);
+        b5.perftTest(4, "Castle Rights");
+        assertEquals(1274206, b5.nodes);
 
         //--Castling Prevented
-        // todo fail
         var b6 = new Board("r3k2r/8/3Q4/8/8/5q2/8/R3K2R b KQkq - 0 1");
-        b6.perftTest(4);
-        //assertEquals(1720476, b6.nodes);
+        b6.perftTest(4, "Castling Prevented");
+        assertEquals(1720476, b6.nodes);
 
         //--Promote out of Check
         var b7 = new Board("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1");
-        b7.perftTest(6);
+        b7.perftTest(6, "Promote out of Check");
         assertEquals(3821001, b7.nodes);
 
         //--Discovered Check
         var b8 = new Board("8/8/1P2K3/8/2n5/1q6/8/5k2 b - - 0 1");
-        b8.perftTest(5);
+        b8.perftTest(5, "Discovered Check");
         assertEquals(1004658, b8.nodes);
 
         //--Promote to give check
         var b9 = new Board("4k3/1P6/8/8/8/8/K7/8 w - - 0 1");
-        b9.perftTest(6);
+        b9.perftTest(6, "Promote to give check");
         assertEquals(217342, b9.nodes);
 
         //--Under Promote to give check
         var b10 = new Board("8/P1k5/K7/8/8/8/8/8 w - - 0 1");
-        b10.perftTest(6);
+        b10.perftTest(6, "Under Promote to give check");
         assertEquals(92683, b10.nodes);
 
         //--Self Stalemate
         var b11 = new Board("K1k5/8/P7/8/8/8/8/8 w - - 0 1");
-        b11.perftTest(6);
+        b11.perftTest(6, "Self Stalemate");
         assertEquals(2217, b11.nodes);
 
         //--Stalemate & Checkmate
         var b12 = new Board("8/k1P5/8/1K6/8/8/8/8 w - - 0 1");
-        b12.perftTest(7);
+        b12.perftTest(7, "Stalemate & Checkmat");
         assertEquals(567584, b12.nodes);
 
         //--Stalemate & Checkmate
         var b13 = new Board("8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1");
-        b13.perftTest(4);
+        b13.perftTest(4, "Stalemate & Checkmate");
         assertEquals(23527, b13.nodes);
     }
 
     @Test
     void perftTest() {
-        /*
-        for (var i = 1; i < 7; i++)
+        for (var i = 1; i < 7; i++) {
             runStartPosition(i, false);
-        */
+        }
 
-        //runKiwipetePosition(3, false); // 3 fails
+        for (var i = 1; i < 6; i++) {
+            runKiwipetePosition(i, false);
+        }
 
-        //runWiki3Position(7, false); // alle ok
-        //runWiki4Position(3, false); // 3 fails
+        for (var i = 1; i < 8; i++) {
+            runWiki3Position(i, false);
+        }
 
-        //talkChessPositions();
+        for (var i = 1; i < 7; i++) {
+            runWiki4Position(i, false);
+        }
 
-        var b5 = new Board("1k6/8/8/8/8/8/8/R3K2R w KQ - 0 1"); // 2182
-        b5.perftTest(3, false);
+        talkChessPositions();
     }
 }

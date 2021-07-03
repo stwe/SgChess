@@ -89,11 +89,6 @@ public class Board {
     private int castlingRights;
 
     /**
-     * A packed integer containing the old {@link #castlingRights}.
-     */
-    private int oldCastlingRights;
-
-    /**
      * The {@link Bitboard.BitIndex} of the En Passant target square.
      */
     private Bitboard.BitIndex epIndex = Bitboard.BitIndex.NO_SQUARE;
@@ -430,6 +425,24 @@ public class Board {
     //-------------------------------------------------
 
     /**
+     * Store previous castling rights for undo.
+     *
+     * @param move {@link Move}
+     */
+    private void storePreviousCastlingRights(Move move) {
+        move.setPreviousCastlingRights(castlingRights);
+    }
+
+    /**
+     * Undo previous castling rights.
+     *
+     * @param move {@link Move}
+     */
+    private void undoPreviousCastlingRights(Move move) {
+        castlingRights = move.getPreviousCastlingRights();
+    }
+
+    /**
      * Check if queen side castling is allowed.
      *
      * @param color The {@link Color} for which to check.
@@ -627,8 +640,10 @@ public class Board {
             epIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
+        // store castling rights before update for undo
+        storePreviousCastlingRights(move);
+
         // update castling rights
-        oldCastlingRights = castlingRights;
         castlingRights &= Bitboard.CASTLING_RIGHTS[move.getFrom()];
         castlingRights &= Bitboard.CASTLING_RIGHTS[move.getTo()];
 
@@ -642,10 +657,13 @@ public class Board {
         // update zkey (color, castling, epIndex)
         xorWhiteColorToMove();
 
+        // todo: Zkey
+        /*
         if (oldCastlingRights != castlingRights) {
             xorCastlingRights(oldCastlingRights);
             xorCastlingRights(castlingRights);
         }
+        */
 
         if (oldEpIndex != epIndex) {
             if (oldEpIndex != Bitboard.BitIndex.NO_SQUARE) {
@@ -791,8 +809,8 @@ public class Board {
             oldEpIndex = Bitboard.BitIndex.NO_SQUARE;
         }
 
-        // undo castling rights
-        castlingRights = oldCastlingRights;
+        // undo previous castling rights
+        undoPreviousCastlingRights(move);
 
         // update bitboards
         updateCommonBitboards();
@@ -1010,12 +1028,13 @@ public class Board {
      * @param depth The search depth.
      * @param quiet True for no text outputs.
      */
-    public void perftTest(int depth, boolean quiet) {
+    public void perftTest(int depth, boolean quiet, String name) {
         System.out.println();
         System.out.println();
         System.out.println("--------------------------------");
         System.out.println("           Perft test           ");
         System.out.println("--------------------------------");
+        System.out.println(name);
 
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
@@ -1102,9 +1121,19 @@ public class Board {
      * Perft test main method.
      *
      * @param depth The search depth.
+     * @param name The name of the test.
+     */
+    public void perftTest(int depth, String name) {
+        perftTest(depth, true, name);
+    }
+
+    /**
+     * Perft test main method.
+     *
+     * @param depth The search depth.
      */
     public void perftTest(int depth) {
-        perftTest(depth, true);
+        perftTest(depth, true, "");
     }
 
     //-------------------------------------------------
