@@ -657,13 +657,10 @@ public class Board {
         // update zkey (color, castling, epIndex)
         xorWhiteColorToMove();
 
-        // todo: Zkey
-        /*
-        if (oldCastlingRights != castlingRights) {
-            xorCastlingRights(oldCastlingRights);
+        if (move.getPreviousCastlingRights() != castlingRights) {
+            xorCastlingRights(move.getPreviousCastlingRights());
             xorCastlingRights(castlingRights);
         }
-        */
 
         if (oldEpIndex != epIndex) {
             if (oldEpIndex != Bitboard.BitIndex.NO_SQUARE) {
