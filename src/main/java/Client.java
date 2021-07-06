@@ -27,7 +27,11 @@ public class Client {
         System.out.println(Config.TITLE);
 
         // setup board to start position
-        var board = new Board();
+        var board = new Board("k7/6RR/8/8/8/8/8/3K4 w - - 0 1");
+        var search = new Search(board);
+        search.minimaxRoot(2);
+
+        var z = 0;
 
         // show board
         System.out.println(board);

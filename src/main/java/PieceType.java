@@ -13,13 +13,24 @@ public enum PieceType {
     // Piece types
     //-------------------------------------------------
 
+    /*
+    material score
+
+    ♙ =   100 = ♙
+    ♘ =   300 = ♙ * 3
+    ♗ =   350 = ♙ * 3 + ♙ * 0.5
+    ♖ =   500 = ♙ * 5
+    ♕ =  1000 = ♙ * 10
+    ♔ = 10000 = ♙ * 100
+    */
+
     NO_PIECE(0, 0, new int[2][64]),
     PAWN(1, 100, EvaluationTables.PAWN_EVAL_TABLE),
-    KNIGHT(2, 320, EvaluationTables.KNIGHT_EVAL_TABLE),
-    BISHOP(3, 330, EvaluationTables.BISHOP_EVAL_TABLE),
+    KNIGHT(2, 300, EvaluationTables.KNIGHT_EVAL_TABLE),
+    BISHOP(3, 350, EvaluationTables.BISHOP_EVAL_TABLE),
     ROOK(4, 500, EvaluationTables.ROOK_EVAL_TABLE),
-    QUEEN(5, 900, EvaluationTables.QUEEN_EVAL_TABLE),
-    KING(6, 20000, EvaluationTables.KING_EVAL_TABLE);
+    QUEEN(5, 1000, EvaluationTables.QUEEN_EVAL_TABLE),
+    KING(6, 10000, EvaluationTables.KING_EVAL_TABLE);
 
     //-------------------------------------------------
     // Member

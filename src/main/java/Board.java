@@ -45,7 +45,7 @@ public class Board {
 
         Color(int value, int sign) {
             this.value = value;
-            this.sign = sign;
+            this.sign = sign; // todo
         }
     }
 
@@ -976,10 +976,11 @@ public class Board {
 
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
+        var moves = moveGenerator.getPseudoLegalMoves();
 
         var legalMovesMaked = 0;
 
-        for (var move : moveGenerator.getPseudoLegalMoves()) {
+        for (var move : moves) {
             if (!makeMove(move)) {
                 continue;
             }
@@ -1035,6 +1036,7 @@ public class Board {
 
         var moveGenerator = new MoveGenerator(this);
         moveGenerator.generatePseudoLegalMoves();
+        var moves = moveGenerator.getPseudoLegalMoves();
 
         captures = new int[depth];
         checks = new int[depth];
@@ -1047,7 +1049,7 @@ public class Board {
 
         var legalMovesMaked = 0;
 
-        for (var move : moveGenerator.getPseudoLegalMoves()) {
+        for (var move : moves) {
             if (!makeMove(move)) {
                 continue;
             }
@@ -1106,6 +1108,7 @@ public class Board {
             System.out.println("Promotions: " + promotions[0]);
             System.out.println("Checks: " + checks[0]);
             // todo: ob die Tiefe Matt ist, kann momentan nur mit Tiefe + 1 festgestellt werden
+            // todo: stalemate?
             for (var i = 0; i < depth; i++) {
                 System.out.println("Checkmates depth " + (depth - i) + ": "  + checkmates[i]);
             }

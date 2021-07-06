@@ -23,7 +23,7 @@ public class Search {
     /**
      * An {@link Evaluation} object.
      */
-    private final Evaluation eval;
+    private final Evaluation evaluation;
 
     //-------------------------------------------------
     // Ctors.
@@ -33,10 +33,8 @@ public class Search {
      * Constructs a new {@link Search} object.
      */
     public Search(Board board) {
-        Objects.requireNonNull(board, "board must not be null");
-
-        this.board = board;
-        eval = new Evaluation(board);
+        this.board = Objects.requireNonNull(board, "board must not be null");;
+        evaluation = new Evaluation(board);
     }
 
     //-------------------------------------------------
@@ -48,24 +46,43 @@ public class Search {
         mg.generatePseudoLegalMoves();
         var moves = mg.getPseudoLegalMoves();
 
-        var bestMoveScore = -9999;
+        var bestScore = -99999;
         Move bestMove = null;
+        var legalMovesMaked = 0;
+
+        var startTime = System.currentTimeMillis();
 
         for (var move : moves) {
-            board.makeMove(move);
-            eval.update(move);
+            if (!board.makeMove(move)) {
+                continue;
+            }
+
+            legalMovesMaked++;
+
+            evaluation.evaluateMove(move);
 
             var score = minimax(depth - 1);
-            move.setScore(score);
-            System.out.println(move);
-
-            board.undoMove(move);
-            eval.undo(move);
-
-            if (score >= bestMoveScore) {
-                bestMoveScore = score;
+            if (score >= bestScore) {
+                bestScore = score;
                 bestMove = move;
             }
+
+            board.undoMove(move);
+            evaluation.undoMove(move);
+        }
+
+        var endTime = System.currentTimeMillis() - startTime;
+
+        // todo: stalemate
+        // der König steht nicht im Schach, hat aber keinen legalen Zug.
+        if (legalMovesMaked == 0) {
+            System.out.println(board.getColorToMove() + " is checkmate.");
+        }
+
+        if (bestMove != null) {
+            System.out.println(bestMove);
+            System.out.println("Best score: " + bestScore);
+            System.out.println("Total execution time: " + endTime + "ms");
         }
 
         return bestMove;
@@ -73,36 +90,62 @@ public class Search {
 
     private int minimax(int depth) {
         if (depth == 0) {
-            return eval.evaluate();
+            return evaluation.evaluate();
         }
 
         var mg = new MoveGenerator(board);
         mg.generatePseudoLegalMoves();
         var moves = mg.getPseudoLegalMoves();
 
+        var legalMovesMaked = 0;
+
         if (board.getColorToMove() == Board.Color.WHITE) {
-            var bestMove = -9999;
+            var bestMove = -99999;
             for (var move : moves) {
-                board.makeMove(move);
-                eval.update(move);
+                if (!board.makeMove(move)) {
+                    continue;
+                }
+
+                legalMovesMaked++;
+
+                evaluation.evaluateMove(move);
 
                 bestMove = Math.max(bestMove, minimax(depth - 1));
 
                 board.undoMove(move);
-                eval.undo(move);
+                evaluation.undoMove(move);
+            }
+
+            // todo: stalemate
+            // der König steht nicht im Schach, hat aber keinen legalen Zug.
+            if (legalMovesMaked == 0) {
+                System.out.println("weiss" + " is checkmate");
+                System.out.println(board);
             }
 
             return bestMove;
         } else {
-            var bestMove = 9999;
+            var bestMove = 99999;
             for (var move : moves) {
-                board.makeMove(move);
-                eval.update(move);
+                if (!board.makeMove(move)) {
+                    continue;
+                }
+
+                legalMovesMaked++;
+
+                evaluation.evaluateMove(move);
 
                 bestMove = Math.min(bestMove, minimax(depth - 1));
 
                 board.undoMove(move);
-                eval.undo(move);
+                evaluation.undoMove(move);
+            }
+
+            // todo: stalemate
+            // der König steht nicht im Schach, hat aber keinen legalen Zug.
+            if (legalMovesMaked == 0) {
+                System.out.println("schwarz" + " is checkmate");
+                System.out.println(board);
             }
 
             return bestMove;
