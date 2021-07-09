@@ -17,19 +17,9 @@ public class Board {
     //-------------------------------------------------
 
     public enum Color {
-        WHITE(0, 1), BLACK(1, -1), NONE(2, 0);
+        WHITE(0), BLACK(1), NONE(2);
 
-        /**
-         * The ordinal value.
-         */
         public int value;
-
-        /**
-         * Used for evaluation calculations.
-         * A positive number means that white's position is better.
-         * A negative number means things look better for black.
-         */
-        public int sign;
 
         public Color getEnemyColor() {
             if (this.value == 0) {
@@ -43,9 +33,8 @@ public class Board {
             return NONE;
         }
 
-        Color(int value, int sign) {
+        Color(int value) {
             this.value = value;
-            this.sign = sign; // todo
         }
     }
 
@@ -958,6 +947,7 @@ public class Board {
     public int[] enPassants;
     public int[] promotions;
     public int[] checkmates;
+    public int[] stalemates;
     public long nodes = 0;
 
     /**
@@ -979,6 +969,7 @@ public class Board {
         var moves = moveGenerator.getPseudoLegalMoves();
 
         var legalMovesMaked = 0;
+        var index = depth - 1;
 
         for (var move : moves) {
             if (!makeMove(move)) {
@@ -989,24 +980,24 @@ public class Board {
 
             if (!quiet) {
                 if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-                    captures[depth - 1]++;
+                    captures[index]++;
                 }
 
                 if (Attack.isCheck(colorToMove, this)) {
-                    checks[depth - 1]++;
+                    checks[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                    castles[depth - 1]++;
+                    castles[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-                    enPassants[depth - 1]++;
-                    captures[depth - 1]++;
+                    enPassants[index]++;
+                    captures[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-                    promotions[depth - 1]++;
+                    promotions[index]++;
                 }
             }
 
@@ -1015,13 +1006,21 @@ public class Board {
             undoMove(move);
         }
 
+        // no legal moves were found in the current position
         if (legalMovesMaked == 0) {
-            checkmates[depth - 1]++;
+            // king is in check
+            if (Attack.isCheck(colorToMove, this)) {
+                checkmates[index]++;
+            } else {
+                // king is not in check
+                stalemates[index]++;
+            }
         }
     }
 
     /**
      * Perft test main method.
+     * Perft ignores draws by repetition, by the fifty-move rule and by insufficient material.
      *
      * @param depth The search depth.
      * @param quiet True for no text outputs.
@@ -1044,10 +1043,12 @@ public class Board {
         enPassants = new int[depth];
         promotions = new int[depth];
         checkmates = new int[depth];
+        stalemates = new int[depth];
 
         var startTime = System.currentTimeMillis();
 
         var legalMovesMaked = 0;
+        var index = depth - 1;
 
         for (var move : moves) {
             if (!makeMove(move)) {
@@ -1058,24 +1059,24 @@ public class Board {
 
             if (!quiet) {
                 if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-                    captures[depth - 1]++;
+                    captures[index]++;
                 }
 
                 if (Attack.isCheck(colorToMove, this)) {
-                    checks[depth - 1]++;
+                    checks[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.CASTLING) {
-                    castles[depth - 1]++;
+                    castles[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.EN_PASSANT) {
-                    enPassants[depth - 1]++;
-                    captures[depth - 1]++;
+                    enPassants[index]++;
+                    captures[index]++;
                 }
 
                 if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
-                    promotions[depth - 1]++;
+                    promotions[index]++;
                 }
             }
 
@@ -1094,10 +1095,18 @@ public class Board {
 
         var endTime = System.currentTimeMillis() - startTime;
 
+        // no legal moves were found in the current position
         if (legalMovesMaked == 0) {
-            checkmates[depth - 1]++;
+            // king is in check
+            if (Attack.isCheck(colorToMove, this)) {
+                checkmates[index]++;
+            } else {
+                // king is not in check
+                stalemates[index]++;
+            }
         }
 
+        // Perft ignores draws by repetition, by the fifty-move rule and by insufficient material.
         System.out.println("---------------------------------");
         System.out.println("Depth: " + depth);
         System.out.println("Nodes: " + nodes);
@@ -1107,10 +1116,10 @@ public class Board {
             System.out.println("Castles: " + castles[0]);
             System.out.println("Promotions: " + promotions[0]);
             System.out.println("Checks: " + checks[0]);
-            // todo: ob die Tiefe Matt ist, kann momentan nur mit Tiefe + 1 festgestellt werden
-            // todo: stalemate?
+            System.out.println("to determine if a position/depth is mate or stalemate, depth + 1 must be tested");
             for (var i = 0; i < depth; i++) {
-                System.out.println("Checkmates depth " + (depth - i) + ": "  + checkmates[i]);
+                System.out.println("Checkmates determined at depth " + (depth - i) + ": "  + checkmates[i]);
+                System.out.println("Stalemates determined at depth " + (depth - i) + ": " + stalemates[i]);
             }
         }
         System.out.println("Total execution time: " + endTime + "ms");

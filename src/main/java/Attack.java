@@ -281,7 +281,7 @@ public class Attack {
     /**
      * Convenience method to determine if a king in check.
      *
-     * @param color The {@link Board.Color} of the kink.
+     * @param color The {@link Board.Color} of the king.
      * @param board The {@link Board}.
      *
      * @return boolean

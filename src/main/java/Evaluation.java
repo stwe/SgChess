@@ -85,8 +85,8 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            materialScore += previousColor.sign * capturedPieceType.materialScore;
-            pstScore += previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
+            //materialScore += previousColor.sign * capturedPieceType.materialScore;
+            //pstScore += previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -97,7 +97,7 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            pstScore += previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
+            //pstScore += previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
         }
     }
 
@@ -123,8 +123,8 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            materialScore -= color.sign * capturedPieceType.materialScore;
-            pstScore -= color.sign * capturedPieceType.evaluationTables[colorValue][to];
+            //materialScore -= color.sign * capturedPieceType.materialScore;
+            //pstScore -= color.sign * capturedPieceType.evaluationTables[colorValue][to];
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -135,7 +135,7 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            pstScore -= color.sign * promotedPieceType.evaluationTables[colorValue][to];
+            //pstScore -= color.sign * promotedPieceType.evaluationTables[colorValue][to];
         }
     }
 
