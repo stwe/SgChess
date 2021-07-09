@@ -73,10 +73,8 @@ public class Search {
 
         var endTime = System.currentTimeMillis() - startTime;
 
-        // todo: stalemate
-        // der König steht nicht im Schach, hat aber keinen legalen Zug.
         if (legalMovesMaked == 0) {
-            System.out.println(board.getColorToMove() + " is checkmate.");
+            noLegalMovesFound();
         }
 
         if (bestMove != null) {
@@ -116,11 +114,8 @@ public class Search {
                 evaluation.undoMove(move);
             }
 
-            // todo: stalemate
-            // der König steht nicht im Schach, hat aber keinen legalen Zug.
             if (legalMovesMaked == 0) {
-                System.out.println("weiss" + " is checkmate");
-                System.out.println(board);
+                noLegalMovesFound();
             }
 
             return bestMove;
@@ -141,14 +136,27 @@ public class Search {
                 evaluation.undoMove(move);
             }
 
-            // todo: stalemate
-            // der König steht nicht im Schach, hat aber keinen legalen Zug.
             if (legalMovesMaked == 0) {
-                System.out.println("schwarz" + " is checkmate");
-                System.out.println(board);
+                noLegalMovesFound();
             }
 
             return bestMove;
         }
+    }
+
+    //-------------------------------------------------
+    // Helper
+    //-------------------------------------------------
+
+    private void noLegalMovesFound() {
+        // king is in check
+        if (Attack.isCheck(board.getColorToMove(), board)) {
+            System.out.println(board.getColorToMove() + " is checkmate.");
+        } else {
+            // king is not in check
+            System.out.println("stalemate");
+        }
+
+        System.out.println(board);
     }
 }
