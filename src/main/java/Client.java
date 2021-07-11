@@ -29,7 +29,13 @@ public class Client {
         // setup board to start position
         var board = new Board("k7/6RR/8/8/8/8/8/3K4 w - - 0 1");
         var search = new Search(board);
-        search.minimaxRoot(2);
+        var searchResult = search.minimaxRoot(2);
+
+        if (searchResult != null) {
+            System.out.println("Best move: " + searchResult.bestMove);
+            System.out.println("Best score: " + searchResult.bestScore);
+            System.out.println("Total execution time: " + searchResult.time + "ms");
+        }
 
         var z = 0;
 
@@ -131,7 +137,7 @@ public class Client {
         System.out.flush();
     }
 
-    private static Move search(Board board) {
+    private static SearchResult search(Board board) {
         var bestMoveSearch = new Search(board);
         return bestMoveSearch.minimaxRoot(3);
     }

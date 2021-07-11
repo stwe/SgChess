@@ -387,6 +387,15 @@ public class Board {
         return zkey;
     }
 
+    /**
+     * Get {@link #halfMovesCounter}.
+     *
+     * @return {@link #halfMovesCounter}
+     */
+    public int getHalfMovesCounter() {
+        return halfMovesCounter;
+    }
+
     //-------------------------------------------------
     // Setter
     //-------------------------------------------------
@@ -407,6 +416,15 @@ public class Board {
      */
     public void setZkey(long zkey) {
         this.zkey = zkey;
+    }
+
+    /**
+     * Set {@link #halfMovesCounter}
+     *
+     * @param halfMovesCounter The new {@link #halfMovesCounter} value.
+     */
+    public void setHalfMovesCounter(int halfMovesCounter) {
+        this.halfMovesCounter = halfMovesCounter;
     }
 
     //-------------------------------------------------
