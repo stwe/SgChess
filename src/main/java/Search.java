@@ -42,12 +42,14 @@ public class Search {
     //-------------------------------------------------
 
     /*
+    Weiss zieht
+
     Depth 0: ungültig
 
     Depth 1: macht keinen Sinn; bestScore ist das beste Evaluierungsergebnis der eigenen Züge
              evaluation.evaluate() für jeden Zug
 
-    Depth 2:
+    Depth 2: alle schwarzen Gegenzüge werden bewertet
     */
 
     public SearchResult minimaxRoot(int depth) {

@@ -67,26 +67,31 @@ public class Evaluation {
         var from = move.getFrom();
         var to = move.getTo();
 
-        // the update() method is called after makeMove(), which has already changed the color
+        // this method is called after makeMove(), which has already changed the color
         // so we need to restore the previous color as the right color
         var previousColor = board.getColorToMove().getEnemyColor();
         var previousColorValue = previousColor.value;
 
         // set pst
-        var tableFrom = piece.pieceType.evaluationTables[previousColorValue][from]; //  -20
-        var tableTo = piece.pieceType.evaluationTables[previousColorValue][to];     //   20
-        pstScore += /*previousColor.sign */ tableTo - tableFrom;                         // = 40
+        var tableFrom = piece.pieceType.evaluationTables[previousColorValue][from];
+        var tableTo = piece.pieceType.evaluationTables[previousColorValue][to];
+        pstScore += tableTo - tableFrom;
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var capturedPieceType = move.getCapturedPieceType();
 
             // todo: temp code
             if (capturedPieceType == PieceType.NO_PIECE) {
-                throw new RuntimeException("unexpected error.");
+                throw new RuntimeException("unexpected error");
             }
 
-            //materialScore += previousColor.sign * capturedPieceType.materialScore;
-            //pstScore += previousColor.sign * capturedPieceType.evaluationTables[previousColorValue][to];
+            if (previousColor == Board.Color.WHITE) {
+                materialScore += capturedPieceType.materialScore;
+                pstScore += capturedPieceType.evaluationTables[previousColorValue][to];
+            } else {
+                materialScore += -capturedPieceType.materialScore;
+                pstScore += -capturedPieceType.evaluationTables[previousColorValue][to];
+            }
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -97,7 +102,11 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            //pstScore += previousColor.sign * promotedPieceType.evaluationTables[previousColorValue][to];
+            if (previousColor == Board.Color.WHITE) {
+                pstScore += promotedPieceType.evaluationTables[previousColorValue][to];
+            } else {
+                pstScore += -promotedPieceType.evaluationTables[previousColorValue][to];
+            }
         }
     }
 
@@ -113,7 +122,7 @@ public class Evaluation {
         // undo pst
         var tableFrom = piece.pieceType.evaluationTables[colorValue][from];
         var tableTo = piece.pieceType.evaluationTables[colorValue][to];
-        pstScore -= /*color.sign*/ tableTo - tableFrom;
+        pstScore -= tableTo - tableFrom;
 
         if (move.getMoveFlag() == Move.MoveFlag.CAPTURE || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
             var capturedPieceType = move.getCapturedPieceType();
@@ -123,8 +132,13 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            //materialScore -= color.sign * capturedPieceType.materialScore;
-            //pstScore -= color.sign * capturedPieceType.evaluationTables[colorValue][to];
+            if (color == Board.Color.WHITE) {
+                materialScore -= capturedPieceType.materialScore;
+                pstScore -= capturedPieceType.evaluationTables[colorValue][to];
+            } else {
+                materialScore -= -capturedPieceType.materialScore;
+                pstScore -= -capturedPieceType.evaluationTables[colorValue][to];
+            }
         }
 
         if (move.getMoveFlag() == Move.MoveFlag.PROMOTION || move.getMoveFlag() == Move.MoveFlag.PROMOTION_CAPTURE) {
@@ -135,7 +149,11 @@ public class Evaluation {
                 throw new RuntimeException("unexpected error.");
             }
 
-            //pstScore -= color.sign * promotedPieceType.evaluationTables[colorValue][to];
+            if (color == Board.Color.WHITE) {
+                pstScore -= promotedPieceType.evaluationTables[colorValue][to];
+            } else {
+                pstScore -= -promotedPieceType.evaluationTables[colorValue][to];
+            }
         }
     }
 
